@@ -1,7 +1,8 @@
 # Vercel이 정적 파일로 함께 배포하지 않아야 할 로컬 전용 파일들
 # (server.py는 로컬 개발용 Flask 서버 — api/interpret.py가 배포용 대체 함수)
+# 주의: 루트 requirements.txt는 여기서 숨기지 않는다 — @vercel/python이
+# api/interpret.py 패키지 설치 시 이 파일을 참조하는 것으로 확인됨 (숨기면 anthropic 설치 안 됨)
 server.py
-requirements.txt
 .env
 .env.example
 __pycache__/
