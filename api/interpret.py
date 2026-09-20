@@ -135,4 +135,4 @@ class handler(BaseHTTPRequestHandler):
             self._send_json(200, {"explanation": explanation, "oneLiner": one_liner})
         except Exception as e:
             print("interpret error:", repr(e))
-            self._send_json(502, {"error": "AI 해석 생성 중 오류가 발생했습니다", "debug": repr(e)})
+            self._send_json(502, {"error": "AI 해석 생성 중 오류가 발생했습니다"})
