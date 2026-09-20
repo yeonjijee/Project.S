@@ -1,0 +1,298 @@
+/* 한글 본문/UI 서체 — 을유1945 세미볼드를 원했지만, 을유1945는 라이선스상 웹 임베딩(서버에
+   폰트 파일 탑재)이 금지돼 있어(눈누 라이선스 요약표 "임베딩" 항목) 그대로 쓸 수 없다.
+   대신 SemiBold(600) 굵기를 그대로 가진 Noto Serif KR(SIL OFL, 웹 임베딩 명시 허용)로 대체. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap');
+/* 영문 디스플레이 서체 — Acumin Variable Concept Wide Black은 Adobe/Typekit 상업 라이선스라
+   대체: Big Shoulders Display Black(Google Fonts, 무료). 브랜드명("Project.S") 등 영문
+   디스플레이 텍스트에만 쓰고, 한글 본문은 위 Noto Serif KR을 그대로 쓴다. */
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@900&display=swap');
+
+/* 연지가 준 픽셀 로고/버튼 PNG에서 실제로 추출한 빨강(#bc0000)을 그대로 사이트 강조색으로 쓴다 —
+   흰 배경 + 빨강 포인트 + 회색 보조 텍스트, 목업 그대로. */
+:root{
+  --bg:#ffffff;
+  --ink:#181818;
+  --red:#bc0000;
+  --sub:#7a7a7a;
+  --line:#d9d9d9;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Noto Serif KR',-apple-system,'Malgun Gothic',serif;overflow:hidden;}
+body{position:relative;}
+
+.font-en{font-family:'Big Shoulders Display',sans-serif;font-weight:900;letter-spacing:0.04em;}
+
+.screen{
+  position:absolute; inset:0; z-index:1;
+  display:none;
+  flex-direction:column; align-items:center; justify-content:center;
+  padding:6vh 6vw;
+  text-align:center;
+}
+.screen.active{display:flex;}
+
+.kicker{font-size:13px;letter-spacing:0.2em;color:var(--sub);margin-bottom:2rem;}
+.title{font-size:clamp(22px,4vw,34px);font-weight:600;line-height:1.5;margin:0 0 1.2rem;max-width:640px;}
+.sub{font-size:14px;line-height:1.9;color:var(--sub);max-width:480px;margin:0 0 3rem;}
+.ai-quote{font-size:14px;line-height:1.9;color:#8f8a80;font-style:italic;max-width:480px;margin:-2rem 0 2.6rem;min-height:1.9em;white-space:pre-line;}
+
+.hero-stage{position:relative;width:min(300px,52vw);aspect-ratio:1/1;margin-bottom:2.5rem;flex:none;}
+.hero-stage canvas{width:100%;height:100%;display:block;}
+
+/* 결과 화면 — 다른 질문 화면들과 같은 톤으로, 모자이크 이미지는 오른쪽에 두고
+   이름/설명/AI 해설/버튼은 왼쪽에 둔다. */
+.result-layout{display:flex; flex-direction:row; align-items:center; justify-content:center; gap:6vw; width:100%; max-width:1100px;}
+.result-text{display:flex; flex-direction:column; align-items:flex-start; text-align:left;}
+.result-text .sub{margin-bottom:1.4rem;}
+.result-text .ai-quote{margin:0 0 2.2rem;}
+
+.result-section-label{
+  font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--sub);
+  margin:0 0 0.7rem;
+}
+.result-kw-wrap{display:flex; flex-wrap:wrap; gap:6px; max-width:480px; margin-bottom:1.8rem;}
+.result-kw-wrap span{
+  font-size:12px; border:1px solid var(--line); color:#999; padding:4px 12px; border-radius:100px;
+}
+/* 관람객이 실제로 고른(=이번 매칭의 근거가 된) 키워드만 빨강으로 강조한다 */
+.result-kw-wrap span.matched{border-color:var(--red); color:var(--red); background:rgba(188,0,0,0.06);}
+
+.result-explanation{
+  font-size:14px; line-height:1.9; color:#444; max-width:480px; margin-bottom:2rem;
+  white-space:pre-line; min-height:1.9em;
+}
+
+.nickname-input{
+  background:none; border:none; border-bottom:1px solid var(--line); color:var(--ink);
+  font-family:inherit; font-size:15px; text-align:center; padding:10px 4px;
+  width:240px; margin-bottom:2rem; outline:none;
+}
+.nickname-input:focus{border-color:var(--red);}
+.nickname-input::placeholder{color:#bbb;}
+.input-hint{font-size:12px; color:#999; margin:-1.4rem 0 2rem;}
+
+.btn-huge{font-size:20px; padding:34px 64px;}
+
+/* 카메라 켜기 화면 — 목업 그대로: 로고 + "나의 영웅을 찾아서" + "Enter 키를 눌러 시작하세요".
+   이 화면은 아직 카메라(손동작)가 켜지기 전이라 dwellable로 만들어봤자 의미가 없어서,
+   실제로는 키보드 Enter 또는 (테스트용) 마우스 클릭으로만 작동한다. */
+.enter-cta{font-size:15px; color:var(--sub); cursor:pointer;}
+.enter-cta .accent{color:var(--red); font-weight:600;}
+
+/* 손 사용법 화면 — 지금 실제 손 상태(편 손/주먹)를 그대로 큼직하게 보여준다(updateTutorial).
+   3번 반복해야 넘어가는 화면이라 직접 보면서 따라 하기 좋게 훨씬 크게 키움. */
+.tutorial-icons{width:min(420px,70vw); height:min(420px,52vh); display:flex; align-items:center; justify-content:center; margin-bottom:2rem;}
+.hand-icon{object-fit:contain;}
+/* 편 손은 기존 크기의 3/5, 주먹은 3/4로 줄여달라는 요청 — 같은 컨테이너 안에서 각자 다른
+   비율로 축소하되, 컨테이너가 flex 중앙 정렬이라 둘 다 계속 가운데에 맞춰진다. */
+#iconHandOpen{width:60%; height:60%;}
+#iconFist{width:75%; height:75%;}
+
+.tutorial-progress{font-size:13px; color:var(--sub); letter-spacing:0.06em; margin:-1.4rem 0 1.6rem;}
+/* "넘어가기" 버튼 — 처음부터 자리(공간)는 차지해두고 안 보이게만 해서, 3번 채워서 나타날 때
+   그 아래/주변 레이아웃이 밀리지 않게 한다(display:none 대신 visibility+opacity). */
+.tutorial-next{visibility:hidden; opacity:0; transition:opacity .3s ease;}
+.tutorial-next.visible{visibility:visible; opacity:1;}
+
+/* 로고(자산14) — 카메라 켜기 화면 상단에 화면의 3/4을 채울 만큼 크게 쓴다.
+   화면 전체가 세로 중앙 정렬이라 로고를 살짝 더 위로 당겨서 놓는다. */
+.logo-img{width:min(1400px,75vw); height:auto; margin-top:-6vh; margin-bottom:1.8rem;}
+
+/* Q1~Q6/결과 화면 상단의 "Q1 · 제목" 텍스트 대신 픽셀 로고 이미지(Page 1~7)를 쓴다 */
+.q-title-img{height:26px; width:auto; margin-bottom:0.9rem;}
+.result-title-img{margin-bottom:1.1rem;}
+
+/* 오프닝(아이디 입력) 화면 — 왼쪽(컬러 그리드 + 말풍선 입력) / 오른쪽(컬러별 랜덤 모자이크 미리보기) */
+#openQuestion{margin-bottom:2.6rem;}
+.open-left{display:flex; flex-direction:column; align-items:center; max-width:min(480px,50vw);}
+.open-stage{width:min(170px,24vw);}
+
+.color-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+  width:min(210px,40vw); margin-bottom:2.2rem;
+}
+.color-swatch{
+  aspect-ratio:1/1; cursor:pointer; position:relative;
+  background:var(--swatch-color,#8a8a8a);
+  border:2px solid transparent; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.15);
+}
+.color-swatch:hover, .color-swatch.dwell-hover{border-color:rgba(188,0,0,0.55);}
+.color-swatch.selected{border-color:var(--red); box-shadow:0 0 0 2px rgba(188,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.15);}
+
+.speech-bubble-input{position:relative; width:min(260px,42vw); display:flex; align-items:center; justify-content:center;}
+.speech-bubble-input .bubble-bg{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none;
+}
+.speech-bubble-input .bubble-input{
+  position:relative; z-index:1; border-bottom:none; width:78%; margin-bottom:0;
+  padding:12px 4px 20px;
+}
+.combined-id{font-size:13px; color:var(--red); letter-spacing:0.04em; margin:0.8rem 0 0; min-height:1.3em;}
+
+/* 컬러 선택 + 아이디 입력 전까지 START 버튼이 흐리게 보이는 건 기존 opacity 로직 그대로 재사용.
+   3개 버튼(ARCHIVE / START / HERO LIST)은 화면 맨 아래에서 전체 폭으로 양 끝까지 벌어진다. */
+.pixel-nav{
+  position:absolute; left:6vw; right:6vw; bottom:6vh;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.pixel-btn{
+  background:none; border:none; padding:6px; cursor:pointer; display:inline-flex;
+  align-items:center; justify-content:center;
+}
+.pixel-btn img{height:22px; width:auto; image-rendering:pixelated;}
+.pixel-btn:hover, .pixel-btn.dwell-hover{filter:drop-shadow(0 0 6px rgba(188,0,0,0.4));}
+
+/* 질문 화면(Q1~Q5) 레이아웃 — 선택지(키워드)는 왼쪽, 모자이크 레인저 이미지는 오른쪽.
+   DOM 순서를 kw-grid -> q-stage로 둬서 그대로 flex-row면 왼쪽/오른쪽이 맞게 배치된다. */
+.q-layout{display:flex; flex-direction:row; align-items:center; justify-content:center; gap:5vw; width:100%; max-width:1100px;}
+
+/* Q5 — 키워드가 진짜 세로 한 줄이라 좁고 길다. center로 두면 이미지랑 가운데로 몰려서
+   붙어 보이니, 양 끝으로 벌려서(space-between) 키워드는 왼쪽으로 더 빠지게 한다. */
+.q-layout.spread{justify-content:space-between; max-width:1300px;}
+
+.q-stage{position:relative; width:min(280px,32vw); aspect-ratio:1/1; margin-bottom:1.6rem; flex:none;}
+.candidate-stage{width:100%; height:100%;}
+.candidate-stage canvas{width:100%; height:100%; display:block; transition:opacity .08s linear;}
+.basket{
+  position:absolute; left:50%; bottom:-20px; transform:translateX(-50%);
+  border:1px solid var(--line); color:#999; font-size:14px; letter-spacing:0.06em;
+  padding:16px 34px; background:#fafaf9; cursor:pointer;
+}
+.basket.drag-over, .basket.dwell-hover{border-color:var(--red); color:var(--red);}
+
+.subjective-input{
+  background:none; border:1px solid var(--line); color:var(--ink);
+  font-family:inherit; font-size:14px; line-height:1.7; text-align:center;
+  width:min(480px,80vw); height:90px; padding:14px; margin-bottom:2rem; outline:none; resize:none;
+}
+.subjective-input:focus{border-color:var(--red);}
+.subjective-input::placeholder{color:#bbb;}
+
+.btn{
+  background:none; border:1px solid var(--line); color:var(--ink);
+  font-family:inherit; font-size:16px; letter-spacing:0.08em;
+  padding:22px 52px; cursor:pointer; position:relative;
+  display:inline-block; text-decoration:none;
+}
+.btn:hover, .btn.dwell-hover{border-color:var(--red);background:rgba(188,0,0,0.05);}
+
+/* 아카이브/리스트로 넘어가는 보조 버튼 — 시작하기/처음부터 다시 같은 주 버튼보다 작게,
+   카메라 손동작(dwellable)과 마우스 클릭 둘 다로 눌린다(전시 화면에서 실제로 쓰는 버튼). */
+.nav-links{display:flex; gap:16px; margin-top:1.4rem;}
+.btn-small{padding:12px 24px; font-size:12px; color:#999; border-color:var(--line);}
+.btn-small:hover, .btn-small.dwell-hover{color:var(--red); border-color:var(--red);}
+
+.cam-status{position:fixed; top:20px; left:24px; z-index:20; font-size:11px; color:#aaa; letter-spacing:0.04em;}
+
+.q-title{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--sub);margin-bottom:0.8rem;}
+.q-sub{font-size:18px;font-weight:500;margin:0 0 0.6rem;max-width:520px;line-height:1.6;color:var(--sub);}
+.q-hint{font-size:12px;color:#999;margin-bottom:1.8rem;}
+
+/* Q1~Q6 페이지 진입 순서 — 헤더 이미지+설명(q-intro)이 먼저 3초간 보이고, 페이드 아웃된 뒤에야
+   선택지/그래픽/버튼(q-body)이 나온다(renderAfterIntro가 두 클래스를 순서대로 바꿔준다).
+   q-body는 처음엔 display:none으로 완전히 숨겨서, Q2의 초기 위치 계산이나 카메라 클릭 판정이
+   보이기 전에 실수로 일어나지 않게 한다. */
+.q-intro{display:flex; flex-direction:column; align-items:center; opacity:1; transition:opacity .4s ease;}
+.q-intro.fade-out{opacity:0;}
+.q-body{display:none; flex-direction:column; align-items:center; width:100%; opacity:0; transition:opacity .4s ease;}
+.q-body.visible{opacity:1;}
+
+/* Q5 — 펀치는 이미 선택된 키워드엔 반응하지 않아서(다른 질문처럼 다시 눌러 취소가 안 됨),
+   잘못 날려보냈을 때 통째로 다시 고를 수 있는 버튼을 따로 둔다. */
+#resetQ5Btn{margin:-1rem 0 1.6rem;}
+
+/* 이전/다음(결과 보기) 버튼 묶음은 항상 화면 하단 고정 위치에 둔다 — 위쪽 키워드 영역이
+   문항마다 높이가 달라져도(예: Q5 세로 정렬처럼 길어져도) 버튼이 밀려 내려가지 않게 한다. */
+.q-nav-row{
+  position:absolute; left:50%; bottom:6.5vh; transform:translateX(-50%);
+  display:flex; align-items:center; gap:18px;
+}
+.q-nav-row .btn-small{color:#999;}
+
+.kw-grid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:min(560px,52vw);margin-bottom:3rem;}
+.kw{
+  border:1px solid var(--line); color:#8a8a8a; font-size:16px;
+  padding:16px 26px; cursor:pointer; user-select:none; background:#fff;
+}
+.kw.selected{border-color:var(--red);color:var(--red);background:rgba(188,0,0,0.05);}
+.kw.dwell-hover{border-color:#bbb;}
+.kw.picked-source{visibility:hidden;}
+
+.drag-ghost{
+  position:fixed; z-index:50; pointer-events:none;
+  border:1px solid var(--red); color:var(--red); background:#fff;
+  font-size:16px; padding:16px 26px; box-shadow:0 4px 20px rgba(0,0,0,0.12);
+  transform:translate(-50%,-50%); white-space:nowrap;
+}
+
+/* Q2 — 무작위로 천천히 떠다니다가, 2초 붙잡으면 불이 켜지듯 밝아지며 선택된다.
+   위치는 JS(initFloatingKeywords/startFloatLoop)가 매 프레임 left/top으로 직접 움직인다. */
+.kw-grid.float{
+  position:relative;
+  width:min(560px,52vw);
+  height:380px;
+  margin-bottom:2rem;
+}
+.kw-grid.float .kw{
+  position:absolute;
+  left:0; top:0;
+  white-space:nowrap;
+}
+
+/* Q3 — 다 칠해지면(선택되면) 빨강으로 꽉 채워지며 빛난다 */
+.kw-grid.glow .kw.selected{
+  border-color:var(--red); color:#fff; background:var(--red);
+  box-shadow:0 0 18px rgba(188,0,0,0.35);
+}
+
+/* Q3 — 주먹을 쥔 채로 버튼 위를 쓸면(브러시) 지나간 칸만 색이 채워지고, 지우개 모드에서는
+   반대로 지워진다. 칸(.paint-cell)은 텍스트 라벨(.kw-label) 뒤에 깔려서 "칠해지는" 느낌을 준다. */
+.kw-paint{position:relative; overflow:hidden;}
+.kw-paint .kw-label{position:relative; z-index:2;}
+.kw-paint .paint-cell{
+  position:absolute; top:0; bottom:0;
+  background:transparent;
+  transition:background .15s ease;
+  z-index:1;
+}
+.kw-paint .paint-cell.painted{background:rgba(188,0,0,0.85);}
+
+/* Q3 옆 브러시/지우개 도구 — 손으로 눌러(주먹) 칠하기/지우기 모드를 바꾼다 */
+.paint-tools{display:none; flex-direction:column; gap:10px;}
+.tool-btn{
+  width:44px; height:44px; padding:0;
+  border:1px solid var(--line); background:none; color:#999;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.tool-btn:hover, .tool-btn.dwell-hover{border-color:#999; color:#555;}
+.tool-btn.active{border-color:var(--red); color:var(--red); background:rgba(188,0,0,0.06);}
+
+/* Q5 — 키워드는 중앙에 세로로 정렬(그래픽은 그대로 오른쪽 q-stage), 빠르게 스치면 날아간다.
+   키워드가 10개라 한 줄로 전부 세로로 쌓으면 너무 길어져서 다음 버튼(화면 하단 고정)까지
+   침범할 수 있다 — flex-wrap으로 일정 높이가 되면 옆으로 새 줄을 만들어 짧게 유지한다. */
+.kw-grid.column{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px; margin-bottom:1.6rem;
+}
+/* 세로 한 줄로 10개가 다 들어가야 해서, 다른 질문들보다 버튼을 살짝 작게 잡는다 */
+.kw-grid.column .kw{padding:10px 20px; font-size:14px;}
+.kw.punched{opacity:0; transform:translateX(-60px) scale(0.4) !important; transition:opacity .35s ease, transform .35s ease;}
+
+/* 위치/크기는 JS(renderQuestion)가 kwGrid(버튼 영역) 크기에 맞춰 매번 지정한다 —
+   그래야 어두워지는 범위가 버튼 쪽에만 한정되고 제목·이미지는 밝게 남는다. */
+#eyeMask{
+  position:fixed; z-index:15; display:none; pointer-events:none;
+  background:rgba(0,0,0,0.88);
+  -webkit-mask-image:radial-gradient(circle 110px at 50% 50%, transparent 0 96px, black 118px);
+  mask-image:radial-gradient(circle 110px at 50% 50%, transparent 0 96px, black 118px);
+}
+
+#handCursor{
+  position:fixed; width:18px; height:18px; border-radius:50%;
+  border:1.5px solid var(--red); pointer-events:none; z-index:999;
+  transform:translate(-50%,-50%); display:none;
+}
+#handCursor.ready{background:rgba(188,0,0,0.35);}
+
+.foot-note{position:fixed; bottom:20px; left:0; right:0; text-align:center; font-size:10.5px; color:#aaa; letter-spacing:0.04em;}

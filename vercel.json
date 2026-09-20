@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/interpret.py": {
+      "maxDuration": 30
+    }
+  }
+}

@@ -1,0 +1,10 @@
+# API 키가 든 파일 — 절대 커밋/푸시하지 않는다 (Vercel에는 대시보드 환경변수로 따로 넣는다)
+.env
+
+# 로컬 실행 부산물
+__pycache__/
+*.pyc
+.DS_Store
+
+# Vercel CLI가 로컬에서 만드는 폴더
+.vercel

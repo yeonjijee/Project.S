@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project.S — 영웅 리스트</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="kicker">Project.S</div>
+
+  <h1>영웅 리스트</h1>
+
+  <p class="lede">50년, 49개 시리즈, 310명. 각 줄이 하나의 전대입니다 
+    <br> 옆으로 스크롤하면 그 전대의 모든 레인저를 볼 수 있습니다.
+     <br> 카드를 클릭하면 그 영웅의 스토리가 열립니다. 
+    </p>
+
+  <div class="toplinks">
+    <a href="../redesign/test/index.html" target="_blank"> <strong>수호 영웅 매칭 테스트</strong> 하러 가기 ↗</a>
+    <a href="../archive/index.html" target="_blank"><strong>기록의 벽</strong> 보기 ↗</a>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="이름 또는 시리즈로 찾기">
+    <span class="search-count" id="searchCount"></span>
+  </div>
+  <div class="rate-row">
+    <span id="rateLabel">모자이크 rate: 0.10 (원본에 가까움)</span>
+    <input type="range" id="rateSlider" min="0.1" max="1" step="0.01" value="0.1">
+  </div>
+  <div class="rare">
+    <span class="rare-badge" style="position:static;">RARE</span> 슈퍼전대 시리즈 스토리 상의 희귀 전사입니다.
+    <br>
+    <span class="leader-badge" style="position:static;">LEADER</span> 전대의 리더입니다.
+    <br>
+    <span class="legend-badge" style="position:static;">LEGEND</span> 시리즈를 대표하는 전설적인 전사입니다.
+  </div>
+</header>
+
+<main id="main"></main>
+<div class="empty-filter" id="emptyFilter" style="display:none;">검색 결과가 없습니다.</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="mosaic.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

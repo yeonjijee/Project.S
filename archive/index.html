@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project.S — 기록의 벽</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="cam-status" id="camStatus"></div>
+<div id="handCursor"></div>
+
+<section class="globe-section">
+  <div class="globe-stage" id="globeStage"></div>
+  <div id="globeLabels"></div>
+
+  <div class="globe-overlay-top">
+    <div class="kicker">Project.S · 기록의 벽</div>
+    <h1>멸종된 것은 파워레인저가 아니라,<br>어쩌면 우리 안의 영웅성이었을지도 모릅니다</h1>
+    <div class="stat-row">
+      <div class="stat"><span class="num" id="statCount">0</span><span class="lbl">기록된 이야기</span></div>
+      <div class="stat"><span class="num" id="statHeroes">0</span><span class="lbl">매칭된 서로 다른 영웅</span></div>
+    </div>
+  </div>
+
+  <div class="globe-overlay-bottom">
+    <div class="top-heroes" id="topHeroes"></div>
+    <div class="globe-hint">주먹을 쥐고 움직이면 회전 · 손을 펴고 위아래로 움직이면 확대·축소</div>
+  </div>
+
+  <div class="empty" id="emptyState" style="display:none;">
+    아직 기록이 없습니다.<br>
+    테스트를 끝까지 마치면 지구본 위에 점으로 남습니다.
+  </div>
+</section>
+
+<!-- 관리자용 — 카메라 전시 화면에서는 숨겨둠. 데이터 관리가 필요할 때 style.css의 .admin-only 표시를 바꿔서 쓴다.
+     (기록 초기화는 브라우저 confirm() 팝업을 띄우는데, 이건 카메라 손동작으로 조작할 수 없는 OS/브라우저 네이티브 창이라
+     전시 화면에는 애초에 노출하지 않는다.) -->
+<div class="admin-only">
+  <a href="../list/index.html" target="_blank" class="list-link">전체 영웅 리스트 보기 ↗</a>
+  <a href="../redesign/test/index.html" target="_blank" class="test-link">수호 영웅 매칭 테스트 하러 가기 ↗</a>
+  <div class="toolbar">
+    <button class="btn" onclick="document.getElementById('importFile').click()">기록 가져오기 (JSON)</button>
+    <input type="file" id="importFile" accept="application/json">
+    <button class="btn" onclick="exportArchive()">기록 내보내기 (JSON)</button>
+    <button class="btn" onclick="loadSample()">데모용 샘플 기록 불러오기</button>
+    <button class="btn" onclick="clearArchive()">기록 초기화</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="script.js"></script>
+<script src="globe.js"></script>
+</body>
+</html>

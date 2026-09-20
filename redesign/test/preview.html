@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>[임시] 사진 연결 미리보기</title>
+<style>
+  body{background:#0b0b0b;color:#f2f0ea;font-family:-apple-system,'Malgun Gothic',sans-serif;padding:32px;}
+  h1{font-size:16px;font-weight:600;margin:0 0 6px;}
+  p.note{font-size:12px;color:#a6a49c;margin:0 0 24px;line-height:1.7;}
+  .rate-row{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .rate-row input{width:280px;}
+  .rate-row span{font-size:12px;color:#a6a49c;min-width:70px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:24px;}
+  .card{text-align:center;}
+  canvas{width:100%;aspect-ratio:1;background:#000;border-radius:6px;display:block;}
+  .name{font-size:12px;margin-top:8px;color:#f2f0ea;}
+  .orig{width:60px;height:60px;object-fit:contain;background:#111;border-radius:4px;margin-top:6px;border:1px solid #333;}
+  .search-row{margin-bottom:16px;}
+  .search-row input{background:#16161a;border:1px solid #333;color:#f2f0ea;padding:8px 12px;border-radius:4px;width:240px;font-size:13px;}
+  .count{font-size:12px;color:#a6a49c;margin-bottom:16px;}
+  .series-header{
+    grid-column:1/-1; font-size:12px; color:#a6a49c; letter-spacing:0.04em;
+    border-top:1px solid #262626; margin-top:18px; padding-top:10px;
+  }
+  .series-header:first-child{border-top:none;margin-top:0;}
+  .card{position:relative;}
+  .idx-badge{
+    position:absolute; top:-8px; left:-8px; background:#c94b32; color:#fff;
+    font-size:10px; padding:2px 6px; border-radius:100px; z-index:2;
+  }
+</style>
+</head>
+<body>
+
+<h1>[임시 확인용] 레인저 사진 연결 미리보기 — 퀴즈 안 돌리고 바로 확인</h1>
+<p class="note">
+  이 페이지는 배포용이 아니라 사진이 모자이크에 잘 들어갔는지만 빠르게 확인하려고 만든 임시 페이지야.
+  실제 사이트(index.html)엔 안 나오고 여기서만 쓰는 용도라, 다 확인했으면 지워도 되는 파일이야.<br>
+  아래 슬라이더로 모자이크 추상화 정도(rate)를 움직여봐 — 퀴즈에서는 1.00(Q1) → 0.79 → 0.64 → 0.50 → 0.45 → 0.34(Q6) → 0.1(결과) 순서로 진행돼.
+  각 카드 오른쪽 아래 작은 사각형은 원본 사진(크롭/여백 비교용). data/hero-images.json에 등록된 전체 목록을 그대로 불러온다.
+</p>
+
+<div class="rate-row">
+  <span id="rateLabel">rate: 0.10 (결과 화면)</span>
+  <input type="range" id="rateSlider" min="0.1" max="1" step="0.01" value="0.1">
+</div>
+
+<div class="search-row">
+  <input type="text" id="searchBox" placeholder="이름으로 검색 (예: 레드)">
+</div>
+<div class="count" id="countLabel"></div>
+
+<div class="grid" id="grid"></div>
+
+<script src="mosaic.js"></script>
+<script>
+// script.js와 동일한 로직: 사진이 한 장이면 꽉 채우고, 배열(콤보 캐릭터)이면 폭을 나눠 나란히 그린다.
+function heroPhotoCanvasFor(imgs){
+  const c = document.createElement('canvas');
+  c.width = 300; c.height = 300;
+  const cx = c.getContext('2d');
+  cx.fillStyle = '#0b0b0b';
+  cx.fillRect(0, 0, 300, 300);
+  const n = imgs.length;
+  const colW = 300 / n;
+  imgs.forEach((img, i) => {
+    const scale = Math.min(colW / img.naturalWidth, 300 / img.naturalHeight) * 0.94;
+    const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+    cx.drawImage(img, i * colW + (colW - dw) / 2, (300 - dh) / 2, dw, dh);
+  });
+  return c;
+}
+
+const grid = document.getElementById('grid');
+const countLabel = document.getElementById('countLabel');
+const searchBox = document.getElementById('searchBox');
+const renderers = [];
+let heroList = [];
+
+// 사진 파일을 같은 이름으로 다시 바꿔 넣어도 브라우저가 예전 캐시를 계속 보여주는 문제가 있었다.
+// 페이지를 새로 열 때마다 값이 바뀌는 쿼리스트링을 붙여서 이 미리보기는 항상 최신 파일을 받아오게 한다.
+const CACHE_BUST = Date.now();
+function withCacheBust(path){
+  return path + (path.includes('?') ? '&' : '?') + 'v=' + CACHE_BUST;
+}
+
+function buildCard(hero){
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.name = hero.name;
+  const idxBadge = document.createElement('div');
+  idxBadge.className = 'idx-badge';
+  idxBadge.textContent = hero.idx;
+  card.appendChild(idxBadge);
+  const canvas = document.createElement('canvas');
+  canvas.width = 300; canvas.height = 300;
+  const label = document.createElement('div');
+  label.className = 'name';
+  label.textContent = hero.name + (hero.paths.length > 1 ? ` (${hero.paths.length}장 콤보)` : '');
+  card.appendChild(canvas);
+  card.appendChild(label);
+  // 원본 미리보기: 콤보(사진 2장 이상)면 두 사진을 나란히 붙인 작은 캔버스로, 아니면 원본 img 태그로 보여준다.
+  // (예전엔 paths[0]만 보여줘서 콤보 캐릭터가 "사진 하나만 연결된 것처럼" 보이는 문제가 있었다)
+  let origEl;
+  if(hero.paths.length > 1){
+    origEl = document.createElement('canvas');
+    origEl.width = 60; origEl.height = 60;
+    origEl.className = 'orig';
+  } else {
+    origEl = document.createElement('img');
+    origEl.className = 'orig';
+    origEl.src = withCacheBust(hero.paths[0]);
+  }
+  card.appendChild(origEl);
+  grid.appendChild(card);
+
+  // onload/onerror를 먼저 붙이고 나서 src를 설정한다 — 순서가 반대면 캐시된 이미지의 경우
+  // load 이벤트를 놓칠 수 있다 (브라우저별 타이밍 이슈 방지용 방어 코드).
+  const imgs = hero.paths.map(() => new Image());
+  let loaded = 0, errored = false;
+  imgs.forEach((img, i) => {
+    img.onload = () => {
+      loaded++;
+      if(loaded === imgs.length && !errored){
+        const composite = heroPhotoCanvasFor(imgs);
+        const m = new MosaicRenderer(canvas, composite, { minCell: 3, maxCell: 30, bg: '#000' });
+        renderers.push(m);
+        m.render(parseFloat(document.getElementById('rateSlider').value));
+        if(hero.paths.length > 1){
+          const octx = origEl.getContext('2d');
+          octx.drawImage(composite, 0, 0, 60, 60);
+        }
+      }
+    };
+    img.onerror = () => {
+      errored = true;
+      label.textContent = hero.name + ' (이미지 로드 실패: ' + img.src + ')';
+      label.style.color = '#c94b32';
+    };
+    img.src = withCacheBust(hero.paths[i]);
+  });
+}
+
+// rangers.json은 이미 시리즈 순서대로 정렬돼 있어서, 그 순서를 그대로 따라가며 사진이 있는 사람만 골라 붙인다.
+// 시리즈가 바뀔 때마다 구분선 + 제목을 넣고, 각 카드에는 전체 순번을 배지로 붙인다.
+Promise.all([
+  fetch('data/rangers.json').then(r => r.json()),
+  fetch('data/hero-images.json').then(r => r.json())
+]).then(([rangers, manifest]) => {
+  let idx = 0;
+  let lastSeries = null;
+  rangers.forEach(r => {
+    const src = manifest[r.name];
+    if(!src) return; // 사진 없는 사람은 이 미리보기에서 건너뜀
+    if(r.series !== lastSeries){
+      lastSeries = r.series;
+      const header = document.createElement('div');
+      header.className = 'series-header';
+      header.textContent = `${r.seriesNo ? r.seriesNo + '. ' : ''}${r.series}`;
+      grid.appendChild(header);
+    }
+    idx++;
+    const hero = { name: r.name, paths: Array.isArray(src) ? src : [src], idx };
+    heroList.push(hero);
+    buildCard(hero); // 헤더와 같은 순서로 바로바로 추가해야 시리즈별로 묶여 보인다
+  });
+  countLabel.textContent = `총 ${heroList.length}명 사진 연결됨 (시리즈 순서대로 정렬)`;
+}).catch(err => {
+  countLabel.textContent = '데이터를 불러오지 못했어 (서버로 열었는지 확인)';
+  countLabel.style.color = '#c94b32';
+  console.error(err);
+});
+
+searchBox.addEventListener('input', () => {
+  const q = searchBox.value.trim();
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.display = card.dataset.name.includes(q) ? '' : 'none';
+  });
+});
+
+const slider = document.getElementById('rateSlider');
+const rateLabel = document.getElementById('rateLabel');
+slider.addEventListener('input', () => {
+  const v = parseFloat(slider.value);
+  rateLabel.textContent = 'rate: ' + v.toFixed(2) + (v >= 0.75 ? ' (Q1 근처, 흐릿함)' : v <= 0.15 ? ' (결과 화면 근처, 선명함)' : '');
+  renderers.forEach(m => m.render(v));
+});
+</script>
+</body>
+</html>

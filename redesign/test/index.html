@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project.S — test</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="cam-status" id="camStatus"></div>
+<div id="handCursor"></div>
+<div id="eyeMask"></div>
+
+<div class="screen active" id="screen-camstart">
+  <img class="logo-img" src="images/ui/logo-projects.png" alt="Project.S">
+  <div class="sub" id="camStartSub">나의 영웅을 찾아서</div>
+  <div class="enter-cta" data-action="camstart" id="camStartBtn"><span class="accent">Enter 키</span>를 눌러 시작하세요</div>
+</div>
+
+<div class="screen" id="screen-tutorial">
+  <div class="kicker">How to...</div>
+  <div class="tutorial-icons">
+    <img class="hand-icon" id="iconHandOpen" src="images/ui/icon-hand-open.png" alt="편 손">
+    <img class="hand-icon" id="iconFist" src="images/ui/icon-fist.png" alt="주먹" style="display:none;">
+  </div>
+  <div class="sub" id="tutorialCaption">손바닥을 편 상태로는 아무 일이 일어나지 않습니다.</div>
+  <div class="tutorial-progress" id="tutorialProgress">0 / 3</div>
+  <button class="btn dwellable tutorial-next" id="tutorialNextBtn" data-action="tutorial-done">넘어가기</button>
+</div>
+
+<div class="screen" id="screen-open">
+  <div class="sub" id="openQuestion">당신의 히어로명은 무엇인가요?</div>
+
+  <div class="q-layout" id="openLayout">
+    <div class="open-left">
+      <div class="color-grid" id="colorGrid"></div>
+      <div class="speech-bubble-input">
+        <img class="bubble-bg" src="images/ui/speech-bubble.png" alt="">
+        <input class="nickname-input bubble-input" id="nicknameInput" maxlength="16">
+      </div>
+      <div class="combined-id" id="combinedIdPreview"></div>
+    </div>
+    <div class="q-stage open-stage">
+      <div class="candidate-stage"><canvas id="openCanvas" width="480" height="480"></canvas></div>
+    </div>
+  </div>
+
+  <div class="pixel-nav">
+    <a class="pixel-btn dwellable" href="../../archive/index.html">
+      <img src="images/ui/btn-archive.png" alt="기록의 벽">
+    </a>
+    <button class="pixel-btn dwellable" data-action="start" id="startBtn" style="opacity:0.35;pointer-events:none;">
+      <img src="images/ui/btn-start.png" alt="시작하기">
+    </button>
+    <a class="pixel-btn dwellable" href="../../list/index.html">
+      <img src="images/ui/btn-herolist.png" alt="전체 영웅 리스트">
+    </a>
+  </div>
+</div>
+
+<div class="screen" id="screen-q">
+  <div class="q-intro" id="qIntro">
+    <img class="q-title-img" id="qTitleImg" src="images/ui/page-header-1.png" alt="Q1">
+    <div class="q-sub" id="qSub">무거운 걸 짊어질 때, 나는 —</div>
+  </div>
+  <div class="q-body" id="qBody">
+    <div class="q-hint" id="qHint"></div>
+    <button class="btn btn-small dwellable" data-action="reset-q5" id="resetQ5Btn" style="display:none;">이 질문 다시 고르기</button>
+    <div class="q-layout" id="qLayout">
+      <div class="kw-grid" id="kwGrid"></div>
+      <div class="paint-tools" id="paintTools" style="display:none;">
+        <button class="tool-btn dwellable active" id="brushTool" data-tool="brush" title="브러시 — 칠해서 선택">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 20l2.5-1 8-8-1.5-1.5-8 8L4 20z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M13 8.5l2-2a1.6 1.6 0 0 1 2.3 2.3l-2 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+        <button class="tool-btn dwellable" id="eraseTool" data-tool="erase" title="지우개 — 칠한 걸 지워서 해제">
+          <svg viewBox="0 0 24 24" width="20" height="20"><rect x="4.5" y="11.5" width="15" height="8" rx="1.2" transform="rotate(-25 12 15)" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="7.5" y1="10.5" x2="16" y2="5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="q-stage">
+        <div class="candidate-stage"><canvas id="candidateCanvas" width="480" height="480"></canvas></div>
+        <div class="basket" id="basketZone">바구니</div>
+      </div>
+    </div>
+    <div class="q-nav-row">
+      <button class="btn btn-small dwellable" data-action="prev" id="prevBtn">이전 질문으로</button>
+      <button class="btn dwellable" data-action="next" id="nextBtn" style="opacity:0.35;pointer-events:none;">다음</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-q6">
+  <div class="q-intro" id="qIntroQ6">
+    <img class="q-title-img" src="images/ui/page-header-6.png" alt="Q6">
+    <div class="q-sub">어릴 때 이루고 싶었지만 이루지 못한 꿈,<br>혹은 스스로 가장 잘 아는 나의 약점을 적어줘.</div>
+  </div>
+  <div class="q-body" id="qBodyQ6">
+    <div class="q-stage"><div class="candidate-stage"><canvas id="candidateCanvasQ6" width="480" height="480"></canvas></div></div>
+    <textarea class="subjective-input" id="subjectiveInput" placeholder="여기에 적어줘…" maxlength="200"></textarea>
+    <div class="input-hint">키보드로 입력해줘</div>
+    <div class="q-nav-row">
+      <button class="btn btn-small dwellable" data-action="prev" id="prevBtnQ6">이전 질문으로</button>
+      <button class="btn dwellable" data-action="finish" id="finishBtn" style="opacity:0.35;pointer-events:none;">결과 보기</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-loading">
+  <div class="kicker">Project.S</div>
+  <div class="title">당신의 약점과<br>가장 닮은 영웅을 찾는 중…</div>
+</div>
+
+<div class="screen" id="screen-result">
+  <div class="result-layout">
+    <div class="result-text">
+      <img class="q-title-img result-title-img" src="images/ui/page-header-7.png" alt="매칭된 영웅">
+      <div class="title" id="resultName">-</div>
+      <div class="sub" id="resultSummary">-</div>
+
+      <div class="result-section-label">영웅의 키워드</div>
+      <div class="result-kw-wrap" id="resultKeywords"></div>
+
+      <div class="result-section-label">영웅과 내가 닮은 이유</div>
+      <div class="result-explanation" id="aiExplanation"></div>
+
+      <div class="ai-quote" id="aiInterpretation"></div>
+      <button class="btn dwellable" data-action="restart">처음부터 다시</button>
+      <div class="nav-links">
+        <a class="btn btn-small dwellable" href="../../archive/index.html">기록의 벽에서 확인하기</a>
+        <a class="btn btn-small dwellable" href="../../list/index.html">전체 영웅 리스트 보기</a>
+      </div>
+    </div>
+    <div class="hero-stage"><canvas id="resultCanvas" width="600" height="600"></canvas></div>
+  </div>
+</div>
+
+
+<script src="mosaic.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project.S — 수호 영웅 찾기</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="screen-intro" class="screen active">
+  <div class="brand-mark">PROJECT.S</div>
+  <div class="kicker">나의 수호 영웅 찾기</div>
+  <h1 class="headline">당신의 낭만은{{NEWLINE}}안녕하신가요?</h1>
+  <p class="sub">50년, 49개 시리즈, 310명의 영웅들. <br>그들의 기록 속에는 완벽한 사람이 단 한 명도 없었습니다.<br><br>이 테스트는 당신의 강점이 아니라 약점으로,<br> 같은 약점을 지녔던 영웅을 찾아드립니다. <br><br> 해당 테스트는 슈퍼전대 시리즈의 <br> 310명 캐릭터의 실제 기록을 바탕으로 만들어졌습니다.</p>
+  <button class="btn primary" onclick="goStart()">시작하기</button>
+  <a href="../list/index.html" target="_blank" class="list-link"><strong>전체 영웅 리스트</strong> 보러가기 ↗</a>
+  <div class="footer-note">Project.S — 슈퍼전대(파워레인저) 50주년을 기록하는 졸업작품 프로젝트의 일부입니다.</div>
+</div>
+
+<div id="screen-question" class="screen">
+  <div class="progress" id="qProgress"></div>
+  <div class="q-cat" id="qCat"></div>
+  <h2 class="q-title" id="qTitle"></h2>
+  <p class="q-sub" id="qSub"></p>
+  <div class="chip-wrap" id="qChips"></div>
+  <button class="more-toggle" id="qMoreBtn" style="display:none;">숨은 키워드 더 보기</button>
+  <div class="nav-row">
+    <button class="btn" id="qBackBtn">이전</button>
+    <button class="btn primary" id="qNextBtn" disabled>다음</button>
+  </div>
+</div>
+
+<div id="screen-freetext" class="screen">
+  <div class="kicker">마지막 질문</div>
+  <h2 class="q-title">어릴 때 이루고 싶었지만{{NEWLINE}}이루지 못한 꿈,{{NEWLINE}}혹은 나의 약점 하나를 적어주세요</h2>
+  <p class="q-sub">이 이야기는 결과를 해석하는 데 쓰입니다. 짧아도 괜찮습니다.</p>
+  <textarea id="freeTextInput" placeholder="예: 화가가 되고 싶었지만, 재능이 없다는 말에 그만뒀다."></textarea>
+  <div class="nav-row">
+    <button class="btn" onclick="goToStep('question', 4)">이전</button>
+    <button class="btn primary" onclick="startMatching()">결과 찾기</button>
+  </div>
+</div>
+
+<div id="screen-loading" class="screen">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">50년의 기록을 살펴보는 중</div>
+</div>
+
+<div id="screen-result1" class="screen">
+  <div class="kicker">당신의 수호 영웅은</div>
+  <div id="heroColorDot" class="hero-color-dot"></div>
+  <h1 class="hero-name" id="heroName1"></h1>
+  <div class="hero-series" id="heroSeries1"></div>
+  <button class="btn primary" onclick="goToStep('result2')" style="margin-top:1.4rem;">이유 보기</button>
+</div>
+
+<div id="screen-result2" class="screen">
+  <div class="kicker">그럼에도, 영웅이었다</div>
+  <h2 class="reveal-headline">이 영웅은 당신과{{NEWLINE}}닮은 약점을 가지고 있습니다</h2>
+  <div class="keyword-match-wrap" id="matchKeywords"></div>
+  <p class="hero-desc" id="heroDesc"></p>
+  <button class="btn primary" onclick="goToStep('message')" style="margin-top:1rem;">다음</button>
+</div>
+
+<div id="screen-message" class="screen">
+  <div class="kicker">Project.S</div>
+  <p class="quote-block">당신의 수호 영웅은,{{NEWLINE}}어쩌면 당신 스스로 였을지도 모릅니다.</p>
+  <p class="quote-user" id="userQuoteEcho"></p>
+  <p class="sub" style="max-width:520px;">잊히지 않으면, 전설이 됩니다. <br> 영웅은 아직 멸종되지 않았습니다.</p>
+  <button class="btn primary" onclick="goToStep('archive')" style="margin-top:1rem;">다음</button>
+</div>
+
+<div id="screen-archive" class="screen">
+  <div class="kicker">기록으로 남기기</div>
+  <h2 class="q-title">기록한다는 것은{{NEWLINE}}기억된다는 것</h2>
+  <div class="archive-actions">
+    <button class="btn primary" onclick="saveToArchive()">기억하기</button>
+    <button class="btn" onclick="exportImage()">이미지로 저장</button>
+    <button class="btn" onclick="restart()">처음으로</button>
+  </div>
+  <div class="saved-flag" id="savedFlag" style="display:none;">
+    기록되었습니다. 기록의 벽에서 계속 이어집니다. 
+    <br> 
+    <a href="../archive/index.html" target="_blank" class="list-link"><strong>기록의 벽</strong>보러가기 ↗</a>
+  </div>
+  <a href="../list/index.html" target="_blank" class="list-link"><strong>전체 영웅 리스트</strong> 보러가기 ↗</a>
+  
+</div>
+
+<canvas id="exportCanvas" width="1080" height="1350"></canvas>
+
+<script src="script.js"></script>
+</body>
+</html>
