@@ -77,7 +77,7 @@ body{position:relative;}
 /* 카메라 켜기 화면 — 목업 그대로: 로고 + "나의 영웅을 찾아서" + "Enter 키를 눌러 시작하세요".
    이 화면은 아직 카메라(손동작)가 켜지기 전이라 dwellable로 만들어봤자 의미가 없어서,
    실제로는 키보드 Enter 또는 (테스트용) 마우스 클릭으로만 작동한다. */
-.enter-cta{font-size:15px; color:var(--sub); cursor:pointer;}
+.enter-cta{font-size:35px; color:var(--sub); cursor:pointer;}
 .enter-cta .accent{color:var(--red); font-weight:600;}
 
 /* 손 사용법 화면 — 지금 실제 손 상태(편 손/주먹)를 그대로 큼직하게 보여준다(updateTutorial).
@@ -97,7 +97,7 @@ body{position:relative;}
 
 /* 로고(자산14) — 카메라 켜기 화면 상단에 화면의 3/4을 채울 만큼 크게 쓴다.
    화면 전체가 세로 중앙 정렬이라 로고를 살짝 더 위로 당겨서 놓는다. */
-.logo-img{width:min(1400px,75vw); height:auto; margin-top:-6vh; margin-bottom:1.8rem;}
+.logo-img{width:min(1000px,50vw); height:auto; margin-top:-15vh; margin-bottom:1.8rem;}
 
 /* Q1~Q6/결과 화면 상단의 "Q1 · 제목" 텍스트 대신 픽셀 로고 이미지(Page 1~7)를 쓴다 */
 .q-title-img{height:26px; width:auto; margin-bottom:0.9rem;}

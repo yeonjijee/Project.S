@@ -177,6 +177,22 @@ function getArchiveForGlobe(){
 
   function resetGesturePointer(){ lastGX = null; lastGY = null; }
 
+  // ---- "다시 테스트하러 가기" 버튼 — 손을 올리고 주먹을 쥐는 순간(마우스는 클릭 순간) 이동 ----
+  // 지구본 회전/줌(handleGesture)과는 별개로 항상 검사한다. 버튼이 화면 구석에 있어서
+  // isInsideGlobe 반경 밖이라 서로 간섭하지 않는다.
+  let backBtnPrevFisted = false;
+  function updateBackButtonHover(x, y, fisted){
+    const btn = document.getElementById('backToTestBtn');
+    if(!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const hovering = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    btn.classList.toggle('dwell-hover', hovering);
+    if(hovering && fisted && !backBtnPrevFisted){
+      btn.click();
+    }
+    backBtnPrevFisted = hovering && fisted;
+  }
+
   // 지금 카메라 거리(zoom)에서 지구본이 화면에 실제로 얼마나 크게 보이는지를 구해서,
   // 손(커서)이 그 원 안에 있을 때만 회전/줌이 걸리게 한다 — 화면 중앙은 항상 지구본 중심과 일치한다
   // (카메라가 원점을 바라보고 x/y 이동 없이 z만 바꾸기 때문).
@@ -212,6 +228,7 @@ function getArchiveForGlobe(){
   window.addEventListener('mouseup', () => { mouseHeld = false; });
   container.addEventListener('mouseleave', resetGesturePointer);
   container.addEventListener('mousemove', (e) => handleGesture(e.clientX, e.clientY, mouseHeld));
+  window.addEventListener('mousemove', (e) => updateBackButtonHover(e.clientX, e.clientY, mouseHeld));
 
   function animate(){
     requestAnimationFrame(animate);
@@ -297,10 +314,12 @@ function getArchiveForGlobe(){
         if(cursor) cursor.classList.toggle('ready', handFisted);
 
         handleGesture(x, y, handFisted);
+        updateBackButtonHover(x, y, handFisted);
         if(camStatus) camStatus.textContent = `카메라: 켜짐 · 손 인식됨 · 벌림정도 ${openness.toFixed(2)} (기준 ${FIST_CLOSE} 이하=주먹, [ ] 키로 기준 조정)`;
       } else {
         handFisted = false;
         if(cursor) cursor.classList.remove('ready');
+        updateBackButtonHover(-9999, -9999, false); // 손을 놓치면 버튼 hover도 해제
         resetGesturePointer(); // 손을 놓쳤다가 다시 찾으면 그 사이 이동은 회전에 반영 안 되게
         if(camStatus) camStatus.textContent = '카메라: 켜짐 · 손 찾는 중 (카메라 앞에 손을 크게 펴서 비춰줘)';
       }
