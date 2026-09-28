@@ -223,6 +223,7 @@ let qIndex = 0;
 let picks = [[],[],[],[],[]];
 let subjectiveText = '';
 let nickname = '';
+let selfName = ''; // 오프닝에서 입력한 원본 이름(컬러 조합 전) — "스스로 생각하는 모습" 비교용
 let matched = null;
 let selectedColor = null; // 오프닝 화면에서 고른 컬러 (예: "레드") — 닉네임과 합쳐져 최종 아이디가 된다
 
@@ -527,9 +528,11 @@ function renderResultKeywords(){
 async function fetchAiInterpretation(){
   const explEl = document.getElementById('aiExplanation');
   const lineEl = document.getElementById('aiInterpretation');
-  if(!subjectiveText){ explEl.textContent = ''; lineEl.textContent = ''; return; }
+  const identityEl = document.getElementById('aiIdentityCompare');
+  if(!subjectiveText){ explEl.textContent = ''; lineEl.textContent = ''; if(identityEl) identityEl.textContent = ''; return; }
   explEl.textContent = '수호 영웅의 답변을 생성하는 중…';
   lineEl.textContent = '';
+  if(identityEl) identityEl.textContent = '';
   try{
     // 왜 닮았는지 설명할 근거로, 실제 매칭에 쓰인 "겹친 키워드"(사용자가 고른 것 중 이
     // 히어로의 약점/성격 키워드와 겹친 것)를 같이 보낸다 — 약점 겹침이 매칭에서 2배 가중치라
@@ -545,7 +548,10 @@ async function fetchAiInterpretation(){
         heroName: matched.name,
         heroSummary: matched.summary || matched.description || '',
         weaknessKeywords,
-        personalityKeywords
+        personalityKeywords,
+        // 오프닝에서 스스로 지은 이름/색 — "스스로 생각하는 모습" vs "실제 매칭(내면)" 비교용
+        selfName,
+        selfColor: selectedColor || ''
       }),
       signal: AbortSignal.timeout(12000)
     });
@@ -553,10 +559,12 @@ async function fetchAiInterpretation(){
     const data = await res.json();
     explEl.textContent = (data && data.explanation) ? data.explanation : '';
     lineEl.textContent = (data && data.oneLiner) ? data.oneLiner : '';
+    if(identityEl) identityEl.textContent = (data && data.identityCompare) ? data.identityCompare : '';
   }catch(err){
     console.warn('AI 해석 불러오기 실패 (조용히 넘어감):', err);
     explEl.textContent = '';
     lineEl.textContent = '';
+    if(identityEl) identityEl.textContent = '';
   }
 }
 
@@ -595,6 +603,7 @@ function handleAction(action){
     // 컬러 + 닉네임을 합쳐서 최종 아이디로 쓴다 (예: "레드" + "지짱" → "지짱 레드")
     const raw = (document.getElementById('nicknameInput').value || '').trim();
     if(!raw || !selectedColor) return;
+    selfName = raw;
     nickname = raw + ' ' + selectedColor;
     qIndex = 0; renderQuestion(); goto('q');
   } else if(action==='next'){
@@ -632,7 +641,7 @@ function handleAction(action){
     }
   } else if(action==='restart'){
     picks = [[],[],[],[],[]]; qIndex = 0; matched = null; subjectiveText = ''; nickname = '';
-    selectedColor = null;
+    selfName = ''; selectedColor = null;
     document.querySelectorAll('#colorGrid .color-swatch').forEach(s => s.classList.remove('selected'));
     document.getElementById('nicknameInput').value = '';
     document.getElementById('subjectiveInput').value = '';
