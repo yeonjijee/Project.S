@@ -329,6 +329,9 @@ function renderQuestion(){
   titleImg.src = 'images/ui/page-header-' + (qIndex + 1) + '.png';
   titleImg.alt = meta.title;
   document.getElementById('qSub').innerHTML = meta.sub + '<br>해당하는 걸 3~5개 골라줘.';
+  // 3초 안내가 끝나고 선택지 화면으로 넘어간 뒤에도 질문이 위에 계속 보이도록 같은 내용을 한 줄 요약으로 복제
+  document.getElementById('qRecapImg').src = 'images/ui/page-header-' + (qIndex + 1) + '.png';
+  document.getElementById('qRecapText').textContent = meta.sub + ' · 해당하는 걸 3~5개 골라줘.';
   const grid = document.getElementById('kwGrid');
   grid.innerHTML = '';
   grid.className = 'kw-grid'; // 매 질문마다 인터렉션별 클래스 초기화
@@ -405,7 +408,7 @@ function renderQuestion(){
   flashThenCycle(document.getElementById('candidateCanvas'), pool, MOSAIC_RATES[qIndex], COLOR_MIX[qIndex]);
 
   // 설명(q-intro)을 3초 보여준 뒤 페이드 아웃하고, 그다음에야 선택지/그래픽/버튼(q-body)을 보여준다.
-  revealAfterIntro('qIntro', 'qBody', 3000, () => {
+  revealAfterIntro('qIntro', 'qBody', 1500, () => {
     if(qIndex === 1) initFloatingKeywords(grid);
     if(isQ4){
       const gridRect = grid.getBoundingClientRect();
@@ -616,7 +619,7 @@ function handleAction(action){
       refreshFinishBtn();
       // Q1~Q5와 같은 순서: 설명(q-intro) 3초 -> 선택지 자리(여기선 입력창)가 있는 q-body.
       // 텍스트 입력창은 보이기 전엔 포커스를 줘봐야 의미 없으니, 진짜 보이기 시작한 뒤에 포커스한다.
-      revealAfterIntro('qIntroQ6', 'qBodyQ6', 3000, () => {
+      revealAfterIntro('qIntroQ6', 'qBodyQ6', 1500, () => {
         setTimeout(() => document.getElementById('subjectiveInput').focus(), 30);
       });
     }

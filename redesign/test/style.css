@@ -186,6 +186,9 @@ body{position:relative;}
 .cam-status{position:fixed; top:20px; left:24px; z-index:20; font-size:11px; color:#aaa; letter-spacing:0.04em;}
 
 .q-title{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--sub);margin-bottom:0.8rem;}
+.q-recap{display:flex; flex-direction:column; align-items:center; margin-bottom:1.1rem; max-width:min(640px,86vw); text-align:center;}
+.q-recap-img{height:18px; width:auto; margin-bottom:0.5rem;}
+.q-recap-text{font-size:15px; font-weight:500; line-height:1.55; color:var(--sub);}
 .q-sub{font-size:18px;font-weight:500;margin:0 0 0.6rem;max-width:520px;line-height:1.6;color:var(--sub);}
 .q-hint{font-size:12px;color:#999;margin-bottom:1.8rem;}
 
