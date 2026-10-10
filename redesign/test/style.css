@@ -42,7 +42,7 @@ body{position:relative;}
 
 /* 결과 화면 — 다른 질문 화면들과 같은 톤으로, 모자이크 이미지는 오른쪽에 두고
    이름/설명/AI 해설/버튼은 왼쪽에 둔다. */
-.result-layout{display:flex; flex-direction:row; align-items:center; justify-content:center; gap:6vw; width:100%; max-width:1100px;}
+.result-layout{display:flex; flex-direction:row; align-items:center; justify-content:center; gap:7vw; width:100%; max-width:1100px;}
 .result-text{display:flex; flex-direction:column; align-items:flex-start; text-align:left;}
 .result-text .sub{margin-bottom:1.4rem;}
 .result-text .ai-quote{margin:0 0 2.2rem;}
@@ -86,8 +86,8 @@ body{position:relative;}
 .hand-icon{object-fit:contain;}
 /* 편 손은 기존 크기의 3/5, 주먹은 3/4로 줄여달라는 요청 — 같은 컨테이너 안에서 각자 다른
    비율로 축소하되, 컨테이너가 flex 중앙 정렬이라 둘 다 계속 가운데에 맞춰진다. */
-#iconHandOpen{width:60%; height:60%;}
-#iconFist{width:75%; height:75%;}
+#iconHandOpen{width:70%; height:70%;}
+#iconFist{width:55%; height:55%;}
 
 .tutorial-progress{font-size:13px; color:var(--sub); letter-spacing:0.06em; margin:-1.4rem 0 1.6rem;}
 /* "넘어가기" 버튼 — 처음부터 자리(공간)는 차지해두고 안 보이게만 해서, 3번 채워서 나타날 때
