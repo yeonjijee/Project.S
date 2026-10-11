@@ -70,25 +70,21 @@
       <div class="q-recap-text" id="qRecapText"></div>
     </div>
     <div class="q-hint" id="qHint"></div>
-    <button class="btn btn-small dwellable" data-action="reset-q5" id="resetQ5Btn" style="display:none;">이 질문 다시 고르기</button>
+    <button class="btn img-btn dwellable" data-action="reset-q5" id="resetQ5Btn" style="display:none;"><img src="images/ui/q/reset.png" alt="이 질문 다시 고르기"></button>
     <div class="q-layout" id="qLayout">
       <div class="kw-grid" id="kwGrid"></div>
       <div class="paint-tools" id="paintTools" style="display:none;">
-        <button class="tool-btn dwellable active" id="brushTool" data-tool="brush" title="브러시 — 칠해서 선택">
-          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 20l2.5-1 8-8-1.5-1.5-8 8L4 20z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M13 8.5l2-2a1.6 1.6 0 0 1 2.3 2.3l-2 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        </button>
-        <button class="tool-btn dwellable" id="eraseTool" data-tool="erase" title="지우개 — 칠한 걸 지워서 해제">
-          <svg viewBox="0 0 24 24" width="20" height="20"><rect x="4.5" y="11.5" width="15" height="8" rx="1.2" transform="rotate(-25 12 15)" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="7.5" y1="10.5" x2="16" y2="5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        </button>
+        <button class="tool-btn dwellable active" id="brushTool" data-tool="brush" title="브러시 — 칠해서 선택"><img src="images/ui/q/pen.png" alt="브러시"></button>
+        <button class="tool-btn dwellable" id="eraseTool" data-tool="erase" title="지우개 — 칠한 걸 지워서 해제"><img src="images/ui/q/eraser.png" alt="지우개"></button>
       </div>
       <div class="q-stage">
         <div class="candidate-stage"><canvas id="candidateCanvas" width="480" height="480"></canvas></div>
-        <div class="basket" id="basketZone">바구니</div>
+        <div class="basket" id="basketZone"><img class="bk-closed" src="images/ui/q/basket-closed.png" alt="바구니"><img class="bk-open" src="images/ui/q/basket-open.png" alt=""></div>
       </div>
     </div>
     <div class="q-nav-row">
       <button class="btn btn-small dwellable" data-action="prev" id="prevBtn">이전 질문으로</button>
-      <button class="btn dwellable" data-action="next" id="nextBtn" style="opacity:0.35;pointer-events:none;">다음</button>
+      <button class="btn img-btn dwellable" data-action="next" id="nextBtn" style="opacity:0.35;pointer-events:none;"><img src="images/ui/q/next.png" alt="다음"></button>
     </div>
   </div>
 </div>
@@ -99,6 +95,7 @@
     <div class="q-sub">어릴 때 이루고 싶었지만 이루지 못한 꿈,<br>혹은 스스로 가장 잘 아는 나의 약점을 적어줘.</div>
   </div>
   <div class="q-body" id="qBodyQ6">
+    <img class="q6-genie" src="images/ui/q/genie.png" alt="">
     <div class="q-recap">
       <img class="q-recap-img" src="images/ui/page-header-6.png" alt="">
       <div class="q-recap-text">어릴 때 이루고 싶었지만 이루지 못한 꿈, 혹은 스스로 가장 잘 아는 나의 약점을 적어줘.</div>

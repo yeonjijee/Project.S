@@ -122,9 +122,15 @@ const screens = {
   camstart:'screen-camstart', tutorial:'screen-tutorial', open:'screen-open',
   q:'screen-q', q6:'screen-q6', loading:'screen-loading', result:'screen-result'
 };
+// 카메라 손 커서를 문항별 도구 그래픽으로 바꾼다 (Q2 집게 / Q4 야광봉 / Q5 주먹). 그 외 화면은 기본 원형 커서.
+function updateCursorMode(){
+  const onQ = document.getElementById('screen-q').classList.contains('active');
+  document.body.dataset.cur = onQ ? ({1:'tongs', 3:'glow', 4:'fist'}[qIndex] || '') : '';
+}
 function goto(name){
   Object.values(screens).forEach(id => document.getElementById(id).classList.remove('active'));
   document.getElementById(screens[name]).classList.add('active');
+  updateCursorMode();
   if(name === 'tutorial'){
     resetTutorial();
   }
@@ -330,14 +336,17 @@ function renderQuestion(){
   titleImg.alt = meta.title;
   document.getElementById('qSub').innerHTML = meta.sub + '<br>해당하는 걸 3~5개 골라줘.';
   // 3초 안내가 끝나고 선택지 화면으로 넘어간 뒤에도 질문이 위에 계속 보이도록 같은 내용을 한 줄 요약으로 복제
-  document.getElementById('qRecapImg').src = 'images/ui/page-header-' + (qIndex + 1) + '.png';
+  updateCursorMode();
+  document.getElementById('qRecapImg').src ='images/ui/page-header-' + (qIndex + 1) + '.png';
   document.getElementById('qRecapText').textContent = meta.sub + ' · 해당하는 걸 3~5개 골라줘.';
   const grid = document.getElementById('kwGrid');
   grid.innerHTML = '';
   grid.className = 'kw-grid'; // 매 질문마다 인터렉션별 클래스 초기화
 
-  const kws = topKeywords(meta.id);
   const isQ1 = qIndex === 0;
+  // Q1은 연지가 만든 9명의 레인저 그래픽(images/ui/q/kw-N-b.png)과 키워드를 1:1로 맞춘다.
+  const Q1_HEROES = ['책임감','리더십','정의감','자기희생','성실함','근성','완벽주의','신념','무리함'];
+  const kws = isQ1 ? Q1_HEROES : topKeywords(meta.id);
   // dwellable(범용 "주먹=클릭" 시스템)은 Q4·브러시/지우개 도구 버튼에만 붙인다.
   // Q1(드래그)·Q2(떠다니다 붙잡기)·Q3(칠하기)·Q5(빠른 스침)는
   // handlePointerActivity/updateQ1Drag에 각자 전용 로직이 있어서, dwellable을 같이 붙이면
@@ -359,6 +368,14 @@ function renderQuestion(){
         cell.style.width = (100/PAINT_BINS) + '%';
         el.appendChild(cell);
       }
+    }
+    if(isQ1){
+      el.classList.add('kw-hero');
+      const img = document.createElement('img');
+      img.src = 'images/ui/q/kw-' + (i + 1) + '-b.png'; // B = 말풍선에 키워드 이름이 적힌 버전
+      img.alt = k;
+      img.draggable = false;
+      el.appendChild(img);
     }
     const label = document.createElement('span');
     label.className = 'kw-label';
