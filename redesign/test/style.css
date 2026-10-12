@@ -285,11 +285,13 @@ body{position:relative;}
 /* 위치/크기는 JS(renderQuestion)가 kwGrid(버튼 영역) 크기에 맞춰 매번 지정한다 —
    그래야 어두워지는 범위가 버튼 쪽에만 한정되고 제목·이미지는 밝게 남는다. */
 #eyeMask{
-  position:fixed; z-index:15; display:none; pointer-events:none;
+  position:fixed; inset:0; z-index:5; display:none; pointer-events:none;
   background:rgba(0,0,0,0.88);
-  -webkit-mask-image:radial-gradient(circle 110px at 50% 50%, transparent 0 96px, black 118px);
-  mask-image:radial-gradient(circle 110px at 50% 50%, transparent 0 96px, black 118px);
 }
+/* Q4: 화면 전체에 검은 톤을 깔고(#eyeMask), 키워드 버튼만 그 아래에 둔다. 제목/그래픽/버튼 등 나머지는 위로 올려 선명하게. */
+#screen-q.q4 .q-recap, #screen-q.q4 .q-hint, #screen-q.q4 .q-stage, #screen-q.q4 .q-nav-row, #screen-q.q4 #resetQ5Btn{position:relative; z-index:10;}
+#screen-q.q4 .q-nav-row{position:absolute;}
+#screen-q.q4 .kw-grid{position:relative; z-index:1;}
 
 #handCursor{
   position:fixed; width:18px; height:18px; border-radius:50%;
@@ -299,14 +301,31 @@ body{position:relative;}
 #handCursor.ready{background:rgba(188,0,0,0.35);}
 
 /* ---- 연지가 만든 그래픽으로 교체한 부분 ---- */
-/* 카메라 손 커서: 편 손 / 주먹 아이콘을 그대로 보여준다 (손 상태가 화면에서 바로 보이게) */
+/* 카메라(또는 마우스 테스트) 손 위치 커서: 기본은 편 손/주먹 아이콘, Q2~Q5는 문항별 도구 그래픽 */
 #handCursor{
+  --tx:-50%; --ty:-50%; --s:1; --rot:0deg;
   width:54px; height:62px; border:none !important; border-radius:0; background-color:transparent !important;
   background-image:url('images/ui/icon-hand-open.png'); background-repeat:no-repeat; background-position:center; background-size:contain;
   image-rendering:pixelated; filter:drop-shadow(0 0 2px rgba(255,255,255,0.9));
+  transform:translate(var(--tx),var(--ty)) scale(var(--s)) rotate(var(--rot)) !important;
+  transition:transform .08s ease;
 }
 #handCursor.fist{background-image:url('images/ui/icon-fist.png'); width:58px; height:58px;}
 #handCursor.ready{filter:drop-shadow(0 0 6px rgba(188,0,0,0.85));}
+body.hand-mouse{cursor:none;}
+body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
+/* Q2 집게: 주먹을 쥐면 닫힌 집게 */
+body[data-cur="tongs"] #handCursor{width:46px; height:176px; --ty:-90%; background-image:url('images/ui/q/tongs-a.png');}
+body[data-cur="tongs"] #handCursor.fist{width:46px; height:176px; background-image:url('images/ui/q/tongs-b.png');}
+/* Q3 펜/지우개: 주먹을 쥐면(칠하는 중) 왼쪽으로 15도 기울어짐 */
+body[data-cur="pen"] #handCursor, body[data-cur="pen"] #handCursor.fist{width:92px; height:96px; --tx:-12%; --ty:-90%; background-image:url('images/ui/q/pen.png'); transform-origin:12% 90%;}
+body[data-cur="eraser"] #handCursor, body[data-cur="eraser"] #handCursor.fist{width:76px; height:70px; background-image:url('images/ui/q/eraser.png');}
+body[data-cur="pen"] #handCursor.fist, body[data-cur="eraser"] #handCursor.fist{--rot:-15deg;}
+/* Q4 랜턴(야광봉) */
+body[data-cur="glow"] #handCursor, body[data-cur="glow"] #handCursor.fist{width:200px; height:42px; background-image:url('images/ui/q/glowstick.png');}
+/* Q5 주먹 */
+body[data-cur="fist"] #handCursor, body[data-cur="fist"] #handCursor.fist{width:66px; height:84px; background-image:url('images/ui/q/fist.png');}
+body[data-cur="fist"] #handCursor.fist{filter:drop-shadow(0 0 8px rgba(188,0,0,0.7));}
 /* 다음/리셋 버튼 */
 .btn.img-btn{padding:0; border:none; background:none; letter-spacing:0;}
 .btn.img-btn:hover, .btn.img-btn.dwell-hover{background:none; border:none; transform:scale(1.06);}
@@ -338,4 +357,4 @@ body{position:relative;}
 .tool-btn{width:64px; height:64px;}
 .tool-btn img{width:44px; height:44px; object-fit:contain; image-rendering:pixelated;}
 /* Q6 소원 지니 */
-.q6-genie{width:min(150px,22vw); height:auto; image-rendering:pixelated; margin-bottom:0.8rem;}
+.q6-genie{position:absolute; right:-34%; bottom:-8%; width:72%; height:auto; image-rendering:pixelated; z-index:3; pointer-events:none;}

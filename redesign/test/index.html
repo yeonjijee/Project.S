@@ -10,7 +10,6 @@
 
 <div class="cam-status" id="camStatus"></div>
 <div id="handCursor"></div>
-<div id="eyeMask"></div>
 
 <div class="screen active" id="screen-camstart">
   <img class="logo-img" src="images/ui/logo-projects.png" alt="Project.S">
@@ -60,6 +59,7 @@
 </div>
 
 <div class="screen" id="screen-q">
+  <div id="eyeMask"></div>
   <div class="q-intro" id="qIntro">
     <img class="q-title-img" id="qTitleImg" src="images/ui/page-header-1.png" alt="Q1">
     <div class="q-sub" id="qSub">무거운 걸 짊어질 때, 나는 어떤 상태인가?</div>
@@ -95,12 +95,11 @@
     <div class="q-sub">어릴 때 이루고 싶었지만 이루지 못한 꿈,<br>혹은 스스로 가장 잘 아는 나의 약점을 적어줘.</div>
   </div>
   <div class="q-body" id="qBodyQ6">
-    <img class="q6-genie" src="images/ui/q/genie.png" alt="">
     <div class="q-recap">
       <img class="q-recap-img" src="images/ui/page-header-6.png" alt="">
       <div class="q-recap-text">어릴 때 이루고 싶었지만 이루지 못한 꿈, 혹은 스스로 가장 잘 아는 나의 약점을 적어줘.</div>
     </div>
-    <div class="q-stage"><div class="candidate-stage"><canvas id="candidateCanvasQ6" width="480" height="480"></canvas></div></div>
+    <div class="q-stage"><div class="candidate-stage"><canvas id="candidateCanvasQ6" width="480" height="480"></canvas></div><img class="q6-genie" src="images/ui/q/genie.png" alt=""></div>
     <textarea class="subjective-input" id="subjectiveInput" placeholder="여기에 적어줘…" maxlength="200"></textarea>
     <div class="input-hint">키보드로 입력해줘</div>
     <div class="q-nav-row">

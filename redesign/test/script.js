@@ -125,7 +125,14 @@ const screens = {
 // 카메라 손 커서를 문항별 도구 그래픽으로 바꾼다 (Q2 집게 / Q4 야광봉 / Q5 주먹). 그 외 화면은 기본 원형 커서.
 function updateCursorMode(){
   const onQ = document.getElementById('screen-q').classList.contains('active');
-  document.body.dataset.cur = onQ ? ({1:'tongs', 3:'glow', 4:'fist'}[qIndex] || '') : '';
+  let cur = '';
+  if(onQ){
+    if(qIndex === 1) cur = 'tongs';
+    else if(qIndex === 2) cur = (paintMode === 'erase') ? 'eraser' : 'pen';
+    else if(qIndex === 3) cur = 'glow';
+    else if(qIndex === 4) cur = 'fist';
+  }
+  document.body.dataset.cur = cur;
 }
 function goto(name){
   Object.values(screens).forEach(id => document.getElementById(id).classList.remove('active'));
@@ -361,7 +368,7 @@ function renderQuestion(){
     const el = document.createElement('div');
     el.className = 'kw' + (usesDwellClick ? ' dwellable' : '') + (isQ3 ? ' kw-paint' : '');
     el.dataset.kw = k;
-    el.draggable = isQ1; // Q1만 바구니로 드래그하는 인터렉션 (마우스 테스트용)
+    el.draggable = false; // Q1 드래그는 카메라/마우스 모두 updateQ1Drag(누름=주먹)로 처리
     if(isQ3){
       // Q3 — 버튼을 PAINT_BINS개의 세로 칸으로 나눠서, 주먹으로 쓸고 지나간 칸만 색이 채워지게 한다.
       for(let b=0;b<PAINT_BINS;b++){
@@ -400,6 +407,7 @@ function renderQuestion(){
   // 뒤에 한다(안 그러면 아직 안 보이는 kwGrid의 크기가 0이라 마스크 위치가 엉뚱하게 잡힌다).
   const eyeMask = document.getElementById('eyeMask');
   eyeMask.style.display = 'none';
+  document.getElementById('screen-q').classList.toggle('q4', isQ4);
   document.getElementById('paintTools').style.display = isQ3 ? 'flex' : 'none';
   document.getElementById('resetQ5Btn').style.display = (qIndex === 4) ? 'inline-block' : 'none';
 
@@ -435,13 +443,8 @@ function renderQuestion(){
   revealAfterIntro('qIntro', 'qBody', 1500, () => {
     if(qIndex === 1) initFloatingKeywords(grid);
     if(isQ4){
-      const gridRect = grid.getBoundingClientRect();
-      const pad = 14;
-      eyeMask.style.display = 'block';
-      eyeMask.style.left = (gridRect.left - pad) + 'px';
-      eyeMask.style.top = (gridRect.top - pad) + 'px';
-      eyeMask.style.width = (gridRect.width + pad * 2) + 'px';
-      eyeMask.style.height = (gridRect.height + pad * 2) + 'px';
+      // 질문(q-intro)이 사라지고 q-body가 페이드인을 마친 뒤에 전체 화면 어둠을 깐다 (페이드 중 순서 꼬임 방지)
+      setTimeout(() => { if(qIndex === 3) eyeMask.style.display = 'block'; }, 450);
     }
   });
 }
@@ -864,6 +867,7 @@ function setPaintMode(mode){
   const eraseBtn = document.getElementById('eraseTool');
   if(brushBtn) brushBtn.classList.toggle('active', mode === 'brush');
   if(eraseBtn) eraseBtn.classList.toggle('active', mode === 'erase');
+  updateCursorMode(); // Q3 커서가 선택한 도구(펜/지우개) 그래픽으로 바뀐다
 }
 
 function updateQ3Paint(kw, x, held){
@@ -910,16 +914,8 @@ function handlePointerActivity(x, y, held){
     // 폰트 로딩/레이아웃이 살짝 밀릴 때 버튼 오른쪽 끝이 마스크 밖으로 빠져나와 보일 수 있어서,
     // 여유 패딩까지 더해 버튼 영역을 항상 넉넉히 덮게 한다.
     const mask = document.getElementById('eyeMask');
-    const gridRect = document.getElementById('kwGrid').getBoundingClientRect();
-    const pad = 14;
-    mask.style.left = (gridRect.left - pad) + 'px';
-    mask.style.top = (gridRect.top - pad) + 'px';
-    mask.style.width = (gridRect.width + pad * 2) + 'px';
-    mask.style.height = (gridRect.height + pad * 2) + 'px';
-    const localX = x - (gridRect.left - pad), localY = y - (gridRect.top - pad);
-    const grad = `radial-gradient(circle 110px at ${localX}px ${localY}px, transparent 0 96px, black 118px)`;
-    mask.style.webkitMaskImage = grad;
-    mask.style.maskImage = grad;
+    // 화면 전체 어둠 + 손 위치만 동그랗게 빨간 빛이 비친다 (구멍 안은 붉은 톤, 바깥은 검은 톤)
+    mask.style.background = `radial-gradient(circle 118px at ${x}px ${y}px, rgba(188,0,0,0.26) 0, rgba(188,0,0,0.26) 92px, rgba(0,0,0,0.88) 118px, rgba(0,0,0,0.88) 100%)`;
   }
 
   const now = performance.now();
@@ -996,8 +992,21 @@ let mouseX = 0, mouseY = 0;
 document.addEventListener('mousedown', () => { mouseHeld = true; });
 document.addEventListener('mouseup', () => { mouseHeld = false; });
 document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+let mouseSeen = false;
+document.addEventListener('mousemove', () => { mouseSeen = true; });
 function pollMouse(){
   handlePointerActivity(mouseX, mouseY, mouseHeld);
+  if(!camOn){
+    // 카메라 없이 마우스로 테스트할 때도 "손 위치" 커서를 똑같이 보여주고, 누름=주먹으로 취급한다
+    if(mouseSeen){
+      document.body.classList.add('hand-mouse');
+      cursor.style.display = 'block';
+      cursor.style.left = mouseX + 'px';
+      cursor.style.top = mouseY + 'px';
+      cursor.classList.toggle('fist', mouseHeld);
+    }
+    updateQ1Drag(mouseX, mouseY, mouseHeld);
+  }
   // 카메라가 켜져 있으면 카메라 쪽(trackHand)이 이미 updateTutorial을 부르고 있다 — 여기서 또
   // 부르면 두 루프가 서로 다른 값으로 같은 상태를 지워버리는 문제가 생기므로, 카메라가 꺼져
   // 있을 때(=마우스로만 테스트할 때)만 마우스 클릭(누름=주먹)으로 대신 센다.
@@ -1284,7 +1293,7 @@ function applyGripProgress(target, p){
 function applyCursorGlow(p){
   // 손 아이콘 커서: 주먹을 오므릴수록 살짝 커지고 붉게 빛난다 (background를 건드리면 아이콘이 지워지므로 filter만 사용)
   const scale = 1 + p * 0.25;
-  cursor.style.transform = `translate(-50%,-50%) scale(${scale})`;
+  cursor.style.setProperty('--s', scale);
   cursor.style.filter = `drop-shadow(0 0 ${2 + p * 6}px rgba(188,0,0,${0.3 + p * 0.6}))`;
 }
 
@@ -1292,7 +1301,7 @@ function resetGripVisual(target){
   if(!target) return;
   target.style.borderColor = '';
   target.style.background = '';
-  cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+  cursor.style.setProperty('--s', 1);
   cursor.style.filter = '';
 }
 
