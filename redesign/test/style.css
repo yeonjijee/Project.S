@@ -301,41 +301,43 @@ body{position:relative;}
 #handCursor.ready{background:rgba(188,0,0,0.35);}
 
 /* ---- 연지가 만든 그래픽으로 교체한 부분 ---- */
-/* 카메라(또는 마우스 테스트) 손 위치 커서: 기본은 편 손/주먹 아이콘, Q2~Q5는 문항별 도구 그래픽 */
+/* 카메라(또는 마우스 테스트) 손 위치 커서: 기본은 편 손/주먹 아이콘, Q2~Q5는 문항별 도구 그래픽.
+   흰 윤곽(항상) + 붉은 빛(버튼 위/주먹 오므림에 따라)을 따로 겹쳐서, 어두운 화면에서도 이미지가 사라지지 않게 한다. */
 #handCursor{
-  --tx:-50%; --ty:-50%; --s:1; --rot:0deg;
+  --tx:-50%; --ty:-50%; --s:1; --rot:0deg; --gr:0px; --gc:rgba(188,0,0,0);
   width:54px; height:62px; border:none !important; border-radius:0; background-color:transparent !important;
   background-image:url('images/ui/icon-hand-open.png'); background-repeat:no-repeat; background-position:center; background-size:contain;
-  image-rendering:pixelated; filter:drop-shadow(0 0 2px rgba(255,255,255,0.9));
+  image-rendering:pixelated; z-index:2147483000 !important;
+  filter:drop-shadow(0 0 2px rgba(255,255,255,0.95)) drop-shadow(0 0 var(--gr) var(--gc));
   transform:translate(var(--tx),var(--ty)) scale(var(--s)) rotate(var(--rot)) !important;
-  transition:transform .08s ease;
 }
 #handCursor.fist{background-image:url('images/ui/icon-fist.png'); width:58px; height:58px;}
-#handCursor.ready{filter:drop-shadow(0 0 6px rgba(188,0,0,0.85));}
+#handCursor.ready{--gr:6px; --gc:rgba(188,0,0,0.85);}
 body.hand-mouse{cursor:none;}
 body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
-/* Q2 집게: 주먹을 쥐면 닫힌 집게 */
-body[data-cur="tongs"] #handCursor{width:46px; height:176px; --ty:-90%; background-image:url('images/ui/q/tongs-a.png');}
-body[data-cur="tongs"] #handCursor.fist{width:46px; height:176px; background-image:url('images/ui/q/tongs-b.png');}
-/* Q3 펜/지우개: 주먹을 쥐면(칠하는 중) 왼쪽으로 15도 기울어짐 */
-body[data-cur="pen"] #handCursor, body[data-cur="pen"] #handCursor.fist{width:92px; height:96px; --tx:-12%; --ty:-90%; background-image:url('images/ui/q/pen.png'); transform-origin:12% 90%;}
-body[data-cur="eraser"] #handCursor, body[data-cur="eraser"] #handCursor.fist{width:76px; height:70px; background-image:url('images/ui/q/eraser.png');}
-body[data-cur="pen"] #handCursor.fist, body[data-cur="eraser"] #handCursor.fist{--rot:-15deg;}
-/* Q4 랜턴(야광봉) */
-body[data-cur="glow"] #handCursor, body[data-cur="glow"] #handCursor.fist{width:200px; height:42px; background-image:url('images/ui/q/glowstick.png');}
-/* Q5 주먹 */
-body[data-cur="fist"] #handCursor, body[data-cur="fist"] #handCursor.fist{width:66px; height:84px; background-image:url('images/ui/q/fist.png');}
-body[data-cur="fist"] #handCursor.fist{filter:drop-shadow(0 0 8px rgba(188,0,0,0.7));}
+/* Q2 집게: 이미지 맨 끝(아래쪽 끝)이 손 위치(선택 지점). 주먹을 쥐면 B(집게가 늘어나며 잡는 모양) */
+body[data-cur="tongs"] #handCursor, body[data-cur="tongs"] #handCursor.fist{width:56px; height:214px; --ty:-97%; transform-origin:50% 97%;}
+body[data-cur="tongs"] #handCursor{background-image:url('images/ui/q/tongs-a.png');}
+body[data-cur="tongs"] #handCursor.fist{background-image:url('images/ui/q/tongs-b.png');}
+/* Q3 펜/지우개: 주먹을 쥐면(칠하는 중) 왼쪽으로 30도 */
+body[data-cur="pen"] #handCursor, body[data-cur="pen"] #handCursor.fist{width:104px; height:110px; --tx:-12%; --ty:-90%; background-image:url('images/ui/q/pen.png'); transform-origin:12% 90%;}
+body[data-cur="eraser"] #handCursor, body[data-cur="eraser"] #handCursor.fist{width:86px; height:78px; background-image:url('images/ui/q/eraser.png');}
+body[data-cur="pen"] #handCursor.fist, body[data-cur="eraser"] #handCursor.fist{--rot:-30deg;}
+/* Q4 랜턴(야광봉): 항상 오른쪽으로 45도 */
+body[data-cur="glow"] #handCursor, body[data-cur="glow"] #handCursor.fist{width:220px; height:46px; background-image:url('images/ui/q/glowstick.png'); --rot:45deg;}
+/* Q5 주먹: 주먹을 쥐면 왼쪽으로 45도 */
+body[data-cur="fist"] #handCursor, body[data-cur="fist"] #handCursor.fist{width:72px; height:92px; background-image:url('images/ui/q/fist.png');}
+body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0,0.7);}
 /* 다음/리셋 버튼 */
 .btn.img-btn{padding:0; border:none; background:none; letter-spacing:0;}
 .btn.img-btn:hover, .btn.img-btn.dwell-hover{background:none; border:none; transform:scale(1.06);}
-.btn.img-btn img{height:56px; width:auto; display:block; image-rendering:pixelated;}
+.btn.img-btn img{height:84px; width:auto; display:block; image-rendering:pixelated;}
 /* Q1 레인저 키워드: 기본 A, 마우스/손을 올리면(hover) 말풍선 있는 B. 5개 + 4개 두 줄 */
-.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:10px 8px; width:min(760px,62vw); max-width:none; justify-items:center; margin-bottom:1rem;}
+.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:10px 8px; width:min(900px,70vw); max-width:none; justify-items:center; margin-bottom:1rem;}
 .kw-grid.q1grid .kw{grid-column:span 2;}
 .kw-grid.q1grid .kw:nth-child(6){grid-column:2 / span 2;}
 .kw.kw-hero{border:none; background:none; padding:0; box-shadow:none; display:block; width:auto; flex:none; line-height:0;}
-.kw.kw-hero img{height:min(150px,15vh); width:auto; max-width:none; display:block; image-rendering:pixelated; pointer-events:none;}
+.kw.kw-hero img{height:min(210px,21vh); width:auto; max-width:none; display:block; image-rendering:pixelated; pointer-events:none;}
 .kw.kw-hero .img-b{display:none;}
 .kw.kw-hero:hover .img-a, .kw.kw-hero.dwell-hover .img-a{display:none;}
 .kw.kw-hero:hover .img-b, .kw.kw-hero.dwell-hover .img-b{display:block;}
@@ -354,7 +356,17 @@ body[data-cur="fist"] #handCursor.fist{filter:drop-shadow(0 0 8px rgba(188,0,0,0
 .basket.open .bk-closed, .basket.drag-over .bk-closed, .basket.dwell-hover .bk-closed{display:none;}
 .basket.open .bk-open, .basket.drag-over .bk-open, .basket.dwell-hover .bk-open{display:block;}
 /* Q3 펜/지우개 */
-.tool-btn{width:64px; height:64px;}
-.tool-btn img{width:44px; height:44px; object-fit:contain; image-rendering:pixelated;}
+.tool-btn{width:92px; height:92px;}
+.tool-btn img{width:64px; height:64px; object-fit:contain; image-rendering:pixelated;}
 /* Q6 소원 지니 */
-.q6-genie{position:absolute; right:-34%; bottom:-8%; width:72%; height:auto; image-rendering:pixelated; z-index:3; pointer-events:none;}
+.q6-genie{position:absolute; right:-46%; bottom:-8%; width:72%; height:auto; image-rendering:pixelated; z-index:3; pointer-events:none;}
+
+/* 키워드 버튼 전체적으로 크게 (Q2~Q5) */
+.kw{font-size:20px; padding:20px 34px;}
+.kw-grid{gap:18px; max-width:min(760px,64vw);}
+.kw-grid.column{max-width:none;}
+.kw-grid.column .kw{padding:14px 28px; font-size:17px;}
+/* Q5: 버튼들을 가운데로 모은다 (양끝으로 벌리지 않음) */
+.q-layout.spread{justify-content:center; gap:6vw; max-width:900px;}
+/* Q4: 선택하면 색 반전(진한 바탕 + 흰 글씨)으로 확실히 표시 */
+#screen-q.q4 .kw.selected{background:var(--ink); color:#fff; border-color:var(--ink);}

@@ -53,8 +53,7 @@ function heroPhotoCanvasFor(imgs){
   const c = document.createElement('canvas');
   c.width = 300; c.height = 300;
   const cx = c.getContext('2d');
-  cx.fillStyle = '#ffffff'; // 사이트 배경색과 통일(흰 배경 테마)
-  cx.fillRect(0, 0, 300, 300);
+  // 배경은 칠하지 않는다(투명) — Q4처럼 어두운 화면 위에서도 레인저만 보이게
   const n = imgs.length;
   const colW = 300 / n;
   imgs.forEach((img, i) => {
@@ -82,7 +81,7 @@ function renderCandidateFrame(canvasEl, ranger, rate, colorMix = 0){
   // 같은 rate라도 체감 모자이크 강도가 달라진다 — 캔버스 폭에 비례하게 계산해서 어느 화면에서든
   // 같은 rate=같은 느낌(타일 개수 동일)이 되게 한다. 기준은 처음 튜닝했던 300px 기준(3~30).
   const scale = canvasEl.width / 300;
-  const m = new MosaicRenderer(canvasEl, mosaicSourceFor(ranger), { minCell: 3 * scale, maxCell: 30 * scale, bg: '#ffffff' });
+  const m = new MosaicRenderer(canvasEl, mosaicSourceFor(ranger), { minCell: 3 * scale, maxCell: 30 * scale, bg: 'transparent' });
   m.render(rate, colorMix);
   return m;
 }
@@ -788,7 +787,7 @@ let floatRunning = false;
 // 해서, 실제 전시의 흔들리는 손 인식에서도 2초 유지가 실질적으로 가능하게 한다.
 let dwellTarget = null;
 let dwellProgress = new Map();
-const DWELL_MS = 2000;
+const DWELL_MS = 500; // Q2 집게로 잡고 있어야 하는 시간
 const DWELL_DECAY_MULT = 2; // 안 잡고 있을 때는 채우는 속도의 2배로 식는다
 const FLOAT_SPEED_MIN = 10, FLOAT_SPEED_MAX = 22; // px/s — "천천히 둥둥"
 
@@ -1294,7 +1293,8 @@ function applyCursorGlow(p){
   // 손 아이콘 커서: 주먹을 오므릴수록 살짝 커지고 붉게 빛난다 (background를 건드리면 아이콘이 지워지므로 filter만 사용)
   const scale = 1 + p * 0.25;
   cursor.style.setProperty('--s', scale);
-  cursor.style.filter = `drop-shadow(0 0 ${2 + p * 6}px rgba(188,0,0,${0.3 + p * 0.6}))`;
+  cursor.style.setProperty('--gr', (p * 8) + 'px');
+  cursor.style.setProperty('--gc', `rgba(188,0,0,${0.3 + p * 0.6})`);
 }
 
 function resetGripVisual(target){
@@ -1302,7 +1302,8 @@ function resetGripVisual(target){
   target.style.borderColor = '';
   target.style.background = '';
   cursor.style.setProperty('--s', 1);
-  cursor.style.filter = '';
+  cursor.style.removeProperty('--gr');
+  cursor.style.removeProperty('--gc');
 }
 
 function clearHover(){
