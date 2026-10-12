@@ -257,11 +257,13 @@ body{position:relative;}
 .kw-paint .kw-label{position:relative; z-index:2;}
 .kw-paint .paint-cell{
   position:absolute; top:0; bottom:0;
-  background:transparent;
-  transition:background .15s ease;
+  background:rgba(188,0,0,0.85);
+  /* 칠해지면 칸마다 무작위 높이의 한 점에서 동그랗게 번져 나간다 (색이 퍼지는 느낌) */
+  clip-path:circle(0% at 50% var(--oy,50%));
+  transition:clip-path .6s cubic-bezier(.2,.8,.3,1) var(--od,0ms);
   z-index:1;
 }
-.kw-paint .paint-cell.painted{background:rgba(188,0,0,0.85);}
+.kw-paint .paint-cell.painted{clip-path:circle(150% at 50% var(--oy,50%));}
 
 /* Q3 옆 브러시/지우개 도구 — 손으로 눌러(주먹) 칠하기/지우기 모드를 바꾼다 */
 .paint-tools{display:none; flex-direction:column; gap:10px;}
@@ -277,11 +279,11 @@ body{position:relative;}
    키워드가 10개라 한 줄로 전부 세로로 쌓으면 너무 길어져서 다음 버튼(화면 하단 고정)까지
    침범할 수 있다 — flex-wrap으로 일정 높이가 되면 옆으로 새 줄을 만들어 짧게 유지한다. */
 .kw-grid.column{
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:8px; margin-bottom:1.6rem;
+  display:grid; grid-template-columns:repeat(2,auto); justify-content:center; justify-items:stretch; align-items:center;
+  gap:12px 16px; margin-bottom:1rem; max-width:none;
 }
 /* 세로 한 줄로 10개가 다 들어가야 해서, 다른 질문들보다 버튼을 살짝 작게 잡는다 */
-.kw-grid.column .kw{padding:10px 20px; font-size:14px;}
+.kw-grid.column .kw{padding:12px 26px; font-size:16px; text-align:center;}
 .kw.punched{opacity:0; transform:translateX(-60px) scale(0.4) !important; transition:opacity .35s ease, transform .35s ease;}
 
 /* 위치/크기는 JS(renderQuestion)가 kwGrid(버튼 영역) 크기에 맞춰 매번 지정한다 —
@@ -300,7 +302,6 @@ body{position:relative;}
   border:1.5px solid var(--red); pointer-events:none; z-index:999;
   transform:translate(-50%,-50%); display:none;
 }
-#handCursor.ready{background:rgba(188,0,0,0.35);}
 
 /* ---- 연지가 만든 그래픽으로 교체한 부분 ---- */
 /* 카메라(또는 마우스 테스트) 손 위치 커서: 기본은 편 손/주먹 아이콘, Q2~Q5는 문항별 도구 그래픽.
@@ -316,10 +317,10 @@ body{position:relative;}
 #handCursor.fist{background-image:url('images/ui/icon-fist.png'); width:58px; height:58px;}
 body.hand-mouse{cursor:none;}
 body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
-/* Q2 집게: 이미지의 "위쪽 끝"(그려진 부분의 맨 위)이 손 위치(선택 지점). 주먹을 쥐면 B(늘어나며 잡는 모양) */
-body[data-cur="tongs"] #handCursor, body[data-cur="tongs"] #handCursor.fist{width:56px; height:214px;}
-body[data-cur="tongs"] #handCursor{background-image:url('images/ui/q/tongs-a.png'); --ty:-42%; transform-origin:50% 42%;}
-body[data-cur="tongs"] #handCursor.fist{background-image:url('images/ui/q/tongs-b.png'); --ty:-3.2%; transform-origin:50% 3.2%;}
+/* Q2 집게: 손잡이 쪽(아래 끝)이 항상 손 위치에 고정되고, 주먹을 쥐면 B로 바뀌며 위쪽 끝(선택 지점)이 길게 늘어난다 */
+body[data-cur="tongs"] #handCursor, body[data-cur="tongs"] #handCursor.fist{width:56px; height:214px; --ty:-97.2%; transform-origin:50% 97.2%;}
+body[data-cur="tongs"] #handCursor{background-image:url('images/ui/q/tongs-a.png');}
+body[data-cur="tongs"] #handCursor.fist{background-image:url('images/ui/q/tongs-b.png');}
 /* Q3 펜/지우개: 주먹을 쥐면(칠하는 중) 왼쪽으로 30도 */
 body[data-cur="pen"] #handCursor, body[data-cur="pen"] #handCursor.fist{width:104px; height:110px; --tx:-12%; --ty:-90%; background-image:url('images/ui/q/pen.png'); transform-origin:12% 90%;}
 body[data-cur="eraser"] #handCursor, body[data-cur="eraser"] #handCursor.fist{width:86px; height:78px; background-image:url('images/ui/q/eraser.png');}
@@ -334,19 +335,24 @@ body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0
 .btn.img-btn{padding:0; border:none; background:none; letter-spacing:0;}
 .btn.img-btn:hover, .btn.img-btn.dwell-hover{background:none; border:none; transform:scale(1.06);}
 .btn.img-btn img{height:101px; width:auto; display:block; image-rendering:pixelated;}
-/* Q1 레인저 키워드: 기본 A, 마우스/손을 올리면(hover) 말풍선 있는 B. 5개 + 4개 두 줄 */
-.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:0 4px; width:min(1000px,74vw); max-width:none; justify-items:center; margin-bottom:1rem;}
+/* Q1 레인저 키워드: 박스는 레인저(몸) 크기만큼만 차지하고(촘촘하게), 말풍선(B)은 박스 밖으로 넘쳐 보인다.
+   기본 A, 마우스/손을 올리면(hover) B. 5개 + 4개 두 줄. --h = 이미지 한 장의 전체 높이 */
+:root{--h:min(380px,38vh);}
+.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:calc(var(--h)*0.02) 2.2vw; width:min(820px,62vw); max-width:none; justify-items:center; margin-bottom:1rem; margin-left:5vw;}
 .kw-grid.q1grid .kw{grid-column:span 2;}
 .kw-grid.q1grid .kw:nth-child(6){grid-column:2 / span 2;}
-.kw.kw-hero{border:none; background:none; padding:0; box-shadow:none; display:block; width:auto; flex:none; line-height:0;}
-.kw.kw-hero img{height:min(260px,25vh); width:auto; max-width:none; display:block; image-rendering:pixelated; pointer-events:none;}
+.q-layout.q1{gap:7vw; max-width:1300px;}
+.kw.kw-hero{border:none; background:none; padding:0; box-shadow:none; display:block; position:relative; flex:none; line-height:0;
+  width:calc(var(--h)*0.26); height:calc(var(--h)*0.75);}
+.kw.kw-hero:hover, .kw.kw-hero.dwell-hover{z-index:6;}
+.kw.kw-hero img, .drag-ghost img{position:absolute; left:calc(var(--h)*-0.004); top:calc(var(--h)*-0.25); height:var(--h); width:auto; max-width:none; image-rendering:pixelated; pointer-events:none;}
 .kw.kw-hero .img-b{display:none;}
 .kw.kw-hero:hover .img-a, .kw.kw-hero.dwell-hover .img-a{display:none;}
 .kw.kw-hero:hover .img-b, .kw.kw-hero.dwell-hover .img-b{display:block;}
 .kw.kw-hero .kw-label{position:absolute; width:1px; height:1px; overflow:hidden; opacity:0;}
 .kw.kw-hero.selected{background:none; box-shadow:none;}
 .drag-ghost:has(img){border:none; background:none; box-shadow:none; padding:0; line-height:0;}
-.drag-ghost img{height:min(260px,25vh); width:auto; display:block; image-rendering:pixelated;}
+.drag-ghost{width:calc(var(--h)*0.26); height:calc(var(--h)*0.75);}
 .drag-ghost .img-a{display:none;}
 .drag-ghost .kw-label{display:none;}
 /* Q1 바구니: 평소 A(닫힘), 키워드를 끌고 있는 동안 B(열림), 선택이 확정되면 다시 A */
@@ -367,7 +373,7 @@ body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0
 .kw{font-size:20px; padding:20px 34px;}
 .kw-grid{gap:18px; max-width:min(760px,64vw);}
 .kw-grid.column{max-width:none;}
-.kw-grid.column .kw{padding:14px 28px; font-size:17px;}
+.kw-grid.column .kw{padding:12px 26px; font-size:16px; text-align:center;}
 /* Q5: 버튼들을 가운데로 모은다 (양끝으로 벌리지 않음) */
 .q-layout.spread{justify-content:center; gap:6vw; max-width:900px;}
 /* Q4: 선택하면 색 반전(진한 바탕 + 흰 글씨)으로 확실히 표시 */
@@ -376,3 +382,19 @@ body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0
 /* 바구니 C(앞면): 열린 바구니(B) 위, 떨어지는 키워드(z 50)보다도 위 — 키워드가 바구니 "안으로" 들어가 보이게 */
 #basketFront{position:fixed; z-index:60; display:none; pointer-events:none; image-rendering:pixelated;}
 #basketFront.on{display:block;}
+
+/* 5개를 이미 골랐을 때: 바구니가 닫힌 채로 부르르 떨며 거부한다 */
+.basket.reject{animation:bkShake .45s linear;}
+@keyframes bkShake{
+  0%,100%{transform:translateX(-50%);}
+  15%{transform:translateX(calc(-50% - 12px));}
+  30%{transform:translateX(calc(-50% + 12px));}
+  45%{transform:translateX(calc(-50% - 9px));}
+  60%{transform:translateX(calc(-50% + 9px));}
+  75%{transform:translateX(calc(-50% - 5px));}
+  90%{transform:translateX(calc(-50% + 5px));}
+}
+/* 모든 화면 우하단 리셋 버튼 */
+.reset-fab{position:fixed; right:2.5vw; bottom:3vh; z-index:30; background:none; border:none; padding:0; cursor:pointer;}
+.reset-fab img{height:52px; width:auto; display:block; image-rendering:pixelated;}
+.reset-fab:hover, .reset-fab.dwell-hover{transform:scale(1.08);}

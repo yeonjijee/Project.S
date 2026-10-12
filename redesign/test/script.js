@@ -137,6 +137,8 @@ function goto(name){
   Object.values(screens).forEach(id => document.getElementById(id).classList.remove('active'));
   document.getElementById(screens[name]).classList.add('active');
   updateCursorMode();
+  const fab = document.getElementById('resetFab');
+  if(fab) fab.style.display = (name === 'camstart' || name === 'loading') ? 'none' : 'block';
   if(name === 'tutorial'){
     resetTutorial();
   }
@@ -375,6 +377,8 @@ function renderQuestion(){
         cell.className = 'paint-cell';
         cell.style.left = (b/PAINT_BINS*100) + '%';
         cell.style.width = (100/PAINT_BINS) + '%';
+        cell.style.setProperty('--oy', (15 + Math.random() * 70) + '%'); // 번지기 시작하는 높이를 칸마다 다르게
+        cell.style.setProperty('--od', Math.round(Math.random() * 140) + 'ms');
         el.appendChild(cell);
       }
     }
@@ -408,7 +412,6 @@ function renderQuestion(){
   eyeMask.style.display = 'none';
   document.getElementById('screen-q').classList.toggle('q4', isQ4);
   document.getElementById('paintTools').style.display = isQ3 ? 'flex' : 'none';
-  document.getElementById('resetQ5Btn').style.display = (qIndex === 4) ? 'inline-block' : 'none';
 
   const HINTS = [
     '키워드를 집어서 바구니 안에 놓아야 선택돼.',
@@ -681,12 +684,31 @@ function handleAction(action){
     goto('open');
   } else if(action==='reset-q5'){
     resetQ5();
+  } else if(action==='reset'){
+    resetCurrentScreen();
   }
 }
 
 // Q5 — 펀치는 "아직 선택 안 된 키워드"에만 반응해서, 다른 질문들처럼 다시 눌러 취소하는 게
 // 안 된다(이미 날아간 키워드는 화면에서 사라져서 다시 펀치할 대상 자체가 없다). 그래서 잘못
 // 날려보냈을 때 이 질문에서 고른 걸 통째로 되돌리는 버튼을 따로 둔다.
+// 모든 화면 우하단 리셋 버튼 — 지금 보고 있는 화면의 입력/선택만 처음 상태로 되돌린다
+function resetCurrentScreen(){
+  const active = id => document.getElementById(id).classList.contains('active');
+  if(active('screen-tutorial')){ resetTutorial(); }
+  else if(active('screen-open')){
+    selectedColor = null;
+    document.querySelectorAll('#colorGrid .color-swatch').forEach(s => s.classList.remove('selected'));
+    document.getElementById('nicknameInput').value = '';
+    document.getElementById('combinedIdPreview').textContent = '';
+    refreshStartBtn();
+    resetOpenPreview();
+  }
+  else if(active('screen-q')){ picks[qIndex] = []; renderQuestion(); }
+  else if(active('screen-q6')){ document.getElementById('subjectiveInput').value = ''; refreshFinishBtn(); }
+  else if(active('screen-result')){ handleAction('restart'); }
+}
+
 function resetQ5(){
   picks[4] = [];
   document.querySelectorAll('#kwGrid .kw').forEach(el => {
@@ -908,6 +930,13 @@ function handlePointerActivity(x, y, held){
     return;
   }
 
+  if(qIndex === 1){
+    // Q2 — 선택 지점은 집게의 "위쪽 끝". 손(손잡이 쪽)에서 이미지 길이만큼 위에 있고,
+    // 주먹을 쥐면 B(늘어난 집게)라 더 멀리(약 94%), 편 손일 땐 A(약 55%) 위치다.
+    const ch = cursor.offsetHeight || 214;
+    y = y - (held ? 0.94 : 0.552) * ch;
+  }
+
   if(qIndex === 3){ // Q4 — 눈 마스크가 커서를 따라간다.
     // 위치/크기를 매 프레임 kwGrid 기준으로 다시 맞춘다 — 한 번만 재보고 고정해두면
     // 폰트 로딩/레이아웃이 살짝 밀릴 때 버튼 오른쪽 끝이 마스크 밖으로 빠져나와 보일 수 있어서,
@@ -1023,7 +1052,17 @@ let q1HoverEl = null;
 let dragGhost = null;
 
 // 바구니 그래픽: 키워드를 끌고 있는 동안 B(열림), 선택이 확정/취소되면 A(닫힘)
+let lastRejectAt = 0;
+function rejectBasket(){
+  const now = performance.now();
+  if(now - lastRejectAt < 700) return;
+  lastRejectAt = now;
+  const b = document.getElementById('basketZone');
+  b.classList.remove('reject'); void b.offsetWidth; b.classList.add('reject');
+  setTimeout(() => b.classList.remove('reject'), 480);
+}
 function setBasketOpen(on){
+  if(on && qIndex === 0 && picks[0].length >= MAX_PICK) on = false; // 가득 찼으면 열리지 않는다(A 고정)
   const b = document.getElementById('basketZone');
   if(b) b.classList.toggle('open', !!on);
   syncBasketFront();
@@ -1045,7 +1084,7 @@ function ghostInBasket(gr){
   const br = basketZone.getBoundingClientRect();
   const left = br.left + br.width * 0.096, right = br.left + br.width * 0.903;
   const visTop = br.top + br.height * 0.083, visH = br.height * 0.861;
-  const line = visTop + visH / 3;
+  const line = visTop + visH * 0.8; // 열린 바구니 보이는 부분의 아래에서 1/5 지점(깊이 80%)까지 들어와야 담긴다
   const cx = (gr.left + gr.right) / 2;
   return cx > left && cx < right && gr.bottom >= line && gr.top < br.bottom;
 }
@@ -1138,8 +1177,12 @@ function updateQ1Drag(x, y, fisted){
 
   if(!draggingKeyword){
     if(fisted && overKw && !overKw.classList.contains('selected')){
-      draggingKeyword = overKw;
-      spawnGhost(overKw, x, y);
+      if(picks[0].length >= MAX_PICK){
+        rejectBasket(); // 이미 5개 — 바구니는 닫힌 채로 떨며 거부
+      } else {
+        draggingKeyword = overKw;
+        spawnGhost(overKw, x, y);
+      }
     }
   } else {
     moveGhost(x, y);
