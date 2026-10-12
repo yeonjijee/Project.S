@@ -995,6 +995,7 @@ let mouseSeen = false;
 document.addEventListener('mousemove', () => { mouseSeen = true; });
 function pollMouse(){
   handlePointerActivity(mouseX, mouseY, mouseHeld);
+  syncBasketFront();
   if(!camOn){
     // 카메라 없이 마우스로 테스트할 때도 "손 위치" 커서를 똑같이 보여주고, 누름=주먹으로 취급한다
     if(mouseSeen){
@@ -1025,6 +1026,28 @@ let dragGhost = null;
 function setBasketOpen(on){
   const b = document.getElementById('basketZone');
   if(b) b.classList.toggle('open', !!on);
+  syncBasketFront();
+}
+// 바구니 C(앞면): 열린 바구니(B)와 같은 자리에 맨 위로 겹쳐 보이게 한다 (떨어지는 키워드 위, A/B 아래가 아니라 "위")
+function syncBasketFront(){
+  const f = document.getElementById('basketFront');
+  const b = document.getElementById('basketZone');
+  if(!f || !b) return;
+  const show = b.classList.contains('open') && qIndex === 0 && document.getElementById('screen-q').classList.contains('active');
+  if(!show){ f.classList.remove('on'); return; }
+  const r = b.getBoundingClientRect();
+  f.style.left = r.left + 'px'; f.style.top = r.top + 'px';
+  f.style.width = r.width + 'px'; f.style.height = r.height + 'px';
+  f.classList.add('on');
+}
+// 떨어지는 키워드가 바구니 세로 1/3 지점(열린 바구니의 보이는 부분 기준)까지 들어오고, 가로로 바구니 안에 있으면 "담긴 것"
+function ghostInBasket(gr){
+  const br = basketZone.getBoundingClientRect();
+  const left = br.left + br.width * 0.096, right = br.left + br.width * 0.903;
+  const visTop = br.top + br.height * 0.083, visH = br.height * 0.861;
+  const line = visTop + visH / 3;
+  const cx = (gr.left + gr.right) / 2;
+  return cx > left && cx < right && gr.bottom >= line && gr.top < br.bottom;
 }
 function spawnGhost(sourceEl, x, y){
   setBasketOpen(true);
@@ -1063,7 +1086,7 @@ function startGravityFall(ghostEl, dropped, x0, y0){
 
     const gr = ghostEl.getBoundingClientRect();
     const br = basketZone.getBoundingClientRect();
-    const overlap = gr.left < br.right && gr.right > br.left && gr.top < br.bottom && gr.bottom > br.top;
+    const overlap = ghostInBasket(gr);
 
     if(overlap){
       resolved = true;

@@ -77,7 +77,9 @@ body{position:relative;}
 /* 카메라 켜기 화면 — 목업 그대로: 로고 + "나의 영웅을 찾아서" + "Enter 키를 눌러 시작하세요".
    이 화면은 아직 카메라(손동작)가 켜지기 전이라 dwellable로 만들어봤자 의미가 없어서,
    실제로는 키보드 Enter 또는 (테스트용) 마우스 클릭으로만 작동한다. */
-.enter-cta{font-size:35px; color:var(--sub); cursor:pointer;}
+.enter-cta{font-size:24.5px; color:var(--sub); cursor:pointer; animation:ctaBlink 2.4s ease-in-out infinite;}
+@keyframes ctaBlink{0%,100%{opacity:1;} 50%{opacity:0.25;}}
+#camStartSub:empty{display:none;}
 .enter-cta .accent{color:var(--red); font-weight:600;}
 
 /* 손 사용법 화면 — 지금 실제 손 상태(편 손/주먹)를 그대로 큼직하게 보여준다(updateTutorial).
@@ -97,7 +99,7 @@ body{position:relative;}
 
 /* 로고(자산14) — 카메라 켜기 화면 상단에 화면의 3/4을 채울 만큼 크게 쓴다.
    화면 전체가 세로 중앙 정렬이라 로고를 살짝 더 위로 당겨서 놓는다. */
-.logo-img{width:min(1000px,50vw); height:auto; margin-top:-15vh; margin-bottom:1.8rem;}
+.logo-img{width:min(1000px,50vw); height:auto; margin-top:-8vh; margin-bottom:2.4rem;}
 
 /* Q1~Q6/결과 화면 상단의 "Q1 · 제목" 텍스트 대신 픽셀 로고 이미지(Page 1~7)를 쓴다 */
 .q-title-img{height:26px; width:auto; margin-bottom:0.9rem;}
@@ -308,43 +310,43 @@ body{position:relative;}
   width:54px; height:62px; border:none !important; border-radius:0; background-color:transparent !important;
   background-image:url('images/ui/icon-hand-open.png'); background-repeat:no-repeat; background-position:center; background-size:contain;
   image-rendering:pixelated; z-index:2147483000 !important;
-  filter:drop-shadow(0 0 2px rgba(255,255,255,0.95)) drop-shadow(0 0 var(--gr) var(--gc));
+  filter:drop-shadow(0 0 2px rgba(255,255,255,0.95)) drop-shadow(0 0 3px rgba(255,255,255,0.8)); will-change:transform;
   transform:translate(var(--tx),var(--ty)) scale(var(--s)) rotate(var(--rot)) !important;
 }
 #handCursor.fist{background-image:url('images/ui/icon-fist.png'); width:58px; height:58px;}
-#handCursor.ready{--gr:6px; --gc:rgba(188,0,0,0.85);}
 body.hand-mouse{cursor:none;}
 body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
-/* Q2 집게: 이미지 맨 끝(아래쪽 끝)이 손 위치(선택 지점). 주먹을 쥐면 B(집게가 늘어나며 잡는 모양) */
-body[data-cur="tongs"] #handCursor, body[data-cur="tongs"] #handCursor.fist{width:56px; height:214px; --ty:-97%; transform-origin:50% 97%;}
-body[data-cur="tongs"] #handCursor{background-image:url('images/ui/q/tongs-a.png');}
-body[data-cur="tongs"] #handCursor.fist{background-image:url('images/ui/q/tongs-b.png');}
+/* Q2 집게: 이미지의 "위쪽 끝"(그려진 부분의 맨 위)이 손 위치(선택 지점). 주먹을 쥐면 B(늘어나며 잡는 모양) */
+body[data-cur="tongs"] #handCursor, body[data-cur="tongs"] #handCursor.fist{width:56px; height:214px;}
+body[data-cur="tongs"] #handCursor{background-image:url('images/ui/q/tongs-a.png'); --ty:-42%; transform-origin:50% 42%;}
+body[data-cur="tongs"] #handCursor.fist{background-image:url('images/ui/q/tongs-b.png'); --ty:-3.2%; transform-origin:50% 3.2%;}
 /* Q3 펜/지우개: 주먹을 쥐면(칠하는 중) 왼쪽으로 30도 */
 body[data-cur="pen"] #handCursor, body[data-cur="pen"] #handCursor.fist{width:104px; height:110px; --tx:-12%; --ty:-90%; background-image:url('images/ui/q/pen.png'); transform-origin:12% 90%;}
 body[data-cur="eraser"] #handCursor, body[data-cur="eraser"] #handCursor.fist{width:86px; height:78px; background-image:url('images/ui/q/eraser.png');}
 body[data-cur="pen"] #handCursor.fist, body[data-cur="eraser"] #handCursor.fist{--rot:-30deg;}
 /* Q4 랜턴(야광봉): 항상 오른쪽으로 45도 */
 body[data-cur="glow"] #handCursor, body[data-cur="glow"] #handCursor.fist{width:220px; height:46px; background-image:url('images/ui/q/glowstick.png'); --rot:45deg;}
+body[data-cur="glow"] #handCursor.fist{--rot:0deg;} /* 주먹을 쥐면 왼쪽으로 45도 */
 /* Q5 주먹: 주먹을 쥐면 왼쪽으로 45도 */
 body[data-cur="fist"] #handCursor, body[data-cur="fist"] #handCursor.fist{width:72px; height:92px; background-image:url('images/ui/q/fist.png');}
 body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0,0.7);}
 /* 다음/리셋 버튼 */
 .btn.img-btn{padding:0; border:none; background:none; letter-spacing:0;}
 .btn.img-btn:hover, .btn.img-btn.dwell-hover{background:none; border:none; transform:scale(1.06);}
-.btn.img-btn img{height:84px; width:auto; display:block; image-rendering:pixelated;}
+.btn.img-btn img{height:101px; width:auto; display:block; image-rendering:pixelated;}
 /* Q1 레인저 키워드: 기본 A, 마우스/손을 올리면(hover) 말풍선 있는 B. 5개 + 4개 두 줄 */
-.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:10px 8px; width:min(900px,70vw); max-width:none; justify-items:center; margin-bottom:1rem;}
+.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:0 4px; width:min(1000px,74vw); max-width:none; justify-items:center; margin-bottom:1rem;}
 .kw-grid.q1grid .kw{grid-column:span 2;}
 .kw-grid.q1grid .kw:nth-child(6){grid-column:2 / span 2;}
 .kw.kw-hero{border:none; background:none; padding:0; box-shadow:none; display:block; width:auto; flex:none; line-height:0;}
-.kw.kw-hero img{height:min(210px,21vh); width:auto; max-width:none; display:block; image-rendering:pixelated; pointer-events:none;}
+.kw.kw-hero img{height:min(260px,25vh); width:auto; max-width:none; display:block; image-rendering:pixelated; pointer-events:none;}
 .kw.kw-hero .img-b{display:none;}
 .kw.kw-hero:hover .img-a, .kw.kw-hero.dwell-hover .img-a{display:none;}
 .kw.kw-hero:hover .img-b, .kw.kw-hero.dwell-hover .img-b{display:block;}
 .kw.kw-hero .kw-label{position:absolute; width:1px; height:1px; overflow:hidden; opacity:0;}
 .kw.kw-hero.selected{background:none; box-shadow:none;}
 .drag-ghost:has(img){border:none; background:none; box-shadow:none; padding:0; line-height:0;}
-.drag-ghost img{height:120px; width:auto; display:block; image-rendering:pixelated;}
+.drag-ghost img{height:min(260px,25vh); width:auto; display:block; image-rendering:pixelated;}
 .drag-ghost .img-a{display:none;}
 .drag-ghost .kw-label{display:none;}
 /* Q1 바구니: 평소 A(닫힘), 키워드를 끌고 있는 동안 B(열림), 선택이 확정되면 다시 A */
@@ -370,3 +372,7 @@ body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0
 .q-layout.spread{justify-content:center; gap:6vw; max-width:900px;}
 /* Q4: 선택하면 색 반전(진한 바탕 + 흰 글씨)으로 확실히 표시 */
 #screen-q.q4 .kw.selected{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+/* 바구니 C(앞면): 열린 바구니(B) 위, 떨어지는 키워드(z 50)보다도 위 — 키워드가 바구니 "안으로" 들어가 보이게 */
+#basketFront{position:fixed; z-index:60; display:none; pointer-events:none; image-rendering:pixelated;}
+#basketFront.on{display:block;}

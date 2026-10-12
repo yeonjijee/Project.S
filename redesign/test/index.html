@@ -13,7 +13,7 @@
 
 <div class="screen active" id="screen-camstart">
   <img class="logo-img" src="images/ui/logo-projects.png" alt="Project.S">
-  <div class="sub" id="camStartSub">나의 영웅을 찾아서</div>
+  <div class="sub" id="camStartSub"></div>
   <div class="enter-cta" data-action="camstart" id="camStartBtn"><span class="accent">Enter 키</span>를 눌러 시작하세요</div>
 </div>
 
@@ -25,7 +25,7 @@
   </div>
   <div class="sub" id="tutorialCaption">손바닥을 편 상태로는 아무 일이 일어나지 않습니다.</div>
   <div class="tutorial-progress" id="tutorialProgress">0 / 3</div>
-  <button class="btn dwellable tutorial-next" id="tutorialNextBtn" data-action="tutorial-done">넘어가기</button>
+  <button class="btn img-btn dwellable tutorial-next" id="tutorialNextBtn" data-action="tutorial-done"><img src="images/ui/q/next.png" alt="넘어가기"></button>
 </div>
 
 <div class="screen" id="screen-open">
@@ -80,6 +80,7 @@
       <div class="q-stage">
         <div class="candidate-stage"><canvas id="candidateCanvas" width="480" height="480"></canvas></div>
         <div class="basket" id="basketZone"><img class="bk-closed" src="images/ui/q/basket-closed.png" alt="바구니"><img class="bk-open" src="images/ui/q/basket-open.png" alt=""></div>
+        <img id="basketFront" src="images/ui/q/basket-front.png" alt="">
       </div>
     </div>
     <div class="q-nav-row">
