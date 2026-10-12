@@ -299,39 +299,43 @@ body{position:relative;}
 #handCursor.ready{background:rgba(188,0,0,0.35);}
 
 /* ---- 연지가 만든 그래픽으로 교체한 부분 ---- */
+/* 카메라 손 커서: 편 손 / 주먹 아이콘을 그대로 보여준다 (손 상태가 화면에서 바로 보이게) */
+#handCursor{
+  width:54px; height:62px; border:none !important; border-radius:0; background-color:transparent !important;
+  background-image:url('images/ui/icon-hand-open.png'); background-repeat:no-repeat; background-position:center; background-size:contain;
+  image-rendering:pixelated; filter:drop-shadow(0 0 2px rgba(255,255,255,0.9));
+}
+#handCursor.fist{background-image:url('images/ui/icon-fist.png'); width:58px; height:58px;}
+#handCursor.ready{filter:drop-shadow(0 0 6px rgba(188,0,0,0.85));}
 /* 다음/리셋 버튼 */
 .btn.img-btn{padding:0; border:none; background:none; letter-spacing:0;}
 .btn.img-btn:hover, .btn.img-btn.dwell-hover{background:none; border:none; transform:scale(1.06);}
 .btn.img-btn img{height:56px; width:auto; display:block; image-rendering:pixelated;}
-/* Q1 레인저 키워드(말풍선 포함 B 그래픽) + 바구니 */
-.kw.kw-hero{border:none; background:none; padding:0; box-shadow:none;}
-.kw.kw-hero img{height:min(150px,18vh); width:auto; display:block; image-rendering:pixelated; pointer-events:none;}
+/* Q1 레인저 키워드: 기본 A, 마우스/손을 올리면(hover) 말풍선 있는 B. 5개 + 4개 두 줄 */
+.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:10px 8px; width:min(760px,62vw); max-width:none; justify-items:center; margin-bottom:1rem;}
+.kw-grid.q1grid .kw{grid-column:span 2;}
+.kw-grid.q1grid .kw:nth-child(6){grid-column:2 / span 2;}
+.kw.kw-hero{border:none; background:none; padding:0; box-shadow:none; display:block; width:auto; flex:none; line-height:0;}
+.kw.kw-hero img{height:min(150px,15vh); width:auto; max-width:none; display:block; image-rendering:pixelated; pointer-events:none;}
+.kw.kw-hero .img-b{display:none;}
+.kw.kw-hero:hover .img-a, .kw.kw-hero.dwell-hover .img-a{display:none;}
+.kw.kw-hero:hover .img-b, .kw.kw-hero.dwell-hover .img-b{display:block;}
 .kw.kw-hero .kw-label{position:absolute; width:1px; height:1px; overflow:hidden; opacity:0;}
 .kw.kw-hero.selected{background:none; box-shadow:none;}
-.kw.kw-hero.dwell-hover{transform:scale(1.05);}
-.drag-ghost:has(img){border:none; background:none; box-shadow:none; padding:0;}
+.drag-ghost:has(img){border:none; background:none; box-shadow:none; padding:0; line-height:0;}
 .drag-ghost img{height:120px; width:auto; display:block; image-rendering:pixelated;}
+.drag-ghost .img-a{display:none;}
 .drag-ghost .kw-label{display:none;}
-.basket{border:none; background:none; padding:0; width:min(150px,16vw);}
-.basket img{width:100%; height:auto; display:block; mix-blend-mode:multiply; image-rendering:pixelated;}
+/* Q1 바구니: 평소 A(닫힘), 키워드를 끌고 있는 동안 B(열림), 선택이 확정되면 다시 A */
+.q-layout.q1{--bw:min(450px,34vh,26vw);}
+.q-layout.q1 .q-stage{margin-bottom:calc(var(--bw) * 1.16 + 0.5rem);}
+.basket{border:none; background:none; padding:0; width:var(--bw,min(150px,16vw)); left:50%; top:calc(100% + 0.4rem); bottom:auto; transform:translateX(-50%);}
+.basket img{width:100%; height:auto; display:block; image-rendering:pixelated;}
 .basket .bk-open{display:none;}
-.basket.drag-over .bk-closed, .basket.dwell-hover .bk-closed{display:none;}
-.basket.drag-over .bk-open, .basket.dwell-hover .bk-open{display:block;}
+.basket.open .bk-closed, .basket.drag-over .bk-closed, .basket.dwell-hover .bk-closed{display:none;}
+.basket.open .bk-open, .basket.drag-over .bk-open, .basket.dwell-hover .bk-open{display:block;}
 /* Q3 펜/지우개 */
 .tool-btn{width:64px; height:64px;}
 .tool-btn img{width:44px; height:44px; object-fit:contain; image-rendering:pixelated;}
 /* Q6 소원 지니 */
 .q6-genie{width:min(150px,22vw); height:auto; image-rendering:pixelated; margin-bottom:0.8rem;}
-/* 문항별 카메라 손 커서: Q2 집게(주먹 쥐면 닫힘) / Q4 야광봉 / Q5 주먹 */
-body[data-cur] #handCursor{
-  border:none !important; border-radius:0; background-color:transparent !important;
-  background-repeat:no-repeat; background-position:center; background-size:contain;
-  transform:translate(-50%,-50%) !important; mix-blend-mode:multiply; image-rendering:pixelated;
-}
-body[data-cur="tongs"] #handCursor{width:44px; height:168px; background-image:url('images/ui/q/tongs-a.png'); transform:translate(-50%,-88%) !important;}
-body[data-cur="tongs"] #handCursor.ready{background-image:url('images/ui/q/tongs-b.png');}
-body[data-cur="glow"] #handCursor{width:190px; height:40px; background-image:url('images/ui/q/glowstick.png');}
-body[data-cur="fist"] #handCursor{width:70px; height:88px; background-image:url('images/ui/q/fist.png');}
-body[data-cur="fist"] #handCursor.ready{filter:drop-shadow(0 0 8px rgba(188,0,0,0.6));}
-
-.foot-note{position:fixed; bottom:20px; left:0; right:0; text-align:center; font-size:10.5px; color:#aaa; letter-spacing:0.04em;}

@@ -342,6 +342,9 @@ function renderQuestion(){
   const grid = document.getElementById('kwGrid');
   grid.innerHTML = '';
   grid.className = 'kw-grid'; // 매 질문마다 인터렉션별 클래스 초기화
+  if(qIndex === 0) grid.classList.add('q1grid'); // Q1: 5개 + 4개 두 줄
+  document.getElementById('qLayout').classList.toggle('q1', qIndex === 0);
+  setBasketOpen(false);
 
   const isQ1 = qIndex === 0;
   // Q1은 연지가 만든 9명의 레인저 그래픽(images/ui/q/kw-N-b.png)과 키워드를 1:1로 맞춘다.
@@ -371,11 +374,15 @@ function renderQuestion(){
     }
     if(isQ1){
       el.classList.add('kw-hero');
-      const img = document.createElement('img');
-      img.src = 'images/ui/q/kw-' + (i + 1) + '-b.png'; // B = 말풍선에 키워드 이름이 적힌 버전
-      img.alt = k;
-      img.draggable = false;
-      el.appendChild(img);
+      // A = 기본(레인저만), B = hover/잡았을 때(말풍선에 키워드 이름)
+      ['a','b'].forEach(v => {
+        const img = document.createElement('img');
+        img.className = 'img-' + v;
+        img.src = 'images/ui/q/kw-' + (i + 1) + '-' + v + '.png';
+        img.alt = v === 'a' ? k : '';
+        img.draggable = false;
+        el.appendChild(img);
+      });
     }
     const label = document.createElement('span');
     label.className = 'kw-label';
@@ -738,14 +745,16 @@ subjectiveInput.addEventListener('input', refreshFinishBtn);
 /* Q1 드래그-투-바구니 (마우스 테스트용 — 실제 전시에서는 카메라 손동작으로 동일 처리) */
 document.addEventListener('dragstart', (e) => {
   const kw = e.target.closest('.kw');
-  if(kw) e.dataTransfer.setData('text/plain', kw.dataset.kw);
+  if(kw){ e.dataTransfer.setData('text/plain', kw.dataset.kw); setBasketOpen(true); }
 });
+document.addEventListener('dragend', () => setBasketOpen(false));
 const basketZone = document.getElementById('basketZone');
 basketZone.addEventListener('dragover', (e) => { e.preventDefault(); basketZone.classList.add('drag-over'); });
 basketZone.addEventListener('dragleave', () => basketZone.classList.remove('drag-over'));
 basketZone.addEventListener('drop', (e) => {
   e.preventDefault();
   basketZone.classList.remove('drag-over');
+  setBasketOpen(false);
   const k = e.dataTransfer.getData('text/plain');
   const el = [...document.querySelectorAll('.kw')].find(x=>x.dataset.kw===k);
   if(el) toggleKeyword(el);
@@ -1001,9 +1010,16 @@ requestAnimationFrame(pollMouse);
    고스트 엘리먼트를 만들고, 바구니 위에서 손을 펴야(놓아야) 선택이 확정된다.
    다른 곳에서 펴면 원래 자리로 돌아가고 취소된다. */
 let draggingKeyword = null;
+let q1HoverEl = null;
 let dragGhost = null;
 
+// 바구니 그래픽: 키워드를 끌고 있는 동안 B(열림), 선택이 확정/취소되면 A(닫힘)
+function setBasketOpen(on){
+  const b = document.getElementById('basketZone');
+  if(b) b.classList.toggle('open', !!on);
+}
 function spawnGhost(sourceEl, x, y){
+  setBasketOpen(true);
   sourceEl.classList.add('picked-source'); // 잡는 순간부터 원래 자리에서 숨긴다
   dragGhost = sourceEl.cloneNode(true);
   dragGhost.className = 'drag-ghost';
@@ -1045,6 +1061,7 @@ function startGravityFall(ghostEl, dropped, x0, y0){
       resolved = true;
       basketZone.classList.remove('drag-over');
       ghostEl.remove();
+      setBasketOpen(false);
       toggleKeyword(dropped); // 선택 확정 — 떨어지다 바구니에 닿은 순간 담긴다
       return;
     }
@@ -1054,6 +1071,7 @@ function startGravityFall(ghostEl, dropped, x0, y0){
       resolved = true;
       basketZone.classList.remove('drag-over');
       ghostEl.remove();
+      setBasketOpen(false);
       dropped.classList.remove('picked-source');
       return;
     }
@@ -1070,13 +1088,22 @@ function updateQ1Drag(x, y, fisted){
       removeGhostEl();
       draggingKeyword = null;
     }
+    setBasketOpen(false);
     basketZone.classList.remove('drag-over');
+    if(q1HoverEl){ q1HoverEl.classList.remove('dwell-hover'); q1HoverEl = null; }
     return;
   }
 
   const el = document.elementFromPoint(x, y);
   const overBasket = !!(el && el.closest('#basketZone'));
   const overKw = el ? el.closest('.kw') : null;
+
+  // 손(카메라)이 레인저 위에 올라가면 A -> B 그래픽으로 (마우스는 CSS :hover가 처리)
+  if(q1HoverEl !== overKw){
+    if(q1HoverEl) q1HoverEl.classList.remove('dwell-hover');
+    q1HoverEl = overKw;
+    if(overKw) overKw.classList.add('dwell-hover');
+  }
 
   if(!draggingKeyword){
     if(fisted && overKw && !overKw.classList.contains('selected')){
@@ -1095,6 +1122,7 @@ function updateQ1Drag(x, y, fisted){
       if(overBasket){
         // 놓는 순간 이미 바구니 위라면 즉시 확정 (기존 동작 유지, 자연스러움)
         fallingGhost.remove();
+        setBasketOpen(false);
         toggleKeyword(dropped);
       } else {
         startGravityFall(fallingGhost, dropped, x, y);
@@ -1207,13 +1235,15 @@ function trackHand(){
       const openness = avgTipDist / handScale; // 작을수록 주먹
 
       const fisted = openness <= FIST_CLOSE;
+      cursor.classList.toggle('fist', fisted); // 편 손 / 주먹 아이콘 전환
       updateGrip(x, y, openness);
       updateQ1Drag(x, y, fisted);
       handlePointerActivity(x, y, fisted);
       updateTutorial(openness);
-      camStatus.textContent = '카메라: 켜짐 · 손 인식됨';
+      camStatus.textContent = '카메라: 켜짐 · 손 인식됨 · ' + (fisted ? '주먹 ✊' : '편 손 ✋');
     } else {
       cursor.classList.remove('ready');
+      cursor.classList.remove('fist');
       clearHover();
       camStatus.textContent = '카메라: 켜짐 · 손 찾는 중 (카메라 앞에 손을 크게 펴서 비춰줘)';
     }
@@ -1252,10 +1282,10 @@ function applyGripProgress(target, p){
   target.style.background = `rgba(188,0,0,${p * 0.12})`;
 }
 function applyCursorGlow(p){
-  const scale = 1 + p * 0.7;
+  // 손 아이콘 커서: 주먹을 오므릴수록 살짝 커지고 붉게 빛난다 (background를 건드리면 아이콘이 지워지므로 filter만 사용)
+  const scale = 1 + p * 0.25;
   cursor.style.transform = `translate(-50%,-50%) scale(${scale})`;
-  cursor.style.background = `rgba(188,0,0,${0.12 + p * 0.68})`;
-  cursor.style.borderColor = `rgba(188,0,0,${0.5 + p * 0.5})`;
+  cursor.style.filter = `drop-shadow(0 0 ${2 + p * 6}px rgba(188,0,0,${0.3 + p * 0.6}))`;
 }
 
 function resetGripVisual(target){
@@ -1263,8 +1293,7 @@ function resetGripVisual(target){
   target.style.borderColor = '';
   target.style.background = '';
   cursor.style.transform = 'translate(-50%,-50%) scale(1)';
-  cursor.style.background = '';
-  cursor.style.borderColor = '';
+  cursor.style.filter = '';
 }
 
 function clearHover(){
