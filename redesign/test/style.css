@@ -1,27 +1,19 @@
-/* 한글 본문/UI 서체 — 을유1945 세미볼드를 원했지만, 을유1945는 라이선스상 웹 임베딩(서버에
-   폰트 파일 탑재)이 금지돼 있어(눈누 라이선스 요약표 "임베딩" 항목) 그대로 쓸 수 없다.
-   대신 SemiBold(600) 굵기를 그대로 가진 Noto Serif KR(SIL OFL, 웹 임베딩 명시 허용)로 대체. */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap');
-/* 영문 디스플레이 서체 — Acumin Variable Concept Wide Black은 Adobe/Typekit 상업 라이선스라
-   대체: Big Shoulders Display Black(Google Fonts, 무료). 브랜드명("Project.S") 등 영문
-   디스플레이 텍스트에만 쓰고, 한글 본문은 위 Noto Serif KR을 그대로 쓴다. */
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@900&display=swap');
+/* 폰트는 전부 Silver(피그마 지정) — fonts/Silver.ttf, 설정은 design.css의 --font-main */
 
 /* 연지가 준 픽셀 로고/버튼 PNG에서 실제로 추출한 빨강(#bc0000)을 그대로 사이트 강조색으로 쓴다 —
    흰 배경 + 빨강 포인트 + 회색 보조 텍스트, 목업 그대로. */
 :root{
   --bg:#ffffff;
-  --ink:#181818;
-  --red:#bc0000;
+  /* --ink, --red 는 design.css에서 정의 */
   --sub:#7a7a7a;
   --line:#d9d9d9;
 }
 
 *{box-sizing:border-box;}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Noto Serif KR',-apple-system,'Malgun Gothic',serif;overflow:hidden;}
+html,body{margin:0;height:100%;background:var(--bg);-webkit-font-smoothing:none;color:var(--ink);font-family:var(--font-main);overflow:hidden;}
 body{position:relative;}
 
-.font-en{font-family:'Big Shoulders Display',sans-serif;font-weight:900;letter-spacing:0.04em;}
+.font-en{font-family:var(--font-main);letter-spacing:0.04em;}
 
 .screen{
   position:absolute; inset:0; z-index:1;
@@ -65,7 +57,7 @@ body{position:relative;}
 
 .nickname-input{
   background:none; border:none; border-bottom:1px solid var(--line); color:var(--ink);
-  font-family:inherit; font-size:15px; text-align:center; padding:10px 4px;
+  font-family:inherit; font-size:36px; color:var(--red); text-align:center; padding:10px 4px;
   width:240px; margin-bottom:2rem; outline:none;
 }
 .nickname-input:focus{border-color:var(--red);}
@@ -77,24 +69,29 @@ body{position:relative;}
 /* 카메라 켜기 화면 — 목업 그대로: 로고 + "나의 영웅을 찾아서" + "Enter 키를 눌러 시작하세요".
    이 화면은 아직 카메라(손동작)가 켜지기 전이라 dwellable로 만들어봤자 의미가 없어서,
    실제로는 키보드 Enter 또는 (테스트용) 마우스 클릭으로만 작동한다. */
-.enter-cta{font-size:24.5px; color:var(--sub); cursor:pointer; animation:ctaBlink 2.4s ease-in-out infinite;}
+.enter-cta{font-size:var(--fs-cta); color:var(--sky-text); cursor:pointer; animation:ctaBlink 2.4s ease-in-out infinite;}
 @keyframes ctaBlink{0%,100%{opacity:1;} 50%{opacity:0.25;}}
 #camStartSub:empty{display:none;}
-.enter-cta .accent{color:var(--red); font-weight:600;}
+.enter-cta .accent{color:#de0c00;}
 
-/* 손 사용법 화면 — 지금 실제 손 상태(편 손/주먹)를 그대로 큼직하게 보여준다(updateTutorial).
-   3번 반복해야 넘어가는 화면이라 직접 보면서 따라 하기 좋게 훨씬 크게 키움. */
-.tutorial-icons{width:min(420px,70vw); height:min(420px,52vh); display:flex; align-items:center; justify-content:center; margin-bottom:2rem;}
-.hand-icon{object-fit:contain;}
-/* 편 손은 기존 크기의 3/5, 주먹은 3/4로 줄여달라는 요청 — 같은 컨테이너 안에서 각자 다른
-   비율로 축소하되, 컨테이너가 flex 중앙 정렬이라 둘 다 계속 가운데에 맞춰진다. */
-#iconHandOpen{width:70%; height:70%;}
-#iconFist{width:55%; height:55%;}
-
-.tutorial-progress{font-size:13px; color:var(--sub); letter-spacing:0.06em; margin:-1.4rem 0 1.6rem;}
-/* "넘어가기" 버튼 — 처음부터 자리(공간)는 차지해두고 안 보이게만 해서, 3번 채워서 나타날 때
-   그 아래/주변 레이아웃이 밀리지 않게 한다(display:none 대신 visibility+opacity). */
-.tutorial-next{visibility:hidden; opacity:0; transition:opacity .3s ease;}
+/* 손 사용법(튜토리얼) — 피그마 tutorial1~7. 하늘색 배경 위 흰 글자, 주먹 3개가 진행 표시.
+   단계/문구는 script.js(updateTutorial)가 바꾼다. */
+.tut-title{position:absolute; top:13.5vh; left:0; right:0; font-size:var(--fs-title); color:var(--sky-text);}
+.tut-main{display:flex; align-items:center; justify-content:center; gap:4vw; margin-top:2vh;}
+.tutorial-icons{width:min(244px,16vw); height:min(339px,32vh); display:flex; align-items:center; justify-content:center;}
+.hand-icon{width:100%; height:100%; object-fit:contain; image-rendering:pixelated;}
+#iconFist{width:92%; height:auto;}
+.tut-caption{font-size:var(--fs-body); line-height:1.6; color:var(--sky-text); text-align:left; min-width:min(660px,40vw);}
+.tut-done{display:none; font-size:var(--fs-title); color:var(--sky-text);}
+#screen-tutorial.finished .tut-main{display:none;}
+#screen-tutorial.finished .tut-done{display:block;}
+.tutorial-progress{position:absolute; bottom:12vh; left:50%; transform:translateX(-50%); display:flex; gap:1.6vw;}
+.tutorial-progress i{display:block; width:min(71px,4.4vw); aspect-ratio:71/76; background:var(--tut-fist-off) center/contain no-repeat; image-rendering:pixelated;}
+.tutorial-progress i.on{background-image:var(--tut-fist-on);}
+#screen-tutorial.finished .tutorial-progress{display:none;}
+/* NEXT — 3번 채우면 오른쪽 아래가 아니라 가운데 아래에 나타난다 */
+.tutorial-next{position:absolute; bottom:8vh; left:50%; transform:translateX(-50%); visibility:hidden; opacity:0; transition:opacity .3s ease;}
+.tutorial-next img{height:var(--btn-next-h); width:auto; display:block;}
 .tutorial-next.visible{visibility:visible; opacity:1;}
 
 /* 로고(자산14) — 카메라 켜기 화면 상단에 화면의 3/4을 채울 만큼 크게 쓴다.
@@ -105,14 +102,25 @@ body{position:relative;}
 .q-title-img{height:26px; width:auto; margin-bottom:0.9rem;}
 .result-title-img{margin-bottom:1.1rem;}
 
-/* 오프닝(아이디 입력) 화면 — 왼쪽(컬러 그리드 + 말풍선 입력) / 오른쪽(컬러별 랜덤 모자이크 미리보기) */
-#openQuestion{margin-bottom:2.6rem;}
-.open-left{display:flex; flex-direction:column; align-items:center; max-width:min(480px,50vw);}
-.open-stage{width:min(170px,24vw);}
+/* 이름 짓기(피그마 naming) — 위: 안내 문구 / 가운데: [색 4x3] + [말풍선] = [모자이크] / 오른쪽 아래: NEXT */
+.top-links{position:absolute; top:2.5vh; left:1.5vw; display:flex; gap:4vw; z-index:3;}
+.top-links .pixel-btn{padding:0;}
+.top-links .pixel-btn img{height:16px; width:auto;}
+.open-head{position:absolute; top:7vh; left:0; right:0;}
+.open-kicker{font-size:48px; color:var(--red);}
+.open-title{font-size:var(--fs-title); color:var(--red); margin-top:0.2em;}
+.open-row{display:flex; align-items:center; justify-content:center; gap:2.5vw; width:100%; margin-top:14vh;}
+.open-colors{display:flex; flex-direction:column; align-items:center;}
+.open-label{font-size:40px; color:#8a8a8a; margin-bottom:1.2rem;}
+.open-op{font-size:56px; color:var(--red);}
+.open-name{display:flex; flex-direction:column; align-items:center;}
+.open-stage{width:min(312px,20vw); margin-bottom:0;}
+.open-next{position:absolute; right:3vw; bottom:4vh;}
+.open-next img{height:var(--btn-next-h); width:auto; display:block;}
 
 .color-grid{
   display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
-  width:min(210px,40vw); margin-bottom:2.2rem;
+  width:min(360px,24vw); gap:min(32px,2vw);
 }
 .color-swatch{
   aspect-ratio:1/1; cursor:pointer; position:relative;
@@ -122,7 +130,7 @@ body{position:relative;}
 .color-swatch:hover, .color-swatch.dwell-hover{border-color:rgba(188,0,0,0.55);}
 .color-swatch.selected{border-color:var(--red); box-shadow:0 0 0 2px rgba(188,0,0,0.25), inset 0 0 0 1px rgba(0,0,0,0.15);}
 
-.speech-bubble-input{position:relative; width:min(260px,42vw); display:flex; align-items:center; justify-content:center;}
+.speech-bubble-input{position:relative; width:min(424px,28vw); display:flex; align-items:center; justify-content:center;}
 .speech-bubble-input .bubble-bg{
   position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none;
 }
@@ -130,7 +138,7 @@ body{position:relative;}
   position:relative; z-index:1; border-bottom:none; width:78%; margin-bottom:0;
   padding:12px 4px 20px;
 }
-.combined-id{font-size:13px; color:var(--red); letter-spacing:0.04em; margin:0.8rem 0 0; min-height:1.3em;}
+.combined-id{font-size:30px; color:var(--red); letter-spacing:0.04em; margin:0.8rem 0 0; min-height:1.3em;}
 
 /* 컬러 선택 + 아이디 입력 전까지 START 버튼이 흐리게 보이는 건 기존 opacity 로직 그대로 재사용.
    3개 버튼(ARCHIVE / START / HERO LIST)은 화면 맨 아래에서 전체 폭으로 양 끝까지 벌어진다. */
@@ -305,45 +313,45 @@ body{position:relative;}
 
 /* ---- 연지가 만든 그래픽으로 교체한 부분 ---- */
 /* 카메라(또는 마우스 테스트) 손 위치 커서: 기본은 편 손/주먹 아이콘, Q2~Q5는 문항별 도구 그래픽.
-   흰 윤곽(항상) + 붉은 빛(버튼 위/주먹 오므림에 따라)을 따로 겹쳐서, 어두운 화면에서도 이미지가 사라지지 않게 한다. */
+   모양/크기/각도 숫자는 전부 design.css의 변수 — 여기는 "동작 규칙"만 둔다. */
 #handCursor{
-  --tx:-50%; --ty:-50%; --s:1; --rot:0deg; --gr:0px; --gc:rgba(188,0,0,0);
-  width:54px; height:62px; border:none !important; border-radius:0; background-color:transparent !important;
-  background-image:url('images/ui/icon-hand-open.png'); background-repeat:no-repeat; background-position:center; background-size:contain;
+  --tx:-50%; --ty:-50%; --s:1; --rot:0deg;
+  width:var(--cur-hand-w); height:var(--cur-hand-h); border:none !important; border-radius:0; background-color:transparent !important;
+  background-image:var(--cur-hand-open); background-repeat:no-repeat; background-position:center; background-size:contain;
   image-rendering:pixelated; z-index:2147483000 !important;
   filter:drop-shadow(0 0 2px rgba(255,255,255,0.95)) drop-shadow(0 0 3px rgba(255,255,255,0.8)); will-change:transform;
   transform:translate(var(--tx),var(--ty)) scale(var(--s)) rotate(var(--rot)) !important;
 }
-#handCursor.fist{background-image:url('images/ui/icon-fist.png'); width:58px; height:58px;}
+#handCursor.fist{background-image:var(--cur-hand-fist); width:var(--cur-fist-w); height:var(--cur-fist-h);}
 body.hand-mouse{cursor:none;}
 body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
-/* Q2 집게: 손잡이 쪽(아래 끝)이 항상 손 위치에 고정되고, 주먹을 쥐면 B로 바뀌며 위쪽 끝(선택 지점)이 길게 늘어난다 */
-body[data-cur="tongs"] #handCursor, body[data-cur="tongs"] #handCursor.fist{width:56px; height:214px; --ty:-97.2%; transform-origin:50% 97.2%;}
-body[data-cur="tongs"] #handCursor{background-image:url('images/ui/q/tongs-a.png');}
-body[data-cur="tongs"] #handCursor.fist{background-image:url('images/ui/q/tongs-b.png');}
-/* Q3 펜/지우개: 주먹을 쥐면(칠하는 중) 왼쪽으로 30도 */
-body[data-cur="pen"] #handCursor, body[data-cur="pen"] #handCursor.fist{width:104px; height:110px; --tx:-12%; --ty:-90%; background-image:url('images/ui/q/pen.png'); transform-origin:12% 90%;}
-body[data-cur="eraser"] #handCursor, body[data-cur="eraser"] #handCursor.fist{width:86px; height:78px; background-image:url('images/ui/q/eraser.png');}
-body[data-cur="pen"] #handCursor.fist, body[data-cur="eraser"] #handCursor.fist{--rot:-30deg;}
-/* Q4 랜턴(야광봉): 항상 오른쪽으로 45도 */
-body[data-cur="glow"] #handCursor, body[data-cur="glow"] #handCursor.fist{width:220px; height:46px; background-image:url('images/ui/q/glowstick.png'); --rot:45deg;}
-body[data-cur="glow"] #handCursor.fist{--rot:0deg;} /* 주먹을 쥐면 왼쪽으로 45도 */
-/* Q5 주먹: 주먹을 쥐면 왼쪽으로 45도 */
-body[data-cur="fist"] #handCursor, body[data-cur="fist"] #handCursor.fist{width:72px; height:92px; background-image:url('images/ui/q/fist.png');}
-body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0,0.7);}
+/* Q2 집게: 손잡이 쪽(아래 끝)이 항상 손 위치에 고정되고, 주먹을 쥐면 B로 바뀌며 위쪽 끝(선택 지점)이 늘어난다 */
+body[data-cur="tongs"] #handCursor, body[data-cur="tongs"] #handCursor.fist{width:var(--cur-tongs-w); height:var(--cur-tongs-h); --ty:-97.2%; transform-origin:50% 97.2%;}
+body[data-cur="tongs"] #handCursor{background-image:var(--cur-tongs-a);}
+body[data-cur="tongs"] #handCursor.fist{background-image:var(--cur-tongs-b);}
+/* Q3 펜/지우개: 주먹을 쥐면(칠하는 중) 기울어진다 */
+body[data-cur="pen"] #handCursor, body[data-cur="pen"] #handCursor.fist{width:var(--cur-pen-w); height:var(--cur-pen-h); --tx:-12%; --ty:-90%; background-image:var(--cur-pen); transform-origin:12% 90%;}
+body[data-cur="eraser"] #handCursor, body[data-cur="eraser"] #handCursor.fist{width:var(--cur-eraser-w); height:var(--cur-eraser-h); background-image:var(--cur-eraser);}
+body[data-cur="pen"] #handCursor.fist, body[data-cur="eraser"] #handCursor.fist{--rot:var(--rot-tool-fist);}
+/* Q4 랜턴 */
+body[data-cur="glow"] #handCursor, body[data-cur="glow"] #handCursor.fist{width:var(--cur-glow-w); height:var(--cur-glow-h); background-image:var(--cur-glow); --rot:var(--rot-glow);}
+body[data-cur="glow"] #handCursor.fist{--rot:var(--rot-glow-fist);}
+/* Q5 주먹 */
+body[data-cur="fist"] #handCursor, body[data-cur="fist"] #handCursor.fist{width:var(--cur-punch-w); height:var(--cur-punch-h); background-image:var(--cur-punch);}
+body[data-cur="fist"] #handCursor.fist{--rot:var(--rot-punch-fist);}
+
 /* 다음/리셋 버튼 */
 .btn.img-btn{padding:0; border:none; background:none; letter-spacing:0;}
 .btn.img-btn:hover, .btn.img-btn.dwell-hover{background:none; border:none; transform:scale(1.06);}
-.btn.img-btn img{height:101px; width:auto; display:block; image-rendering:pixelated;}
+.btn.img-btn img{height:var(--btn-next-h); width:auto; display:block; image-rendering:pixelated;}
 /* Q1 레인저 키워드: 박스는 레인저(몸) 크기만큼만 차지하고(촘촘하게), 말풍선(B)은 박스 밖으로 넘쳐 보인다.
    기본 A, 마우스/손을 올리면(hover) B. 5개 + 4개 두 줄. --h = 이미지 한 장의 전체 높이 */
-:root{--h:min(380px,38vh);}
 .kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:calc(var(--h)*0.02) 2.2vw; width:min(820px,62vw); max-width:none; justify-items:center; margin-bottom:1rem; margin-left:5vw;}
 .kw-grid.q1grid .kw{grid-column:span 2;}
 .kw-grid.q1grid .kw:nth-child(6){grid-column:2 / span 2;}
 .q-layout.q1{gap:7vw; max-width:1300px;}
 .kw.kw-hero{border:none; background:none; padding:0; box-shadow:none; display:block; position:relative; flex:none; line-height:0;
-  width:calc(var(--h)*0.26); height:calc(var(--h)*0.75);}
+  width:calc(var(--h)*var(--q1-box-w)); height:calc(var(--h)*var(--q1-box-h));}
 .kw.kw-hero:hover, .kw.kw-hero.dwell-hover{z-index:6;}
 .kw.kw-hero img, .drag-ghost img{position:absolute; left:calc(var(--h)*-0.004); top:calc(var(--h)*-0.25); height:var(--h); width:auto; max-width:none; image-rendering:pixelated; pointer-events:none;}
 .kw.kw-hero .img-b{display:none;}
@@ -352,25 +360,25 @@ body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0
 .kw.kw-hero .kw-label{position:absolute; width:1px; height:1px; overflow:hidden; opacity:0;}
 .kw.kw-hero.selected{background:none; box-shadow:none;}
 .drag-ghost:has(img){border:none; background:none; box-shadow:none; padding:0; line-height:0;}
-.drag-ghost{width:calc(var(--h)*0.26); height:calc(var(--h)*0.75);}
+.drag-ghost{width:calc(var(--h)*var(--q1-box-w)); height:calc(var(--h)*var(--q1-box-h));}
 .drag-ghost .img-a{display:none;}
 .drag-ghost .kw-label{display:none;}
 /* Q1 바구니: 평소 A(닫힘), 키워드를 끌고 있는 동안 B(열림), 선택이 확정되면 다시 A */
-.q-layout.q1{--bw:min(450px,34vh,26vw);}
+.q-layout.q1{}
 .q-layout.q1 .q-stage{margin-bottom:calc(var(--bw) * 1.16 + 0.5rem);}
-.basket{border:none; background:none; padding:0; width:var(--bw,min(150px,16vw)); left:50%; top:calc(100% + 0.4rem); bottom:auto; transform:translateX(-50%);}
+.basket{border:none; background:none; padding:0; width:var(--bw); left:50%; top:calc(100% + 0.4rem); bottom:auto; transform:translateX(-50%);}
 .basket img{width:100%; height:auto; display:block; image-rendering:pixelated;}
 .basket .bk-open{display:none;}
 .basket.open .bk-closed, .basket.drag-over .bk-closed, .basket.dwell-hover .bk-closed{display:none;}
 .basket.open .bk-open, .basket.drag-over .bk-open, .basket.dwell-hover .bk-open{display:block;}
 /* Q3 펜/지우개 */
-.tool-btn{width:92px; height:92px;}
+.tool-btn{width:var(--tool-btn); height:var(--tool-btn);}
 .tool-btn img{width:64px; height:64px; object-fit:contain; image-rendering:pixelated;}
 /* Q6 소원 지니 */
 .q6-genie{position:absolute; right:-46%; bottom:-8%; width:72%; height:auto; image-rendering:pixelated; z-index:3; pointer-events:none;}
 
 /* 키워드 버튼 전체적으로 크게 (Q2~Q5) */
-.kw{font-size:20px; padding:20px 34px;}
+.kw{font-size:var(--kw-font); padding:20px 34px;}
 .kw-grid{gap:18px; max-width:min(760px,64vw);}
 .kw-grid.column{max-width:none;}
 .kw-grid.column .kw{padding:12px 26px; font-size:16px; text-align:center;}
@@ -396,5 +404,30 @@ body[data-cur="fist"] #handCursor.fist{--rot:-45deg; --gr:8px; --gc:rgba(188,0,0
 }
 /* 모든 화면 우하단 리셋 버튼 */
 .reset-fab{position:fixed; right:2.5vw; bottom:3vh; z-index:30; background:none; border:none; padding:0; cursor:pointer;}
-.reset-fab img{height:52px; width:auto; display:block; image-rendering:pixelated;}
+.reset-fab img{height:var(--btn-reset-h); width:auto; display:block; image-rendering:pixelated;}
 .reset-fab:hover, .reset-fab.dwell-hover{transform:scale(1.08);}
+
+
+/* ---- 배경 레이어 (피그마: 하늘색 bg-02+bg-01 / 노을색 bg-peach / 질문 연분홍) ---- */
+.bg-layer{position:fixed; inset:0; z-index:0; overflow:hidden; --bgy:0%;}
+.bg-layer > div{position:absolute; inset:0; background-repeat:no-repeat; background-size:100% auto; background-position:50% var(--bgy); opacity:0; transition:opacity .6s ease, background-position 1.4s ease; image-rendering:pixelated;}
+.bg-sky{background-image:var(--bg-sky-grad);}
+.bg-cloud{background-image:var(--bg-sky-cloud);}
+.bg-peach{background-image:var(--bg-peach);}
+body[data-bg="sky"] .bg-sky{opacity:1;}
+body[data-bg="peach"] .bg-peach{opacity:1;}
+body[data-bg="page"] .bg-layer{background:var(--bg-page);}
+html,body{background:transparent;}
+body{background:var(--bg-page);}
+.cam-status{color:rgba(0,0,0,0.35);}
+
+.story-text{font-size:var(--fs-cta); line-height:1.15; color:var(--red); white-space:pre-line; transition:opacity .5s ease;}
+.story-text.fade{opacity:0;}
+.story-start{position:absolute; bottom:12vh; left:50%; transform:translateX(-50%); visibility:hidden; opacity:0; transition:opacity .5s ease;}
+.story-start img{height:86px; width:auto; display:block; image-rendering:pixelated;}
+.story-start.visible{visibility:visible; opacity:1;}
+
+/* 이미지 버튼 공통 (NEXT / START) */
+.img-btn{background:none; border:none; padding:0; cursor:pointer; transition:transform .15s ease;}
+.img-btn:hover, .img-btn.dwell-hover{transform:scale(1.06);}
+.tutorial-next:hover, .tutorial-next.dwell-hover, .story-start:hover, .story-start.dwell-hover{transform:translateX(-50%) scale(1.06);}

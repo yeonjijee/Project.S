@@ -118,7 +118,7 @@ function flashThenCycle(canvasEl, pool, rate, colorMix){
 
 /* ---------- 2. 화면 전환 ---------- */
 const screens = {
-  camstart:'screen-camstart', tutorial:'screen-tutorial', open:'screen-open',
+  camstart:'screen-camstart', tutorial:'screen-tutorial', open:'screen-open', story:'screen-story',
   q:'screen-q', q6:'screen-q6', loading:'screen-loading', result:'screen-result'
 };
 // 카메라 손 커서를 문항별 도구 그래픽으로 바꾼다 (Q2 집게 / Q4 야광봉 / Q5 주먹). 그 외 화면은 기본 원형 커서.
@@ -133,14 +133,28 @@ function updateCursorMode(){
   }
   document.body.dataset.cur = cur;
 }
+/* 화면별 배경 — 피그마 프레임 기준: 하늘색(오프닝→튜토리얼에서 구름이 위→아래로 흐름) / 노을색(이름 짓기·시작 스토리) /
+   연분홍(질문·결과). bgy = 구름 이미지의 세로 위치(0% 위쪽 구름 ~ 100% 아래쪽 구름). */
+const BG_BY_SCREEN = {
+  camstart:['sky','0%'], tutorial:['sky','99%'], open:['peach','100%'], story:['peach','100%'],
+  q:['page','100%'], q6:['page','100%'], loading:['page','100%'], result:['page','100%']
+};
+function setBackground(kind, y){
+  document.body.dataset.bg = kind;
+  document.getElementById('bgLayer').style.setProperty('--bgy', y);
+}
 function goto(name){
   Object.values(screens).forEach(id => document.getElementById(id).classList.remove('active'));
   document.getElementById(screens[name]).classList.add('active');
+  const bg = BG_BY_SCREEN[name]; if(bg) setBackground(bg[0], bg[1]);
   updateCursorMode();
   const fab = document.getElementById('resetFab');
   if(fab) fab.style.display = (name === 'camstart' || name === 'loading') ? 'none' : 'block';
   if(name === 'tutorial'){
     resetTutorial();
+  }
+  if(name === 'story'){
+    runStory();
   }
   if(name === 'open'){
     const input = document.getElementById('nicknameInput');
@@ -165,20 +179,30 @@ let tutorialArmed = true;
 let tutorialOpenSince = 0;
 const TUTORIAL_REARM_MS = 150;
 
+const TUT_CAPTIONS = {
+  open: '손바닥을 편 상태로는<br>아무 일도 일어나지 않습니다...',
+  fist: '주먹을 쥐면<br>선택이 됩니다',
+  more: '몇 번 더<br>반복해 보세요'
+};
+function setTutorialCaption(key){
+  const el = document.getElementById('tutorialCaption');
+  if(el.dataset.key !== key){ el.dataset.key = key; el.innerHTML = TUT_CAPTIONS[key]; }
+}
 function resetTutorial(){
   tutorialReps = 0;
   tutorialArmed = true;
   tutorialOpenSince = 0;
+  document.getElementById('screen-tutorial').classList.remove('finished');
   document.getElementById('iconHandOpen').style.display = 'block';
   document.getElementById('iconFist').style.display = 'none';
-  document.getElementById('tutorialCaption').textContent = '손바닥을 편 상태로는 아무 일이 일어나지 않습니다.';
+  setTutorialCaption('open');
   document.getElementById('tutorialNextBtn').classList.remove('visible');
   updateTutorialProgress();
 }
 
+// 주먹 아이콘 3개 중 쥔 횟수만큼 빨갛게 채운다
 function updateTutorialProgress(){
-  const el = document.getElementById('tutorialProgress');
-  if(el) el.textContent = Math.min(tutorialReps, TUTORIAL_REPS_NEEDED) + ' / ' + TUTORIAL_REPS_NEEDED;
+  document.querySelectorAll('#tutorialProgress i').forEach((el, i) => el.classList.toggle('on', i < tutorialReps));
 }
 
 // openness: trackHand가 계산하는 "얼마나 편 손인가" 값 그대로 받는다(작을수록 주먹).
@@ -187,16 +211,13 @@ function updateTutorialProgress(){
 // 건드리고 있어도 그 "false" 호출이 카메라가 방금 감지한 "주먹 쥠"을 끼어들어 지워버려서 —
 // 카메라가 켜진 동안은 카메라만, 꺼져 있을 때(마우스로만 테스트할 때)는 마우스만 부르게 했다.
 function updateTutorial(openness){
-  const onTutorial = document.getElementById('screen-tutorial').classList.contains('active');
-  if(!onTutorial) return;
+  const scr = document.getElementById('screen-tutorial');
+  if(!scr.classList.contains('active') || scr.classList.contains('finished')) return;
   const fisted = openness <= FIST_CLOSE;
   const now = performance.now();
 
   document.getElementById('iconHandOpen').style.display = fisted ? 'none' : 'block';
   document.getElementById('iconFist').style.display = fisted ? 'block' : 'none';
-  document.getElementById('tutorialCaption').textContent = fisted
-    ? '주먹을 쥐면 선택이 됩니다.'
-    : '손바닥을 편 상태로는 아무 일이 일어나지 않습니다.';
 
   if(fisted){
     tutorialOpenSince = 0;
@@ -205,15 +226,50 @@ function updateTutorial(openness){
       tutorialArmed = false; // 다시 일정 시간 펴기 전까지는 같은 쥠을 또 세지 않는다
       updateTutorialProgress();
       if(tutorialReps >= TUTORIAL_REPS_NEEDED){
-        // 3번 채웠다고 바로 넘기지 않고, "넘어가기" 버튼을 보여준다 — 손을 계속 쥐고 있어도
-        // 실수로 바로 넘어가지 않고, 스스로 버튼을 눌러(또는 주먹으로) 확인하고 넘어간다.
-        document.getElementById('tutorialNextBtn').classList.add('visible');
+        // 3번 채우면 "이제 좀 익숙해지셨나요??" + NEXT. 바로 넘기지 않고 버튼으로 확인한다.
+        setTimeout(() => {
+          scr.classList.add('finished');
+          document.getElementById('tutorialNextBtn').classList.add('visible');
+        }, 600);
       }
     }
+    setTutorialCaption(tutorialReps <= 1 ? 'fist' : 'more');
   } else {
+    setTutorialCaption(tutorialReps === 0 ? 'open' : 'more');
     if(!tutorialOpenSince) tutorialOpenSince = now;
     if(now - tutorialOpenSince >= TUTORIAL_REARM_MS) tutorialArmed = true;
   }
+}
+
+/* 시작 스토리 — 문장이 차례로 바뀌고 구름 배경이 아래→위로 흘러간다(피그마 start1~4). 마지막에 START. */
+const STORY_LINES = [
+  { t:'갑자기 웬 히어로냐구요?', y:'100%' },
+  { t:'저기에 당신을 기다리는\n310명의 히어로가 있거든요.', y:'63%' },
+  { t:'당신과 그들은\n그리 다르지 않아요.', y:'33%' },
+  { t:'당신은 사실 어떤 히어로인지,\n차근차근 알아가봅시다.', y:'0%' }
+];
+const STORY_STEP_MS = 3200;
+let storyTimer = null;
+function runStory(){
+  clearTimeout(storyTimer);
+  const txt = document.getElementById('storyText');
+  const btn = document.getElementById('storyStartBtn');
+  btn.classList.remove('visible');
+  let i = 0;
+  const show = () => {
+    if(!document.getElementById('screen-story').classList.contains('active')) return;
+    txt.classList.add('fade');
+    setTimeout(() => {
+      txt.textContent = STORY_LINES[i].t;
+      txt.classList.remove('fade');
+      setBackground('peach', STORY_LINES[i].y);
+      if(i === STORY_LINES.length - 1){ btn.classList.add('visible'); return; }
+      i++;
+      storyTimer = setTimeout(show, STORY_STEP_MS);
+    }, i === 0 ? 0 : 450);
+  };
+  txt.textContent = '';
+  show();
 }
 
 /* ---------- 3. Q1~Q5 데이터 + 진행 상태 ---------- */
@@ -637,6 +693,9 @@ function handleAction(action){
     if(!raw || !selectedColor) return;
     selfName = raw;
     nickname = raw + ' ' + selectedColor;
+    goto('story'); // 시작 스토리 → START 를 누르면 Q1
+  } else if(action==='story-done'){
+    clearTimeout(storyTimer);
     qIndex = 0; renderQuestion(); goto('q');
   } else if(action==='next'){
     if(qIndex < Q_META.length-1){
@@ -669,7 +728,7 @@ function handleAction(action){
     } else if(qIndex > 0){
       qIndex--; renderQuestion();
     } else {
-      goto('open'); // Q1보다 더 이전은 오프닝 화면
+      goto('open'); // Q1보다 더 이전은 이름 짓기 화면
     }
   } else if(action==='restart'){
     picks = [[],[],[],[],[]]; qIndex = 0; matched = null; subjectiveText = ''; nickname = '';

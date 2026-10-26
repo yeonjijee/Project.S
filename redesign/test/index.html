@@ -4,10 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project.S — test</title>
+<link rel="stylesheet" href="design.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- 배경: 화면마다 data-bg(sky/peach/page)와 --bgy(구름 세로 위치 0~100%)를 JS(goto)가 바꾼다 -->
+<div class="bg-layer" id="bgLayer"><div class="bg-sky"></div><div class="bg-sky bg-cloud"></div><div class="bg-peach"></div></div>
 <div class="cam-status" id="camStatus"></div>
 <div id="handCursor"></div>
 
@@ -18,44 +21,56 @@
 </div>
 
 <div class="screen" id="screen-tutorial">
-  <div class="kicker">How to...</div>
-  <div class="tutorial-icons">
-    <img class="hand-icon" id="iconHandOpen" src="images/ui/icon-hand-open.png" alt="편 손">
-    <img class="hand-icon" id="iconFist" src="images/ui/icon-fist.png" alt="주먹" style="display:none;">
+  <div class="tut-title">Tutorial...</div>
+  <div class="tut-main" id="tutMain">
+    <div class="tutorial-icons">
+      <img class="hand-icon" id="iconHandOpen" src="images/ui/icon-hand-open(W).png" alt="편 손">
+      <img class="hand-icon" id="iconFist" src="images/ui/tut-fist-off.png" alt="주먹" style="display:none;">
+    </div>
+    <div class="tut-caption" id="tutorialCaption">손바닥을 편 상태로는<br>아무 일도 일어나지 않습니다...</div>
   </div>
-  <div class="sub" id="tutorialCaption">손바닥을 편 상태로는 아무 일이 일어나지 않습니다.</div>
-  <div class="tutorial-progress" id="tutorialProgress">0 / 3</div>
-  <button class="btn img-btn dwellable tutorial-next" id="tutorialNextBtn" data-action="tutorial-done"><img src="images/ui/q/next.png" alt="넘어가기"></button>
+  <div class="tut-done" id="tutDone">이제 좀 익숙해지셨나요??</div>
+  <!-- 진행 표시: 주먹 3개, 쥘 때마다 하나씩 빨갛게 채워진다 -->
+  <div class="tutorial-progress" id="tutorialProgress"><i></i><i></i><i></i></div>
+  <button class="img-btn dwellable tutorial-next" id="tutorialNextBtn" data-action="tutorial-done"><img src="images/ui/next-w.png" alt="NEXT"></button>
 </div>
 
 <div class="screen" id="screen-open">
-  <div class="sub" id="openQuestion">당신의 히어로명은 무엇인가요?</div>
+  <div class="top-links">
+    <a class="pixel-btn dwellable" href="../../archive/index.html"><img src="images/ui/link-archive.png" alt="ARCHIVE"></a>
+    <a class="pixel-btn dwellable" href="../../list/index.html"><img src="images/ui/link-herolist.png" alt="HERO LIST"></a>
+  </div>
+  <div class="open-head">
+    <div class="open-kicker">시작하기 전에...</div>
+    <div class="open-title" id="openQuestion">나의 히어로명을 지어봅시다</div>
+  </div>
 
-  <div class="q-layout" id="openLayout">
-    <div class="open-left">
+  <div class="open-row" id="openLayout">
+    <div class="open-colors">
+      <div class="open-label">내가 생각하는 나의 색</div>
       <div class="color-grid" id="colorGrid"></div>
+    </div>
+    <div class="open-op">+</div>
+    <div class="open-name">
       <div class="speech-bubble-input">
         <img class="bubble-bg" src="images/ui/speech-bubble.png" alt="">
         <input class="nickname-input bubble-input" id="nicknameInput" maxlength="16">
       </div>
       <div class="combined-id" id="combinedIdPreview"></div>
     </div>
+    <div class="open-op">=</div>
     <div class="q-stage open-stage">
       <div class="candidate-stage"><canvas id="openCanvas" width="480" height="480"></canvas></div>
     </div>
   </div>
 
-  <div class="pixel-nav">
-    <a class="pixel-btn dwellable" href="../../archive/index.html">
-      <img src="images/ui/btn-archive.png" alt="기록의 벽">
-    </a>
-    <button class="pixel-btn dwellable" data-action="start" id="startBtn" style="opacity:0.35;pointer-events:none;">
-      <img src="images/ui/btn-start.png" alt="시작하기">
-    </button>
-    <a class="pixel-btn dwellable" href="../../list/index.html">
-      <img src="images/ui/btn-herolist.png" alt="전체 영웅 리스트">
-    </a>
-  </div>
+  <button class="img-btn dwellable open-next" data-action="start" id="startBtn" style="opacity:0.35;pointer-events:none;"><img src="images/ui/next-w.png" alt="NEXT"></button>
+</div>
+
+<!-- 시작 스토리 (피그마 start1~4): 문장이 바뀔 때마다 구름 배경이 아래→위로 흘러간다 -->
+<div class="screen" id="screen-story">
+  <div class="story-text" id="storyText"></div>
+  <button class="img-btn dwellable story-start" id="storyStartBtn" data-action="story-done"><img src="images/ui/btn-start.png" alt="START"></button>
 </div>
 
 <div class="screen" id="screen-q">

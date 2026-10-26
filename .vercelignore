@@ -9,3 +9,4 @@ __pycache__/
 *.pyc
 .DS_Store
 배포방법.md
+tools/
