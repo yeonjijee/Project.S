@@ -77,11 +77,11 @@ body{position:relative;}
 /* 손 사용법(튜토리얼) — 피그마 tutorial1~7. 하늘색 배경 위 흰 글자, 주먹 3개가 진행 표시.
    단계/문구는 script.js(updateTutorial)가 바꾼다. */
 .tut-title{position:absolute; top:13.5vh; left:0; right:0; font-size:var(--fs-title); color:var(--sky-text);}
-.tut-main{display:flex; align-items:center; justify-content:center; gap:4vw; margin-top:2vh;}
-.tutorial-icons{width:min(244px,16vw); height:min(339px,32vh); display:flex; align-items:center; justify-content:center;}
+.tut-main{display:flex; align-items:center; justify-content:center; gap:4vw; width:100%;}
+.tutorial-icons{width:16vw; height:min(339px,34vh); flex:none; display:flex; align-items:center; justify-content:center;}
 .hand-icon{width:100%; height:100%; object-fit:contain; image-rendering:pixelated;}
 #iconFist{width:92%; height:auto;}
-.tut-caption{font-size:var(--fs-body); line-height:1.6; color:var(--sky-text); text-align:left; min-width:min(660px,40vw);}
+.tut-caption{font-size:var(--fs-body); line-height:1.6; color:var(--sky-text); text-align:left; width:36vw; flex:none;}
 .tut-done{display:none; font-size:var(--fs-title); color:var(--sky-text);}
 #screen-tutorial.finished .tut-main{display:none;}
 #screen-tutorial.finished .tut-done{display:block;}
@@ -111,7 +111,7 @@ body{position:relative;}
 .open-title{font-size:var(--fs-title); color:var(--red); margin-top:0.2em;}
 .open-row{display:flex; align-items:center; justify-content:center; gap:2.5vw; width:100%; margin-top:14vh;}
 .open-colors{display:flex; flex-direction:column; align-items:center;}
-.open-label{font-size:2.1vw; color:#8a8a8a; margin-bottom:1.2rem;}
+.open-label{font-size:1.6vw; color:#8a8a8a; margin-bottom:0.8rem;}
 .open-op{font-size:2.9vw; color:var(--red);}
 .open-name{display:flex; flex-direction:column; align-items:center;}
 .open-stage{width:min(312px,20vw); margin-bottom:0;}
@@ -120,7 +120,7 @@ body{position:relative;}
 
 .color-grid{
   display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
-  width:min(360px,24vw); gap:min(32px,2vw);
+  width:min(250px,15vw); gap:min(18px,1.1vw);
 }
 .color-swatch{
   aspect-ratio:1/1; cursor:pointer; position:relative;
@@ -419,7 +419,8 @@ body[data-bg="peach"] .bg-peach{opacity:1;}
 body[data-bg="page"] .bg-layer{background:var(--bg-page);}
 html,body{background:transparent;}
 body{background:var(--bg-page);}
-.cam-status{color:rgba(0,0,0,0.35);}
+.cam-status{display:none; color:rgba(0,0,0,0.35);}
+body.debug .cam-status{display:block;}   /* 주소 뒤에 ?debug 를 붙이면 카메라 상태 표시가 다시 나온다 */
 
 .story-text{font-size:var(--fs-cta); line-height:1.15; color:var(--red); white-space:pre-line; transition:opacity .5s ease;}
 .story-text.fade{opacity:0;}
@@ -431,3 +432,15 @@ body{background:var(--bg-page);}
 .img-btn{background:none; border:none; padding:0; cursor:pointer; transition:transform .15s ease;}
 .img-btn:hover, .img-btn.dwell-hover{transform:scale(1.06);}
 .tutorial-next:hover, .tutorial-next.dwell-hover, .story-start:hover, .story-start.dwell-hover{transform:translateX(-50%) scale(1.06);}
+
+/* 자산 40(빨간 레인저) — 피그마에서 하늘 배경 위 (왼쪽, 세로 48% 지점)에 붙어 있어서, 오프닝→튜토리얼로 하늘이
+   내려올 때 화면 아래에서 올라와 위로 지나간다. 배경과 같은 속도(--bgf)로 움직인다. */
+@property --bgf{syntax:'<number>'; inherits:true; initial-value:0;}
+.bg-layer{--bgf:0; transition:--bgf 1.4s ease;}
+.bg-layer > .bg-ranger{
+  --bgh:177.78vw;                 /* 배경 이미지 전체 높이(너비 100% 기준, 2250x4000) */
+  position:absolute; left:0; width:19.06vw; height:auto; inset:auto auto auto 0;
+  top:calc(var(--bgh) * 0.4827 - (var(--bgh) - 100vh) * var(--bgf));
+  background:none; opacity:0; image-rendering:pixelated; transition:opacity .6s ease;
+}
+body[data-bg="sky"] .bg-layer > .bg-ranger{opacity:1;}

@@ -142,6 +142,7 @@ const BG_BY_SCREEN = {
 function setBackground(kind, y){
   document.body.dataset.bg = kind;
   document.getElementById('bgLayer').style.setProperty('--bgy', y);
+  document.getElementById('bgLayer').style.setProperty('--bgf', parseFloat(y)/100); // 숫자 버전(자산 40 위치 계산용)
 }
 setBackground('sky','0%'); // 첫 화면(오프닝)도 하늘색으로 시작 — goto()가 불리기 전이라 따로 지정
 function goto(name){
@@ -1275,6 +1276,7 @@ loadData().catch(err => console.error('데이터 로드 실패 (data/ 폴더가 
    (Q4의 왼손 마스크+오른손 주먹처럼 완전한 양손 인터렉션은 아직 없음 — 지금은 한 손으로 마스크 이동과
    선택을 함께 처리하는 단순화된 버전) */
 
+if(/[?&]debug/.test(location.search)) document.body.classList.add('debug');
 const camStatus = document.getElementById('camStatus');
 const cursor = document.getElementById('handCursor');
 let camOn = false, video = null, landmarker = null;
