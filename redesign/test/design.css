@@ -1,68 +1,12 @@
 /* =====================================================================
-   design.css — Project.S "디자인 값" 전용 파일
-   피그마에서 디자인을 바꿨다면 이 파일의 숫자/이미지 경로만 고치면 된다.
-   (동작 = script.js, 배치 규칙 = style.css 는 건드리지 않는다)
-   이미지는 images/ui/ 안에 "같은 파일 이름"으로 덮어쓰면 자동으로 바뀐다 (파일명 규칙: 정리 문서 참고).
+   design.css — 디자인 값 파일 (지금은 "뼈대 상태": 기능에 꼭 필요한 숫자만 남김)
+   이전 디자인(피그마 1차 적용본)은 _old-design/ 폴더와 git 기록에 보관돼 있다.
+   새 디자인을 만들 때 색/폰트/이미지 경로 변수를 여기에 다시 추가한다.
    ===================================================================== */
 :root{
-  /* ---- 색 ---- */
-  --red:#bc0000;          /* 포인트 빨강 */
-  --ink:#181818;          /* 글자/반전 색 */
-
-  /* ---- 손 위치 커서 (카메라/마우스 공통) ---- */
-  --cur-hand-open:url('images/ui/icon-hand-open.png');   --cur-hand-w:54px;  --cur-hand-h:62px;
-  --cur-hand-fist:url('images/ui/icon-fist.png');        --cur-fist-w:58px;  --cur-fist-h:58px;
-  /* Q2 집게 — 손잡이(아래 끝)가 손 위치, 위쪽 끝이 선택 지점. A=편 손, B=주먹 */
-  --cur-tongs-a:url('images/ui/q/tongs-a.png');
-  --cur-tongs-b:url('images/ui/q/tongs-b.png');
-  --cur-tongs-w:56px; --cur-tongs-h:214px;
-  /* Q3 펜/지우개 — 주먹 쥘 때 기울어지는 각도 */
-  --cur-pen:url('images/ui/q/pen.png');         --cur-pen-w:104px;  --cur-pen-h:110px;
-  --cur-eraser:url('images/ui/q/eraser.png');   --cur-eraser-w:86px; --cur-eraser-h:78px;
-  --rot-tool-fist:-30deg;
-  /* Q4 랜턴(야광봉) — 평소 각도 / 주먹 쥘 때 각도 */
-  --cur-glow:url('images/ui/q/glowstick.png');  --cur-glow-w:220px;  --cur-glow-h:46px;
-  --rot-glow:45deg;  --rot-glow-fist:0deg;
-  /* Q5 주먹 — 주먹 쥘 때 각도 */
-  --cur-punch:url('images/ui/q/fist.png');      --cur-punch-w:72px;  --cur-punch-h:92px;
-  --rot-punch-fist:-45deg;
-
-  /* ---- Q1 레인저 / 바구니 ---- */
-  --h:min(380px,38vh);          /* 레인저 이미지 한 장의 전체 높이 (키우려면 숫자 ↑) */
-  --q1-box-w:0.26;              /* 레인저 몸이 차지하는 가로 비율 (촘촘함) */
+  /* Q1 레인저/바구니 — 드래그·바구니 판정(script.js)이 이 박스 크기에 맞춰 동작하므로 숫자만 유지 */
+  --h:min(380px,38vh);          /* 레인저 이미지 한 장의 전체 높이 */
+  --q1-box-w:0.26;              /* 레인저 몸이 차지하는 가로 비율 */
   --q1-box-h:0.75;              /* 세로 비율 */
   --bw:min(450px,34vh,26vw);    /* 바구니 가로 크기 */
-
-  /* ---- 버튼 크기 ---- */
-  --btn-next-h:101px;           /* 다음 / 넘어가기 이미지 버튼 높이 */
-  --btn-reset-h:52px;           /* 우하단 리셋 버튼 높이 */
-  --tool-btn:92px;              /* Q3 펜/지우개 버튼 */
-  --kw-font:30px;               /* 키워드 글자 크기 (Q2~Q5) */
-
-  /* ---- 폰트 (피그마: 모든 글꼴 Silver) — fonts/Silver.ttf 를 바꾸면 전체가 바뀐다 ---- */
-  --font-main:'Silver',-apple-system,'Malgun Gothic',sans-serif;
-  --fs-cta:3.34vw;                /* 1920 기준 64px = 3.34vw — 화면 크기에 비례해서 커진다 */
-  --fs-title:3.34vw;              /* 튜토리얼·이름 짓기 큰 제목 */
-  --fs-body:2.5vw;               /* 튜토리얼 설명 */
-  --white:#ffffff;
-  --sky-text:#ffffff;           /* 하늘색 배경 위 글자색 */
-
-  /* ---- 배경 (피그마 bg-01/bg-02 = 하늘색, bg-peach = 노을색) ---- */
-  --bg-sky-grad:url('images/ui/bg/bg-02.png');
-  --bg-sky-cloud:url('images/ui/bg/bg-01.png');
-  --bg-peach:url('images/ui/bg/bg-peach.png');
-  --bg-page:#fff2fb;            /* 질문 페이지 연분홍 */
-
-  /* ---- 튜토리얼 ---- */
-  --tut-hand-open:url('images/ui/icon-hand-open(W).png');
-  --tut-fist-off:url('images/ui/tut-fist-off.png');
-  --tut-fist-on:url('images/ui/tut-fist-on.png');
 }
-
-@font-face{
-  font-family:'Silver';
-  src:url('fonts/Silver.ttf') format('truetype');
-  font-weight:normal; font-style:normal; font-display:swap;
-}
-
-:root{ --fs-ui:1.1vw; }  /* 일반 안내 글자 기준(작은 글자들은 style.css에서 이 값의 배수) */
