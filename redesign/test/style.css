@@ -146,3 +146,10 @@ body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
 .nickname-input{font-size:32px;} .subjective-input{font-size:28px;}
 .btn, .btn-small{font-size:26px;}
 .combined-id{font-size:28px;}
+
+/* 튜토리얼 — 손 아이콘과 문구를 화면 가로·세로 정중앙에 (아이콘이 display:block이라 왼쪽에 붙던 문제 수정) */
+.tut-main{display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; gap:24px;}
+.tutorial-icons{display:flex; align-items:center; justify-content:center; width:100%; height:200px;}
+.hand-icon{display:block; width:auto; height:100%; max-width:100%; margin:0 auto; object-fit:contain;}
+#iconFist{height:88%;}
+.tut-caption{text-align:center; width:auto;}
