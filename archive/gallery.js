@@ -68,8 +68,8 @@ function getArchiveForGlobe(){
     records.forEach((rec, i) => {
       const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(globeColorFor(rec.heroColor)), side: THREE.DoubleSide, transparent:true });
       const mesh = new THREE.Mesh(geo, mat);
-      // 얇은 빨간 테두리(= 흰색 칸도 배경 위에서 보이게)
-      const edge = new THREE.Mesh(edgeGeo, new THREE.MeshBasicMaterial({ color:0xbc0000, side: THREE.DoubleSide, transparent:true }));
+      // 얇은 검정 테두리(= 흰색 칸도 배경 위에서 보이게)
+      const edge = new THREE.Mesh(edgeGeo, new THREE.MeshBasicMaterial({ color:0x111111, side: THREE.DoubleSide, transparent:true }));
       edge.position.z = -0.5; mesh.add(edge); mesh.userData.edge = edge;
       const angle = i * ANGLE_STEP;
       Object.assign(mesh.userData, { rec, angle, baseY:(rowCenter - i) * ROW_GAP, scale:0, push:0, born: performance.now() + i*STAGGER_MS });

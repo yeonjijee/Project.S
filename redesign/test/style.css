@@ -7,7 +7,7 @@
    이전 디자인: _old-design/style.old.css
    ===================================================================== */
 *{box-sizing:border-box;}
-body{margin:0; font-family:sans-serif; font-size:16px; color:#111; background:#f3f3f1;}   /* 텅 빈 흰 공간 느낌(순백 아님) */
+body{margin:0; font-family:var(--font-main); font-size:var(--fs-base); color:#111; background:#f3f3f1;}   /* 텅 빈 흰 공간 느낌(순백 아님) */
 img{image-rendering:pixelated;}
 /* 흰색 그래픽(흰 선 아이콘/버튼)은 배경에서 안 보이므로 검정으로 반전 */
 img[src*="(W)"], img[src*="next-w"], img[src*="tut-fist-off"]{filter:invert(1);}
@@ -130,3 +130,19 @@ body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
 .reset-fab{position:fixed; right:12px; bottom:12px; z-index:30;}
 .reset-fab{background:none; border:none; padding:0;}
 .reset-fab img{height:40px; width:auto; display:block;}   /* RE 버튼 크기 — 이 숫자만 바꾸면 됨 */
+
+/* ---- 글자 크기 (Silver 기준) ---- */
+.enter-cta{font-size:48px;}
+.title{font-size:44px; margin:0 0 12px;}
+.sub, .tut-caption, .q-hint{font-size:30px;}
+.kicker, .tut-title, .open-kicker{font-size:36px;}
+.tut-done, .open-title, .story-text{font-size:52px;}
+.open-label{font-size:30px;}
+.open-op{font-size:48px;}
+.q-sub, .q-recap-text{font-size:36px;}
+.kw{font-size:28px; padding:8px 16px;}
+.result-section-label{font-size:24px; margin-top:16px;}
+.result-explanation, .ai-quote{font-size:26px; line-height:1.5; max-width:640px;}
+.nickname-input{font-size:32px;} .subjective-input{font-size:28px;}
+.btn, .btn-small{font-size:26px;}
+.combined-id{font-size:28px;}

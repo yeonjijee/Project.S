@@ -195,7 +195,7 @@ function openModal(seriesNo, slug){
   if(!c) return;
   const col = colorFor(c.color);
   document.getElementById('modalBody').innerHTML = `
-    <div class="modal-kicker">${c.series} · ${c.color}${c.rare ? ' · <span style="color:#e8c66a">RARE</span>' : ''}${c.leader ? ' · <span style="color:#e8564a">LEADER</span>' : ''}${c.legend ? ' · <span style="color:#ffffff">LEGEND</span>' : ''}</div>
+    <div class="modal-kicker">${c.series} · ${c.color}${c.rare ? ' · <span style="color:#b8901f">RARE</span>' : ''}${c.leader ? ' · <span style="color:#e8564a">LEADER</span>' : ''}${c.legend ? ' · <span style="color:#111">LEGEND</span>' : ''}</div>
     <h2 class="modal-title" style="color:${col}">${c.name}</h2>
     <div class="modal-sub">${c.summary || ''}</div>
     ${c.description ? `<p class="modal-summary">${c.description}</p>` : ''}
