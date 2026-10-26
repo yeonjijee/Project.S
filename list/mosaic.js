@@ -27,7 +27,7 @@ class MosaicRenderer {
     // 구버전 { cell: 12 } 옵션과의 호환: cell만 주어지면 그 값을 maxCell로 쓰고 minCell은 기본값을 쓴다.
     this.minCell = opts.minCell ?? 3;
     this.maxCell = opts.maxCell ?? (opts.cell || 30);
-    this.bg = opts.bg || '#0b0b0b';   // 타일 사이 그라우트/여백 색
+    this.bg = opts.bg || '#ffffff';   // 타일 사이 그라우트/여백 색
 
     this.w = canvas.width;
     this.h = canvas.height;
@@ -46,7 +46,7 @@ class MosaicRenderer {
     y = Math.max(0, Math.min(this.h - 1, Math.round(y)));
     const i = (y * this.w + x) * 4;
     const p = this._pixels;
-    return { r: p[i], g: p[i + 1], b: p[i + 2] };
+    return { r: p[i], g: p[i + 1], b: p[i + 2], a: p[i + 3] };
   }
 
   // rate: 1(완전 추상) ~ 0.1(원본에 가까움, 이 아래로는 내려가지 않게 clamp).
@@ -60,8 +60,11 @@ class MosaicRenderer {
     const cell = this.minCell + (this.maxCell - this.minCell) * rate;
     const gap = Math.max(0.5, cell * 0.08); // 타일 사이 살짝 그라우트 틈 — 완전 모자이크 느낌
 
-    ctx.fillStyle = this.bg;
-    ctx.fillRect(0, 0, this.w, this.h);
+    // bg가 'transparent'면 배경을 칠하지 않고(=캔버스 투명), 소스 사진이 투명한 곳엔 타일도 그리지 않는다
+    // (어두운 배경 위에서도 흰 네모가 튀지 않게).
+    const transparentBg = (this.bg === 'transparent');
+    if (transparentBg) ctx.clearRect(0, 0, this.w, this.h);
+    else { ctx.fillStyle = this.bg; ctx.fillRect(0, 0, this.w, this.h); }
 
     const cols = Math.ceil(this.w / cell) + 1;
     const rows = Math.ceil(this.h / cell) + 1;
@@ -74,6 +77,7 @@ class MosaicRenderer {
         const px = this._pixelAt(left + cell / 2, top + cell / 2);
         const size = cell - gap;
         if (size <= 0) continue;
+        if (transparentBg && px.a < 40) continue;
         let r = px.r, g = px.g, b = px.b;
         if (colorMix < 1) {
           const gray = r * 0.299 + g * 0.587 + b * 0.114;
