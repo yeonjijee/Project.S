@@ -28,7 +28,7 @@ main{padding:8px 0 10vh;}
 .series-name{color:#444;}
 .series-scroll{display:flex; gap:12px; overflow-x:auto; padding-bottom:8px;}
 .hero-card{flex:0 0 auto; width:170px; border:1px solid #111; cursor:pointer; overflow:hidden; position:relative; background:transparent;}
-.hero-img-wrap{width:100%; aspect-ratio:3/4; background:var(--card-color,#bbb); display:flex; align-items:center; justify-content:center; position:relative;}
+.hero-img-wrap{width:100%; aspect-ratio:3/4; background:#f3f3f1; display:flex; align-items:center; justify-content:center; position:relative;}
 .hero-canvas{width:100%; height:100%; display:block;}
 .hero-placeholder{font-size:20px; text-align:center;}
 .hero-info{padding:8px 10px 10px; text-align:left;}

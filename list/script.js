@@ -135,7 +135,7 @@ function mountCanvas(wrap, source){
   canvas.width = CARD_W; canvas.height = CARD_H;
   canvas.className = 'hero-canvas';
   wrap.insertBefore(canvas, wrap.firstChild);
-  const m = new MosaicRenderer(canvas, source, { minCell: 2, maxCell: 16, bg: '#000' });
+  const m = new MosaicRenderer(canvas, source, { minCell: 2, maxCell: 16, bg: '#f3f3f1' });
   heroRenderers.push(m);
   m.render(currentRate);
 }
