@@ -8,6 +8,7 @@ function colorFor(name){
   return "#c94b32";
 }
 const KEY = 'projectR_archive';
+if(/[?&]debug/.test(location.search)) document.body.classList.add('debug');
 
 function getArchive(){
   try{ return JSON.parse(localStorage.getItem(KEY) || '[]'); }catch(e){ return []; }
