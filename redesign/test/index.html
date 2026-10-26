@@ -11,6 +11,7 @@
 
 <!-- 배경: 화면마다 data-bg(sky/peach/page)와 --bgy(구름 세로 위치 0~100%)를 JS(goto)가 바꾼다 -->
 <div class="bg-layer" id="bgLayer"><div class="bg-sky"></div><div class="bg-sky bg-cloud"></div><div class="bg-peach"></div><img class="bg-ranger" src="images/ui/bg/asset-40.png" alt=""></div>
+<canvas id="fxCanvas"></canvas>   <!-- 화면 전체 그레인 이펙트(fx.js) -->
 <div class="cam-status" id="camStatus"></div>
 <div id="handCursor"></div>
 
@@ -161,6 +162,7 @@
 <button class="reset-fab dwellable" id="resetFab" data-action="reset" style="display:none;"><img src="images/ui/q/reset.png" alt="리셋"></button>
 
 <script src="mosaic.js"></script>
+<script src="fx.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

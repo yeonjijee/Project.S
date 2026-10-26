@@ -7,14 +7,24 @@
    이전 디자인: _old-design/style.old.css
    ===================================================================== */
 *{box-sizing:border-box;}
-body{margin:12px; font-family:sans-serif; font-size:16px; color:#000; background:#fff;}
+body{margin:0; font-family:sans-serif; font-size:16px; color:#000; background:#fff;}
 img{max-width:100%; height:auto;}
 canvas{width:240px; height:240px;}
+#fxCanvas{position:fixed; inset:0; width:100vw; height:100vh; z-index:0; pointer-events:none;}
 button{font:inherit; cursor:pointer;}
 
 /* ---- 화면 전환 ---- */
-.screen{display:none;}
-.screen.active{display:block;}
+.screen{display:none; position:absolute; inset:0; z-index:1; padding:24px; overflow:auto;}
+/* 모든 화면: 가로·세로 정중앙 정렬 */
+.screen.active{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;}
+.q-intro, .q-body{flex-direction:column; align-items:center; text-align:center; width:100%;}
+.q-layout{justify-content:center; align-items:center;}
+.open-row{justify-content:center;}
+.result-layout{display:flex; align-items:center; justify-content:center; gap:32px; width:100%;}
+.result-text{display:flex; flex-direction:column; align-items:center; text-align:center;}
+.kw-grid{justify-content:center;}
+.q-nav-row{display:flex; justify-content:center; gap:12px;}
+.top-links{position:absolute; top:12px; left:12px; display:flex; gap:12px;}
 
 /* ---- 배경 레이어(사용 안 함 — JS가 참조하므로 요소만 남김) ---- */
 .bg-layer{display:none;}
@@ -49,12 +59,12 @@ body.debug .cam-status{display:block;}   /* 주소 뒤에 ?debug */
 
 /* ---- 2. 질문 화면 공통 ---- */
 .q-body{display:none;}                      /* JS(revealAfterIntro)가 보여준다 */
-.q-layout{display:flex; align-items:flex-start; gap:24px;}
+.q-layout{display:flex; gap:24px;}
 .kw-grid{display:flex; flex-wrap:wrap; gap:8px; max-width:560px;}
 .kw{border:1px solid #000; padding:6px 12px; background:#fff; cursor:pointer; user-select:none;}
 .kw.selected{outline:3px solid red;}
 .kw.picked-source{visibility:hidden;}
-.q-nav-row{margin-top:16px;}
+
 
 /* ---- 커서(손 위치) — JS가 left/top/--s를 바꾼다 ---- */
 #handCursor{
@@ -66,7 +76,7 @@ body.hand-mouse{cursor:none;}
 body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
 
 /* ---- Q1: 레인저 드래그 → 바구니 (크기에 판정이 의존) ---- */
-.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:calc(var(--h)*0.02) 2.2vw; width:min(820px,62vw); max-width:none; justify-items:center; margin-left:5vw;}
+.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:calc(var(--h)*0.02) 2.2vw; width:min(820px,62vw); max-width:none; justify-items:center;}
 .kw-grid.q1grid .kw{grid-column:span 2;}
 .kw-grid.q1grid .kw:nth-child(6){grid-column:2 / span 2;}
 .kw.kw-hero{border:none; background:none; padding:0; display:block; position:relative; flex:none; line-height:0;
