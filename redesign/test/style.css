@@ -444,3 +444,32 @@ body.debug .cam-status{display:block;}   /* 주소 뒤에 ?debug 를 붙이면 �
   background:none; opacity:0; image-rendering:pixelated; transition:opacity .6s ease;
 }
 body[data-bg="sky"] .bg-layer > .bg-ranger{opacity:1;}
+
+
+/* ================= 질문 페이지 (피그마 page1-1 ~ page6-2) ================= */
+body[data-bg="page"] .bg-layer{background:linear-gradient(#ffeefa,#fffafc);}
+
+/* 인트로(page N-1): 큰 "Page N" 라벨이 위, 질문 문장이 화면 한가운데 */
+.q-intro{position:absolute; inset:0; display:block; text-align:center; z-index:3;}
+.q-intro .q-title-img{position:absolute; left:50%; top:19.8vh; transform:translateX(-50%); height:8vh; width:auto; margin:0; image-rendering:pixelated;}
+.q-intro .q-sub{position:absolute; left:50%; top:45vh; transform:translateX(-50%); width:50vw; max-width:none; margin:0;
+  font-size:var(--fs-title); line-height:1.25; color:#111;}
+
+/* 본문(page N-2): 왼쪽 위 작은 "Page N" 라벨 + 위 가운데 한 줄 질문 */
+.q-recap{position:absolute; top:0; left:0; right:0; height:14vh; max-width:none; margin:0; display:block; text-align:center;}
+.q-recap-img{position:absolute; left:2.8vw; top:5.5vh; height:4.1vh; width:auto; margin:0; image-rendering:pixelated;}
+.q-recap-text{position:absolute; left:50%; top:5.2vh; transform:translateX(-50%); width:56vw; font-size:1.75vw; line-height:1.3; color:#111; font-weight:400;}
+.q-hint{font-size:1.2vw; color:#c97a7a; margin:0 0 1rem;}
+
+/* NEXT / RE — 화면 아래 가운데에 나란히(NEXT는 왼쪽, RE는 오른쪽) */
+.q-nav-row{left:44.5%; bottom:8.5vh; transform:none; width:0; display:flex; justify-content:center; gap:0;}   /* transform을 쓰면 안의 fixed 버튼 기준이 틀어진다 → 폭 0 + 가운데 정렬로 중심을 맞춤 */
+.q-nav-row > .img-btn, .q-nav-row > .btn:not(.btn-small){flex:none;}
+.q-nav-row .btn-small{position:fixed; left:2.8vw; bottom:4vh; transform:none; font-size:1.2vw; color:#c97a7a; border:none; background:none; padding:6px 10px;}
+.btn.img-btn img{height:var(--btn-next-h);}
+.reset-fab{left:55.5%; right:auto; bottom:8.2vh; transform:translateX(-50%);}
+.reset-fab img{height:var(--btn-reset-h-page, 99px);}
+.reset-fab:hover, .reset-fab.dwell-hover{transform:translateX(-50%) scale(1.08);}
+#screen-q.q4 .q-recap{position:absolute;}   /* Q4 어두운 화면에서도 질문 줄은 선명하게(z-index만 올리고 위치는 고정) */
+/* Page 2~5: 선택지는 가운데, 레인저 그래픽은 피그마처럼 오른쪽(가로 76~93%) — Q1은 별도 배치라 건드리지 않음 */
+.q-layout:not(.q1){max-width:none; width:100%; padding:0 7vw 0 4vw; justify-content:space-between;}
+.q-layout:not(.q1) .q-stage{width:min(16.25vw,300px);}

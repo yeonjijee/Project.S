@@ -151,7 +151,7 @@ function goto(name){
   const bg = BG_BY_SCREEN[name]; if(bg) setBackground(bg[0], bg[1]);
   updateCursorMode();
   const fab = document.getElementById('resetFab');
-  if(fab) fab.style.display = (name === 'camstart' || name === 'loading') ? 'none' : 'block';
+  if(fab) fab.style.display = (name === 'q' || name === 'q6') ? 'block' : 'none';  // 피그마: RE 버튼은 질문 페이지(Page 1~6)에만
   if(name === 'tutorial'){
     resetTutorial();
   }
@@ -276,11 +276,11 @@ function runStory(){
 
 /* ---------- 3. Q1~Q5 데이터 + 진행 상태 ---------- */
 const Q_META = [
-  { id:'Q1_책임과 사명', title:'Q1 · 책임과 사명', sub:'무거운 걸 짊어질 때, 나는 어떤 상태인가?' },
-  { id:'Q2_감정을 다루는 방식', title:'Q2 · 감정을 다루는 방식', sub:'마음이 흔들릴 때, 나는 —' },
-  { id:'Q3_관계 맺는 방식', title:'Q3 · 관계 맺는 방식', sub:'사람과 함께일 때, 나는 —' },
-  { id:'Q4_나를 보는 시선', title:'Q4 · 나를 보는 시선', sub:'스스로를 볼 때, 나는 —' },
-  { id:'Q5_행동하는 방식', title:'Q5 · 행동하는 방식', sub:'무언가에 부딪힐 때, 나는 —' }
+  { id:'Q1_책임과 사명', title:'Q1 · 책임과 사명', sub:'무거운 걸 짊어져야 하는 상황이 온다면, 당신은 어떤 상태가 되나요?' },
+  { id:'Q2_감정을 다루는 방식', title:'Q2 · 감정을 다루는 방식', sub:'마음이 흔들릴 때 당신의 마음속에서는 어떤게 떠오르나요?' },
+  { id:'Q3_관계 맺는 방식', title:'Q3 · 관계 맺는 방식', sub:'다른 사람들 속 당신의 모습을 칠해주세요' },
+  { id:'Q4_나를 보는 시선', title:'Q4 · 나를 보는 시선', sub:'당신이 바라보는 스스로의 모습은 어떤가요?' },
+  { id:'Q5_행동하는 방식', title:'Q5 · 행동하는 방식', sub:'벽에 부딪힐 때 발휘되는 당신의 특성은 무엇인가요?' }
 ];
 const MOSAIC_RATES = [1.00, 0.79, 0.64, 0.50, 0.45]; // Q1~Q5 고정 모자이크 비율
 const Q6_RATE = 0.34, RESULT_RATE = 0.1;
@@ -400,11 +400,11 @@ function renderQuestion(){
   const titleImg = document.getElementById('qTitleImg');
   titleImg.src = 'images/ui/page-header-' + (qIndex + 1) + '.png';
   titleImg.alt = meta.title;
-  document.getElementById('qSub').innerHTML = meta.sub + '<br>해당하는 걸 3~5개 골라줘.';
+  document.getElementById('qSub').textContent = meta.sub;
   // 3초 안내가 끝나고 선택지 화면으로 넘어간 뒤에도 질문이 위에 계속 보이도록 같은 내용을 한 줄 요약으로 복제
   updateCursorMode();
   document.getElementById('qRecapImg').src ='images/ui/page-header-' + (qIndex + 1) + '.png';
-  document.getElementById('qRecapText').textContent = meta.sub + ' · 해당하는 걸 3~5개 골라줘.';
+  document.getElementById('qRecapText').textContent = meta.sub;
   const grid = document.getElementById('kwGrid');
   grid.innerHTML = '';
   grid.className = 'kw-grid'; // 매 질문마다 인터렉션별 클래스 초기화
@@ -478,7 +478,7 @@ function renderQuestion(){
     '눈을 움직여 원하는 키워드를 찾고 짚어줘.',
     '주먹을 쥔 채로 해당하는 키워드를 펀치하듯 빠르게 쳐내면 날아가.'
   ];
-  document.getElementById('qHint').textContent = HINTS[qIndex] || '';
+  document.getElementById('qHint').textContent = (HINTS[qIndex] ? HINTS[qIndex] + ' · ' : '') + '3~5개를 골라줘';
 
   // Q2 float 클래스는 지금 붙여도 되지만(그냥 CSS), 실제 좌표 계산(initFloatingKeywords)은
   // kwGrid가 아직 안 보이는 상태(q-body가 display:none)라 크기가 0으로 잡혀서 전부 한쪽 구석에
