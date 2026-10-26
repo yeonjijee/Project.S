@@ -7,10 +7,14 @@
    이전 디자인: _old-design/style.old.css
    ===================================================================== */
 *{box-sizing:border-box;}
-body{margin:0; font-family:sans-serif; font-size:16px; color:#000; background:#fff;}
+body{margin:0; font-family:sans-serif; font-size:16px; color:#111; background:#f3f3f1;}   /* 텅 빈 흰 공간 느낌(순백 아님) */
+img{image-rendering:pixelated;}
+/* 흰색 그래픽(흰 선 아이콘/버튼)은 배경에서 안 보이므로 검정으로 반전 */
+img[src*="(W)"], img[src*="next-w"], img[src*="tut-fist-off"]{filter:invert(1);}
 img{max-width:100%; height:auto;}
 canvas{width:240px; height:240px;}
-#fxCanvas{position:fixed; inset:0; width:100vw; height:100vh; z-index:0; pointer-events:none;}
+/* 화면 전체 그레인 필터 — 내용 위에 multiply로 씌움(클릭은 통과). 픽셀아트라 확대할 때 뭉개지 않는다 */
+#fxCanvas{position:fixed; inset:0; z-index:2147482000; pointer-events:none; image-rendering:pixelated; mix-blend-mode:multiply;}
 button{font:inherit; cursor:pointer;}
 
 /* ---- 화면 전환 ---- */
@@ -61,7 +65,7 @@ body.debug .cam-status{display:block;}   /* 주소 뒤에 ?debug */
 .q-body{display:none;}                      /* JS(revealAfterIntro)가 보여준다 */
 .q-layout{display:flex; gap:24px;}
 .kw-grid{display:flex; flex-wrap:wrap; gap:8px; max-width:560px;}
-.kw{border:1px solid #000; padding:6px 12px; background:#fff; cursor:pointer; user-select:none;}
+.kw{border:1px solid #111; padding:6px 12px; background:#f3f3f1; color:#111; cursor:pointer; user-select:none;}
 .kw.selected{outline:3px solid red;}
 .kw.picked-source{visibility:hidden;}
 
@@ -117,7 +121,7 @@ body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
 #eyeMask{position:fixed; inset:0; z-index:5; display:none; pointer-events:none; background:rgba(0,0,0,.88);}
 #screen-q.q4 .q-recap, #screen-q.q4 .q-hint, #screen-q.q4 .q-stage, #screen-q.q4 .q-nav-row{position:relative; z-index:10;}
 #screen-q.q4 .kw-grid{position:relative; z-index:1;}
-#screen-q.q4 .kw.selected{background:#000; color:#fff;}
+#screen-q.q4 .kw.selected{background:#111; color:#ff5a4d;}
 
 /* ---- Q5: 펀치로 날아가는 키워드 ---- */
 .kw.punched{opacity:0; transform:translateX(-60px) scale(.4) !important; transition:opacity .35s, transform .35s;}
