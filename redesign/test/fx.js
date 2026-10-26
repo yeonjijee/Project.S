@@ -8,16 +8,16 @@
   const CONFIG = {
     PIXEL: 2,            // 픽셀 한 칸의 실제 크기(px) — 클수록 도트가 굵어짐 (캔버스를 1/PIXEL로 그려서 확대)
     STEP: 5,             // 그레인 간격(캔버스 칸 기준) — 작을수록 촘촘 (5 ≈ 화면에서 10px 간격)
-    JITTER: 2,           // 격자에서 흩어지는 정도(칸)
-    SIZES: [1, 1, 1, 2], // 그레인 한 변(칸) 후보 — 1이 대부분, 가끔 2
-    TONES: ['rgba(0,0,0,0.05)', 'rgba(0,0,0,0.09)', 'rgba(0,0,0,0.14)'],  // 평소 그레인 색(투명한 먹색) — 흰색 없음
-    LIT:   'rgba(0,0,0,0.30)',     // 파동 위에서 진해지는 색
+    JITTER: 0,           // 0 = 격자 줄에 정확히 맞춤 (픽셀 느낌의 핵심 — 올리면 점박이처럼 흩어짐)
+    SIZES: [1],          // 그레인 한 변(칸) — 전부 같은 크기
+    TONES: ['rgba(0,0,0,0.035)', 'rgba(0,0,0,0.055)', 'rgba(0,0,0,0.08)'],  // 평소 그레인 색(투명한 먹색) — 흰색 없음
+    LIT:   ['rgba(0,0,0,0.10)', 'rgba(0,0,0,0.16)'],   // 파동이 지나갈 때 진해지는 2단계(은은하게)
     RIPPLE_EVERY: 46,    // 커서가 이만큼(px) 움직일 때마다 파동 하나
     RIPPLE_SPEED: 380,   // 퍼지는 속도(px/초)
     RIPPLE_WIDTH: 70,    // 파동 띠 두께(px)
-    RIPPLE_LIFE: 2.2,    // 파동 수명(초)
-    PUSH: 7,             // 밀려나는 거리(칸)
-    CLICK_BOOST: 2.2,    // 주먹/클릭 파동 세기
+    RIPPLE_LIFE: 1.8,    // 파동 수명(초)
+    PUSH: 1.3,           // 밀려나는 최대 거리(격자 칸 수) — 한 칸 단위로만 이동(반올림)
+    CLICK_BOOST: 1.4,    // 주먹/클릭 파동 세기
     MAX_RIPPLES: 12
   };
 
@@ -67,7 +67,7 @@
 
   const nTones = CONFIG.TONES.length;
   const buckets = [];                 // 색별로 모아서 그리면 fillStyle 변경이 적다
-  for(let t = 0; t <= nTones; t++) buckets.push([]);
+  for(let t = 0; t < nTones + 2; t++) buckets.push([]);
   const sigma2 = (CONFIG.RIPPLE_WIDTH / P) * (CONFIG.RIPPLE_WIDTH / P);
   const widthC = CONFIG.RIPPLE_WIDTH / P;
 
@@ -87,7 +87,7 @@
       const age = (now - r.t0) / 1000;
       return { x: r.x, y: r.y, rad: age * CONFIG.RIPPLE_SPEED / P, amp: r.p * Math.pow(1 - age / CONFIG.RIPPLE_LIFE, 2) };
     });
-    for(let t = 0; t <= nTones; t++) buckets[t].length = 0;
+    for(let t = 0; t < nTones + 2; t++) buckets[t].length = 0;
     // buckets[t] = [x, y, size, x, y, size, ...]
     for(let i = 0; i < N; i++){
       let dx = 0, dy = 0, lit = 0;
@@ -99,20 +99,21 @@
         if(d > widthC * 2.5 || d < -widthC * 2.5) continue;
         const w = Math.exp(-(d * d) / sigma2) * r.amp;
         const wave = Math.cos((d / widthC) * Math.PI);
-        dx += (vx / dist) * CONFIG.PUSH * w * wave;
+        dx += (vx / dist) * CONFIG.PUSH * w * wave;   // 칸 단위 (아래에서 반올림)
         dy += (vy / dist) * CONFIG.PUSH * w * wave;
         lit += w;
       }
-      const size = gs[i] + (lit > 0.35 ? 1 : 0) + (lit > 0.9 ? 1 : 0);   // 칸 단위로만 커진다(픽셀 느낌)
-      const b = lit > 0.25 ? nTones : gt[i];
-      const arr = buckets[b];
-      arr.push(Math.round(gx[i] + dx), Math.round(gy[i] + dy), size);
+      // 이동은 격자 칸 단위로만(0 또는 ±1칸) — 자유롭게 퍼지지 않고 줄 맞춰 한 칸씩 밀린다
+      const ox = Math.round(dx) * CONFIG.STEP, oy = Math.round(dy) * CONFIG.STEP;
+      const size = gs[i] + (lit > 0.6 ? 1 : 0);
+      const b = lit > 0.45 ? nTones + 1 : (lit > 0.18 ? nTones : gt[i]);   // 파동 세기를 2단계로 끊어서 표시
+      buckets[b].push(gx[i] + ox, gy[i] + oy, size);
     }
     ctx.clearRect(0, 0, CW, CH);
-    for(let t = 0; t <= nTones; t++){
+    for(let t = 0; t < nTones + 2; t++){
       const arr = buckets[t];
       if(!arr.length) continue;
-      ctx.fillStyle = t === nTones ? CONFIG.LIT : CONFIG.TONES[t];
+      ctx.fillStyle = t < nTones ? CONFIG.TONES[t] : CONFIG.LIT[t - nTones];
       for(let j = 0; j < arr.length; j += 3) ctx.fillRect(arr[j], arr[j + 1], arr[j + 2], arr[j + 2]);
     }
   }
