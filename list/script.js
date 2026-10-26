@@ -112,8 +112,7 @@ function heroPhotoCanvasFor(imgs){
   const c = document.createElement('canvas');
   c.width = CARD_W; c.height = CARD_H;
   const cx = c.getContext('2d');
-  cx.fillStyle = '#0b0b0b';
-  cx.fillRect(0, 0, CARD_W, CARD_H);
+  // (예전엔 여기서 검정으로 먼저 칠했는데, 그러면 투명한 사진 배경이 검게 나와서 칠하지 않는다 — 투명 그대로 둔다)
   const n = imgs.length;
   const colW = CARD_W / n;
   imgs.forEach((img, i) => {
