@@ -24,10 +24,10 @@ body{position:relative;}
 }
 .screen.active{display:flex;}
 
-.kicker{font-size:13px;letter-spacing:0.2em;color:var(--sub);margin-bottom:2rem;}
+.kicker{font-size:22px;letter-spacing:0.2em;color:var(--sub);margin-bottom:2rem;}
 .title{font-size:clamp(22px,4vw,34px);font-weight:600;line-height:1.5;margin:0 0 1.2rem;max-width:640px;}
-.sub{font-size:14px;line-height:1.9;color:var(--sub);max-width:480px;margin:0 0 3rem;}
-.ai-quote{font-size:14px;line-height:1.9;color:#8f8a80;font-style:italic;max-width:480px;margin:-2rem 0 2.6rem;min-height:1.9em;white-space:pre-line;}
+.sub{font-size:24px;line-height:1.9;color:var(--sub);max-width:480px;margin:0 0 3rem;}
+.ai-quote{font-size:24px;line-height:1.9;color:#8f8a80;font-style:italic;max-width:480px;margin:-2rem 0 2.6rem;min-height:1.9em;white-space:pre-line;}
 
 .hero-stage{position:relative;width:min(300px,52vw);aspect-ratio:1/1;margin-bottom:2.5rem;flex:none;}
 .hero-stage canvas{width:100%;height:100%;display:block;}
@@ -40,31 +40,31 @@ body{position:relative;}
 .result-text .ai-quote{margin:0 0 2.2rem;}
 
 .result-section-label{
-  font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--sub);
+  font-size:19px; letter-spacing:0.14em; text-transform:uppercase; color:var(--sub);
   margin:0 0 0.7rem;
 }
 .result-kw-wrap{display:flex; flex-wrap:wrap; gap:6px; max-width:480px; margin-bottom:1.8rem;}
 .result-kw-wrap span{
-  font-size:12px; border:1px solid var(--line); color:#999; padding:4px 12px; border-radius:100px;
+  font-size:20px; border:1px solid var(--line); color:#999; padding:4px 12px; border-radius:100px;
 }
 /* 관람객이 실제로 고른(=이번 매칭의 근거가 된) 키워드만 빨강으로 강조한다 */
 .result-kw-wrap span.matched{border-color:var(--red); color:var(--red); background:rgba(188,0,0,0.06);}
 
 .result-explanation{
-  font-size:14px; line-height:1.9; color:#444; max-width:480px; margin-bottom:2rem;
+  font-size:24px; line-height:1.9; color:#444; max-width:480px; margin-bottom:2rem;
   white-space:pre-line; min-height:1.9em;
 }
 
 .nickname-input{
   background:none; border:none; border-bottom:1px solid var(--line); color:var(--ink);
-  font-family:inherit; font-size:36px; color:var(--red); text-align:center; padding:10px 4px;
+  font-family:inherit; font-size:1.9vw; color:var(--red); text-align:center; padding:10px 4px;
   width:240px; margin-bottom:2rem; outline:none;
 }
 .nickname-input:focus{border-color:var(--red);}
 .nickname-input::placeholder{color:#bbb;}
-.input-hint{font-size:12px; color:#999; margin:-1.4rem 0 2rem;}
+.input-hint{font-size:20px; color:#999; margin:-1.4rem 0 2rem;}
 
-.btn-huge{font-size:20px; padding:34px 64px;}
+.btn-huge{font-size:34px; padding:34px 64px;}
 
 /* 카메라 켜기 화면 — 목업 그대로: 로고 + "나의 영웅을 찾아서" + "Enter 키를 눌러 시작하세요".
    이 화면은 아직 카메라(손동작)가 켜지기 전이라 dwellable로 만들어봤자 의미가 없어서,
@@ -107,12 +107,12 @@ body{position:relative;}
 .top-links .pixel-btn{padding:0;}
 .top-links .pixel-btn img{height:16px; width:auto;}
 .open-head{position:absolute; top:7vh; left:0; right:0;}
-.open-kicker{font-size:48px; color:var(--red);}
+.open-kicker{font-size:2.5vw; color:var(--red);}
 .open-title{font-size:var(--fs-title); color:var(--red); margin-top:0.2em;}
 .open-row{display:flex; align-items:center; justify-content:center; gap:2.5vw; width:100%; margin-top:14vh;}
 .open-colors{display:flex; flex-direction:column; align-items:center;}
-.open-label{font-size:40px; color:#8a8a8a; margin-bottom:1.2rem;}
-.open-op{font-size:56px; color:var(--red);}
+.open-label{font-size:2.1vw; color:#8a8a8a; margin-bottom:1.2rem;}
+.open-op{font-size:2.9vw; color:var(--red);}
 .open-name{display:flex; flex-direction:column; align-items:center;}
 .open-stage{width:min(312px,20vw); margin-bottom:0;}
 .open-next{position:absolute; right:3vw; bottom:4vh;}
@@ -138,7 +138,7 @@ body{position:relative;}
   position:relative; z-index:1; border-bottom:none; width:78%; margin-bottom:0;
   padding:12px 4px 20px;
 }
-.combined-id{font-size:30px; color:var(--red); letter-spacing:0.04em; margin:0.8rem 0 0; min-height:1.3em;}
+.combined-id{font-size:1.5vw; color:var(--red); letter-spacing:0.04em; margin:0.8rem 0 0; min-height:1.3em;}
 
 /* 컬러 선택 + 아이디 입력 전까지 START 버튼이 흐리게 보이는 건 기존 opacity 로직 그대로 재사용.
    3개 버튼(ARCHIVE / START / HERO LIST)은 화면 맨 아래에서 전체 폭으로 양 끝까지 벌어진다. */
@@ -166,14 +166,14 @@ body{position:relative;}
 .candidate-stage canvas{width:100%; height:100%; display:block; transition:opacity .08s linear;}
 .basket{
   position:absolute; left:50%; bottom:-20px; transform:translateX(-50%);
-  border:1px solid var(--line); color:#999; font-size:14px; letter-spacing:0.06em;
+  border:1px solid var(--line); color:#999; font-size:24px; letter-spacing:0.06em;
   padding:16px 34px; background:#fafaf9; cursor:pointer;
 }
 .basket.drag-over, .basket.dwell-hover{border-color:var(--red); color:var(--red);}
 
 .subjective-input{
   background:none; border:1px solid var(--line); color:var(--ink);
-  font-family:inherit; font-size:14px; line-height:1.7; text-align:center;
+  font-family:inherit; font-size:24px; line-height:1.7; text-align:center;
   width:min(480px,80vw); height:90px; padding:14px; margin-bottom:2rem; outline:none; resize:none;
 }
 .subjective-input:focus{border-color:var(--red);}
@@ -181,7 +181,7 @@ body{position:relative;}
 
 .btn{
   background:none; border:1px solid var(--line); color:var(--ink);
-  font-family:inherit; font-size:16px; letter-spacing:0.08em;
+  font-family:inherit; font-size:27px; letter-spacing:0.08em;
   padding:22px 52px; cursor:pointer; position:relative;
   display:inline-block; text-decoration:none;
 }
@@ -190,17 +190,17 @@ body{position:relative;}
 /* 아카이브/리스트로 넘어가는 보조 버튼 — 시작하기/처음부터 다시 같은 주 버튼보다 작게,
    카메라 손동작(dwellable)과 마우스 클릭 둘 다로 눌린다(전시 화면에서 실제로 쓰는 버튼). */
 .nav-links{display:flex; gap:16px; margin-top:1.4rem;}
-.btn-small{padding:12px 24px; font-size:12px; color:#999; border-color:var(--line);}
+.btn-small{padding:12px 24px; font-size:20px; color:#999; border-color:var(--line);}
 .btn-small:hover, .btn-small.dwell-hover{color:var(--red); border-color:var(--red);}
 
-.cam-status{position:fixed; top:20px; left:24px; z-index:20; font-size:11px; color:#aaa; letter-spacing:0.04em;}
+.cam-status{position:fixed; top:20px; left:24px; z-index:20; font-size:19px; color:#aaa; letter-spacing:0.04em;}
 
-.q-title{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--sub);margin-bottom:0.8rem;}
+.q-title{font-size:19px;letter-spacing:0.2em;text-transform:uppercase;color:var(--sub);margin-bottom:0.8rem;}
 .q-recap{display:flex; flex-direction:column; align-items:center; margin-bottom:1.1rem; max-width:min(640px,86vw); text-align:center;}
 .q-recap-img{height:18px; width:auto; margin-bottom:0.5rem;}
-.q-recap-text{font-size:15px; font-weight:500; line-height:1.55; color:var(--sub);}
-.q-sub{font-size:18px;font-weight:500;margin:0 0 0.6rem;max-width:520px;line-height:1.6;color:var(--sub);}
-.q-hint{font-size:12px;color:#999;margin-bottom:1.8rem;}
+.q-recap-text{font-size:26px; font-weight:500; line-height:1.55; color:var(--sub);}
+.q-sub{font-size:31px;font-weight:500;margin:0 0 0.6rem;max-width:520px;line-height:1.6;color:var(--sub);}
+.q-hint{font-size:20px;color:#999;margin-bottom:1.8rem;}
 
 /* Q1~Q6 페이지 진입 순서 — 헤더 이미지+설명(q-intro)이 먼저 3초간 보이고, 페이드 아웃된 뒤에야
    선택지/그래픽/버튼(q-body)이 나온다(renderAfterIntro가 두 클래스를 순서대로 바꿔준다).
@@ -225,7 +225,7 @@ body{position:relative;}
 
 .kw-grid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:min(560px,52vw);margin-bottom:3rem;}
 .kw{
-  border:1px solid var(--line); color:#8a8a8a; font-size:16px;
+  border:1px solid var(--line); color:#8a8a8a; font-size:27px;
   padding:16px 26px; cursor:pointer; user-select:none; background:#fff;
 }
 .kw.selected{border-color:var(--red);color:var(--red);background:rgba(188,0,0,0.05);}
@@ -235,7 +235,7 @@ body{position:relative;}
 .drag-ghost{
   position:fixed; z-index:50; pointer-events:none;
   border:1px solid var(--red); color:var(--red); background:#fff;
-  font-size:16px; padding:16px 26px; box-shadow:0 4px 20px rgba(0,0,0,0.12);
+  font-size:27px; padding:16px 26px; box-shadow:0 4px 20px rgba(0,0,0,0.12);
   transform:translate(-50%,-50%); white-space:nowrap;
 }
 
@@ -291,7 +291,7 @@ body{position:relative;}
   gap:12px 16px; margin-bottom:1rem; max-width:none;
 }
 /* 세로 한 줄로 10개가 다 들어가야 해서, 다른 질문들보다 버튼을 살짝 작게 잡는다 */
-.kw-grid.column .kw{padding:12px 26px; font-size:16px; text-align:center;}
+.kw-grid.column .kw{padding:12px 26px; font-size:27px; text-align:center;}
 .kw.punched{opacity:0; transform:translateX(-60px) scale(0.4) !important; transition:opacity .35s ease, transform .35s ease;}
 
 /* 위치/크기는 JS(renderQuestion)가 kwGrid(버튼 영역) 크기에 맞춰 매번 지정한다 —
@@ -381,7 +381,7 @@ body[data-cur="fist"] #handCursor.fist{--rot:var(--rot-punch-fist);}
 .kw{font-size:var(--kw-font); padding:20px 34px;}
 .kw-grid{gap:18px; max-width:min(760px,64vw);}
 .kw-grid.column{max-width:none;}
-.kw-grid.column .kw{padding:12px 26px; font-size:16px; text-align:center;}
+.kw-grid.column .kw{padding:12px 26px; font-size:27px; text-align:center;}
 /* Q5: 버튼들을 가운데로 모은다 (양끝으로 벌리지 않음) */
 .q-layout.spread{justify-content:center; gap:6vw; max-width:900px;}
 /* Q4: 선택하면 색 반전(진한 바탕 + 흰 글씨)으로 확실히 표시 */

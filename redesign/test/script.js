@@ -143,6 +143,7 @@ function setBackground(kind, y){
   document.body.dataset.bg = kind;
   document.getElementById('bgLayer').style.setProperty('--bgy', y);
 }
+setBackground('sky','0%'); // 첫 화면(오프닝)도 하늘색으로 시작 — goto()가 불리기 전이라 따로 지정
 function goto(name){
   Object.values(screens).forEach(id => document.getElementById(id).classList.remove('active'));
   document.getElementById(screens[name]).classList.add('active');

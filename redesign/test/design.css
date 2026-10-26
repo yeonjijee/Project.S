@@ -37,13 +37,13 @@
   --btn-next-h:101px;           /* 다음 / 넘어가기 이미지 버튼 높이 */
   --btn-reset-h:52px;           /* 우하단 리셋 버튼 높이 */
   --tool-btn:92px;              /* Q3 펜/지우개 버튼 */
-  --kw-font:20px;               /* 키워드 글자 크기 (Q2~Q5) */
+  --kw-font:30px;               /* 키워드 글자 크기 (Q2~Q5) */
 
   /* ---- 폰트 (피그마: 모든 글꼴 Silver) — fonts/Silver.ttf 를 바꾸면 전체가 바뀐다 ---- */
   --font-main:'Silver',-apple-system,'Malgun Gothic',sans-serif;
-  --fs-cta:64px;                /* 오프닝 "Enter 키를 눌러 시작하세요" / 시작 스토리 문장 */
-  --fs-title:64px;              /* 튜토리얼·이름 짓기 큰 제목 */
-  --fs-body:48px;               /* 튜토리얼 설명 */
+  --fs-cta:3.34vw;                /* 1920 기준 64px = 3.34vw — 화면 크기에 비례해서 커진다 */
+  --fs-title:3.34vw;              /* 튜토리얼·이름 짓기 큰 제목 */
+  --fs-body:2.5vw;               /* 튜토리얼 설명 */
   --white:#ffffff;
   --sky-text:#ffffff;           /* 하늘색 배경 위 글자색 */
 
@@ -64,3 +64,5 @@
   src:url('fonts/Silver.ttf') format('truetype');
   font-weight:normal; font-style:normal; font-display:swap;
 }
+
+:root{ --fs-ui:1.1vw; }  /* 일반 안내 글자 기준(작은 글자들은 style.css에서 이 값의 배수) */
