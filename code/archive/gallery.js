@@ -51,6 +51,34 @@ function getArchiveForGlobe(){
   const helix = new THREE.Group();
   scene.add(helix);
 
+  // ---- 레인저 사진 → 픽셀 텍스처 (테스트 화면처럼 도트 느낌: 작게 그린 뒤 확대) ----
+  const TEX_PX = 40;          // 한 칸 안의 도트 수 (작을수록 굵은 픽셀)
+  let heroImages = null;      // hero-images.json
+  const texCache = {};        // heroName → Promise<Texture|null>
+  const manifestReady = fetch('../../files/data/hero-images.json').then(r => r.json()).then(m => { heroImages = m; }).catch(() => { heroImages = {}; });
+  function heroTexture(name){
+    if(texCache[name]) return texCache[name];
+    texCache[name] = manifestReady.then(() => new Promise(res => {
+      const src = heroImages[name]; const path = Array.isArray(src) ? src[0] : src;
+      if(!path){ res(null); return; }
+      const img = new Image();
+      img.onload = () => {
+        const small = document.createElement('canvas'); small.width = small.height = TEX_PX;
+        const sx = small.getContext('2d');
+        sx.fillStyle = '#e2e2dc'; sx.fillRect(0, 0, TEX_PX, TEX_PX);
+        const pad = TEX_PX * 0.06, box = TEX_PX - pad * 2, k = Math.min(box / img.width, box / img.height);
+        const w = img.width * k, hgt = img.height * k;
+        sx.drawImage(img, (TEX_PX - w) / 2, (TEX_PX - hgt) / 2, w, hgt);
+        const tex = new THREE.CanvasTexture(small);
+        tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false;
+        res(tex);
+      };
+      img.onerror = () => res(null);
+      img.src = '../../files/' + path;
+    }));
+    return texCache[name];
+  }
+
   // ---- 카드 만들기 ----
   let cards = [];
   let rowCenter = 0, scrollTarget = 0, scrollY = 0, scrollLimit = 0;
@@ -68,6 +96,8 @@ function getArchiveForGlobe(){
     records.forEach((rec, i) => {
       const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(globeColorFor(rec.heroColor)), side: THREE.DoubleSide, transparent:true });
       const mesh = new THREE.Mesh(geo, mat);
+      // 사진이 있으면 색 칸 → 레인저 도트 이미지로 바꾼다 (없으면 색 칸 그대로)
+      heroTexture(rec.heroName).then(tex => { if(tex){ mat.map = tex; mat.color.set(0xffffff); mat.needsUpdate = true; } });
       // 얇은 검정 테두리(= 흰색 칸도 배경 위에서 보이게)
       const edge = new THREE.Mesh(edgeGeo, new THREE.MeshBasicMaterial({ color:0x111111, side: THREE.DoubleSide, transparent:true }));
       edge.position.z = -0.5; mesh.add(edge); mesh.userData.edge = edge;
@@ -80,7 +110,7 @@ function getArchiveForGlobe(){
     const countEl = document.getElementById('globeCount');
     if(countEl) countEl.textContent = N;
   }
-  window.refreshGlobePoints = buildCards; // script.js가 기록이 바뀔 때 부른다
+  window.refreshGlobePoints = () => { buildCards(); if(typeof runSearch === 'function' && nickInput) runSearch(); }; // script.js가 기록이 바뀔 때 부른다
   // 첫 그리기
   buildCards();
 
@@ -95,7 +125,7 @@ function getArchiveForGlobe(){
   // 손으로 누를 수 있는 것: 오른쪽 NEXT 띠(테스트로) + 위쪽 흐린 HERO LIST(영웅 리스트로)
   function updateBackButtonHover(x, y, fisted){
     let anyHover = false;
-    ['backToTestBtn', 'heroListLink'].forEach(id => {
+    ['heroListLink'].forEach(id => {
       const btn = document.getElementById(id);
       if(!btn) return;
       const rect = btn.getBoundingClientRect();
@@ -109,7 +139,30 @@ function getArchiveForGlobe(){
     backBtnPrevFisted = anyHover && fisted;
   }
 
+  // ---- 닉네임 찾기: 맞는 기록을 정면으로 돌려 세우고, 나머지는 흐리게 ----
+  const nickInput = document.getElementById('nickSearch');
+  const nickCount = document.getElementById('nickCount');
+  let searchHits = [], searchIdx = 0, searchLock = null;   // searchLock = 정면으로 보낼 카드
+  function runSearch(){
+    const q = (nickInput.value || '').trim().toLowerCase();
+    searchHits = q ? cards.filter(m => String(m.userData.rec.nickname || '').toLowerCase().includes(q)) : [];
+    searchIdx = 0;
+    searchLock = searchHits[0] || null;
+    nickCount.textContent = q ? (searchHits.length ? (searchHits.length > 1 ? `1/${searchHits.length}` : '') : '없음') : '';
+  }
+  if(nickInput){
+    nickInput.addEventListener('input', runSearch);
+    nickInput.addEventListener('keydown', e => {   // 엔터 = 다음 결과
+      if(e.key === 'Enter' && searchHits.length){
+        searchIdx = (searchIdx + 1) % searchHits.length; searchLock = searchHits[searchIdx];
+        nickCount.textContent = searchHits.length > 1 ? `${searchIdx + 1}/${searchHits.length}` : '';
+      }
+      e.stopPropagation();   // 입력 중 [ ] 키가 주먹 기준을 바꾸지 않게
+    });
+  }
+
   function handleGesture(x, y, fisted){
+    if(fisted && lastGX !== null && Math.hypot(x - lastGX, y - lastGY) > 2) searchLock = null;   // 손으로 돌리기 시작하면 찾기 고정 풀기
     if(lastGX !== null){
       const dx = x - lastGX, dy = y - lastGY;
       if(fisted){
@@ -136,7 +189,15 @@ function getArchiveForGlobe(){
   function animate(){
     requestAnimationFrame(animate);
     const now = performance.now();
-    helix.rotation.y += rotVelocity + BASELINE_SPIN;
+    if(searchLock){
+      // 찾은 카드의 각도로 가장 가까운 방향으로 돌고, 그 높이로 스크롤
+      const ta = -searchLock.userData.angle, cur = helix.rotation.y;   // 그룹을 -각도만큼 돌리면 그 카드가 정면
+      const diff = Math.atan2(Math.sin(ta - cur), Math.cos(ta - cur));
+      helix.rotation.y = cur + diff * 0.12; rotVelocity = 0;
+      scrollTarget = searchLock.userData.baseY; scrollVelocity = 0;
+    } else {
+      helix.rotation.y += rotVelocity + BASELINE_SPIN;
+    }
     rotVelocity *= FRICTION;
     scrollTarget = clamp(scrollTarget + scrollVelocity, -scrollLimit, scrollLimit);
     scrollVelocity *= FRICTION;
@@ -147,7 +208,7 @@ function getArchiveForGlobe(){
     let best = -1, bestScore = -9;
     cards.forEach((m, i) => {
       const u = m.userData;
-      const a = u.angle - helix.rotation.y;   // 그룹이 +y로 돌면 카드의 실제 각도는 그만큼 줄어든다
+      const a = u.angle + helix.rotation.y;   // 그룹이 +y로 돌면 카드의 실제 각도는 그만큼 줄어든다
       const facing = Math.cos(a);
       const yWorld = u.baseY + helix.position.y;
       const score = facing - Math.abs(yWorld) / (ROW_GAP * 4);
@@ -157,7 +218,7 @@ function getArchiveForGlobe(){
 
     cards.forEach((m, i) => {
       const u = m.userData;
-      const focused = (i === best && u.facing > 0.55);
+      const focused = searchLock ? (m === searchLock) : (i === best && u.facing > 0.55);
       // 등장: 순서대로 0 → 1 (오버슈트가 있는 스프링처럼)
       const age = Math.max(0, now - u.born) / 600;
       const intro = age >= 1 ? 1 : 1 - Math.pow(1 - age, 3) * Math.cos(age * 9);
@@ -170,13 +231,14 @@ function getArchiveForGlobe(){
       // 뒤로 간 칸/화면 위아래 끝의 칸은 옅게 (색은 그대로 — 1:1 색상 픽셀)
       const front = clamp((u.facing + 0.25) / 1.25, 0.12, 1);
       const vert = clamp(1 - (Math.abs(u.yWorld) / (ROW_GAP * 9)), 0.2, 1);
-      const op = focused ? 1 : 0.18 + 0.82 * front * vert;
+      let op = focused ? 1 : 0.18 + 0.82 * front * vert;
+      if(searchHits.length && !searchHits.includes(m)) op *= 0.25;   // 찾는 중이면 안 맞는 칸은 흐리게
       m.material.opacity = op; u.edge.material.opacity = op;
     });
 
     // 정면 칸의 정보를 아래에 표시
     if(focusInfo){
-      const rec = (best >= 0 && cards[best].userData.facing > 0.55) ? cards[best].userData.rec : null;
+      const rec = searchLock ? searchLock.userData.rec : ((best >= 0 && cards[best].userData.facing > 0.55) ? cards[best].userData.rec : null);
       const key = rec ? (rec.ts + '|' + rec.heroName) : '';
       if(key !== focusKey){
         focusKey = key;

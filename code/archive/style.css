@@ -10,7 +10,7 @@
   --bg:#e2e2dc; --bg-card:#f3f3f1; --text:#000; --text-dim:#333; --text-faint:#666; --accent:var(--red); --line-strong:#000;
   --font-head:'AGSuperBlack','Eulyoo',sans-serif; --serif:'Eulyoo',serif; --sans:'Eulyoo','Apple SD Gothic Neo','Malgun Gothic',serif;
   --title-w:36vw;      /* 왼쪽 ARCHIVE 폭 */
-  --next-w:10vw;       /* 오른쪽 NEXT 띠 */
+  --next-w:2vw;        /* 오른쪽 여백 (NEXT 띠는 뺐음) */
 }
 *{box-sizing:border-box;}
 html,body{margin:0; height:100%; background:var(--bg); color:var(--text); font-family:var(--sans); overflow:hidden;}
@@ -60,13 +60,12 @@ body{position:relative;}
 .globe-section .empty{position:absolute; left:calc(var(--title-w) + 2vw + (100vw - var(--title-w) - 2vw - var(--next-w)) / 2); top:50%; transform:translate(-50%,-50%); z-index:5;
   text-align:center; padding:3vh 3vw; color:#000; font-size:4.4vh; line-height:1.4; border:var(--line) dashed #000; pointer-events:none;}
 
-/* NEXT 띠 — 테스트 화면의 다음 버튼과 같은 늘어난 픽셀 화살표 (누르면 다시 테스트로) */
-.back-to-test-btn{position:fixed; right:0; top:0; width:var(--next-w); height:100vh; padding:3vh 1vw; z-index:15;
-  appearance:none; border:none; background:none; cursor:pointer; line-height:0; transition:transform .15s;}
-.back-to-test-btn svg{width:100%; height:100%; display:block;}
-.back-to-test-btn rect{fill:rgba(170,170,170,.72); transition:fill .15s;}
-.back-to-test-btn:hover rect, .back-to-test-btn.dwell-hover rect{fill:var(--red);}
-.back-to-test-btn.dwell-hover{transform:scale(1.03);}
+/* 닉네임 찾기 — HERO LIST 아래 오른쪽 */
+.ar-search{position:fixed; right:2vw; top:20vh; z-index:7; display:flex; align-items:center; gap:.8vw; font-size:4.4vh; white-space:nowrap;}
+.ar-search span{font-weight:600; color:var(--red);}
+#nickSearch{font:inherit; font-size:4.4vh; border:none; border-bottom:var(--line) solid #000; background:transparent; padding:.2vh .3vw; width:14vw; outline:none; color:#000;}
+#nickSearch:focus{border-bottom-color:var(--red);}
+.ar-search em{font-style:normal; color:#555; min-width:4vw;}
 
 /* 손 커서 — 테스트 화면과 같은 빨간 동그라미 */
 .cam-status{display:none; position:fixed; top:16px; left:20px; z-index:20; font-size:18px; color:#555;}
