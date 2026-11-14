@@ -1,102 +1,80 @@
-@font-face{ font-family:'Eulyoo'; src:url('../../files/fonts/Eulyoo1945-Regular.woff') format('woff'); size-adjust:61.7%; font-display:block; }
-@font-face{ font-family:'Silver'; src:url('../../files/fonts/Silver.ttf') format('truetype'); font-display:swap; }
-  :root{
-    --bg:#e2e2dc; --bg-card:#f3f3f1;   /* 배경은 오프닝과 같은 색 */ --line:rgba(0,0,0,0.2); --line-strong:rgba(0,0,0,0.5);
-    --text:#111; --text-dim:#444; --text-faint:#777; --accent:#111;
-    --serif:'Eulyoo',serif; --sans:'Eulyoo',-apple-system,'Malgun Gothic',sans-serif;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;} /* 스크롤 없이 한 화면에 다 담는다 */
-  body{position:relative;}
+@font-face{ font-family:'Eulyoo'; src:url('../../files/fonts/Eulyoo1945-Regular.woff') format('woff'); font-weight:400; size-adjust:61.7%; font-display:swap; }
+@font-face{ font-family:'Eulyoo'; src:url('../../files/fonts/Eulyoo1945-SemiBold.woff') format('woff'); font-weight:600 900; size-adjust:61.7%; font-display:swap; }
+@font-face{ font-family:'AGSuperBlack'; src:url('../../files/fonts/AGSuperBlackGothic-Regular_noHint.otf') format('opentype'); font-display:swap; }
+/* =====================================================================
+   ARCHIVE — 테스트 화면 디자인 규칙: 배경 #e2e2dc / 빨강 #a70000 / 선 1.75px /
+   제목 AG를 칸에 맞게 늘림, 본문 을유. 흐린 로고 배경, 픽셀 그레인. 오른쪽 끝 10vw = NEXT 띠
+   ===================================================================== */
+:root{
+  --red:#a70000; --paper:#e2e2dc; --line:1.75px; --gray:#aaaaaa; --faint:#c9c9c1;
+  --bg:#e2e2dc; --bg-card:#f3f3f1; --text:#000; --text-dim:#333; --text-faint:#666; --accent:var(--red); --line-strong:#000;
+  --font-head:'AGSuperBlack','Eulyoo',sans-serif; --serif:'Eulyoo',serif; --sans:'Eulyoo','Apple SD Gothic Neo','Malgun Gothic',serif;
+  --title-w:36vw;      /* 왼쪽 ARCHIVE 폭 */
+  --next-w:10vw;       /* 오른쪽 NEXT 띠 */
+}
+*{box-sizing:border-box;}
+html,body{margin:0; height:100%; background:var(--bg); color:var(--text); font-family:var(--sans); overflow:hidden;}
+body{position:relative;}
+#fxCanvas{position:fixed; inset:0; z-index:2147482000; pointer-events:none; image-rendering:pixelated;}
 
-  /* 지구본 — 화면 전체를 채우는 배경이자 유일한 화면 */
-  .globe-section{position:fixed;inset:0;}
-  .globe-stage{width:100%;height:100%;}
-  .globe-stage canvas{display:block;width:100%;height:100%;}
+.bg-logo{position:fixed; left:58vw; top:55vh; width:80vw; aspect-ratio:2750/474; transform:translate(-50%,-50%) rotate(28deg);
+  background:var(--faint); -webkit-mask:url('../../files/images/ui/icons/Logo-project_S.png') center/contain no-repeat; mask:url('../../files/images/ui/icons/Logo-project_S.png') center/contain no-repeat;
+  opacity:.75; z-index:0; pointer-events:none;}
+/* 위쪽 흐린 HERO LIST — 누르면 영웅 리스트로 */
+.bg-word{position:fixed; left:calc(var(--title-w) + 2vw); right:calc(var(--next-w) + 1vw); top:1vh; text-align:center; font-family:var(--font-head); font-size:17vh; line-height:1;
+  color:var(--faint); text-decoration:none; z-index:6; white-space:nowrap; transition:color .2s;}
+.bg-word:hover, .bg-word.dwell-hover{color:var(--red);}
 
-  .globe-overlay-top, .globe-overlay-bottom{
-    position:absolute; left:0; right:0; z-index:5; text-align:center; pointer-events:none;
-  }
-  .globe-overlay-top{top:0; padding:4vh 6vw 2vh; background:none;}
-  .globe-overlay-bottom{bottom:0; padding:2vh 6vw 3.5vh; background:none;}
+.globe-section{position:fixed; inset:0; z-index:1;}
+/* 왼쪽 — 세로로 꽉 채운 ARCHIVE */
+.ar-title{position:absolute; left:1.2vw; top:2vh; width:var(--title-w); height:72vh; overflow:visible; z-index:3;}
+.ar-title text{font-family:var(--font-head); fill:var(--red);}
+.ar-side{position:absolute; left:1.5vw; top:77vh; width:var(--title-w); z-index:3;}
+.ar-lede{margin:0 0 1.6vh; font-size:4.4vh; font-weight:600; line-height:1.15; color:var(--red);}
+.stat-row{display:flex; gap:2.5vw;}
+.stat{display:flex; align-items:baseline; gap:.5vw;}
+.stat .num{font-family:var(--font-head); font-size:7vh; line-height:1; color:var(--red);}
+.stat .lbl{font-size:4vh; color:#000;}
 
-  .kicker{font-size:18px;letter-spacing:0.24em;color:var(--text-faint);text-transform:uppercase;margin-bottom:0.8rem;}
-  h1{font-family:var(--serif);font-weight:600;font-size:clamp(22px,3vw,44px);margin:0 0 0.9rem;line-height:1.5;}
-  .stat-row{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;}
-  .stat{display:flex; align-items:baseline; gap:6px;}
-  .stat .num{font-family:var(--serif);font-size:32px;color:var(--accent);}
-  .stat .lbl{font-size:18px;color:var(--text-faint);letter-spacing:0.04em;}
+/* 가운데~오른쪽 — 기록 나선 */
+.globe-stage{position:absolute; left:calc(var(--title-w) + 2vw); right:var(--next-w); top:0; bottom:0; z-index:2;}
+.globe-stage canvas{display:block; width:100%; height:100%;}
+#globeLabels{position:absolute; inset:0; z-index:4; pointer-events:none; overflow:hidden;}
+.globe-label{--bubble-color:#000; position:absolute; top:0; left:0; transform:translate(-50%,-100%); background:var(--paper); border:var(--line) solid var(--bubble-color);
+  padding:.4vh .5vw; white-space:nowrap; pointer-events:none; display:flex; align-items:center; gap:.4vw; transition:opacity .15s ease;}
+.globe-label .dot2{width:1vh; height:1vh; background:var(--bubble-color); flex:none;}
+.globe-label .name{font-size:3vh; color:#000;}
+.globe-label .nick{font-size:2.6vh; color:#555;}
 
-  .top-heroes{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:1rem;pointer-events:none;}
-  .top-hero-pill{
-    border:0.5px solid var(--line-strong); border-radius:100px; padding:6px 13px; font-size:18px; color:var(--text-dim);
-    display:flex; align-items:center; gap:6px; background:transparent;
-  }
-  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+/* 정면 기록 정보 */
+.focus-info{position:absolute; left:calc(var(--title-w) + 2vw); right:var(--next-w); bottom:17vh; z-index:6; text-align:center; pointer-events:none; display:flex; flex-direction:column; gap:.6vh; align-items:center;}
+.focus-info .fi-name{font-family:var(--font-head); font-size:7vh; line-height:1; color:var(--red);}
+.focus-info .fi-nick{font-size:4.6vh; color:#000;}
+.focus-info .fi-series{font-size:3.8vh; color:#555;}
 
-  .globe-hint{font-size:18px;color:var(--text-faint);text-align:center;}
+.globe-overlay-bottom{position:absolute; left:calc(var(--title-w) + 2vw); right:calc(var(--next-w) + 1vw); bottom:2.5vh; z-index:5; text-align:center; pointer-events:none;}
+.top-heroes{display:flex; flex-wrap:wrap; gap:.5vw; justify-content:center; margin-bottom:1.2vh;}
+.top-hero-pill{border:var(--line) solid #000; padding:.5vh .6vw; font-size:3.2vh; color:#000; display:flex; align-items:center; gap:.4vw; background:transparent;}
+.dot{width:1.1vh; height:1.1vh; display:inline-block;}
+.globe-hint{font-size:3.2vh; color:#555;}
+.globe-section .empty{position:absolute; left:calc(var(--title-w) + 2vw + (100vw - var(--title-w) - 2vw - var(--next-w)) / 2); top:50%; transform:translate(-50%,-50%); z-index:5;
+  text-align:center; padding:3vh 3vw; color:#000; font-size:4.4vh; line-height:1.4; border:var(--line) dashed #000; pointer-events:none;}
 
-  .globe-section .empty{
-    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:5;
-    margin:0; background:transparent; text-align:center; padding:2rem; color:var(--text-faint);
-    font-size:21px; line-height:2; border:1px dashed var(--line); border-radius:8px; pointer-events:none;
-  }
+/* NEXT 띠 — 테스트 화면의 다음 버튼과 같은 늘어난 픽셀 화살표 (누르면 다시 테스트로) */
+.back-to-test-btn{position:fixed; right:0; top:0; width:var(--next-w); height:100vh; padding:3vh 1vw; z-index:15;
+  appearance:none; border:none; background:none; cursor:pointer; line-height:0; transition:transform .15s;}
+.back-to-test-btn svg{width:100%; height:100%; display:block;}
+.back-to-test-btn rect{fill:rgba(170,170,170,.72); transition:fill .15s;}
+.back-to-test-btn:hover rect, .back-to-test-btn.dwell-hover rect{fill:var(--red);}
+.back-to-test-btn.dwell-hover{transform:scale(1.03);}
 
-  /* 손 인식 상태 표시 · 커서 (redesign/test 페이지와 같은 방식) */
-  .cam-status{display:none; position:fixed; top:16px; left:20px; z-index:20; font-size:18px; color:var(--text-faint); letter-spacing:0.04em;}
-  #handCursor{
-    position:fixed; width:18px; height:18px; border-radius:50%;
-    border:1.5px solid var(--text); pointer-events:none; z-index:25;
-    transform:translate(-50%,-50%); display:none;
-  }
-  #handCursor.ready{background:rgba(242,240,234,0.5);}
+/* 손 커서 — 테스트 화면과 같은 빨간 동그라미 */
+.cam-status{display:none; position:fixed; top:16px; left:20px; z-index:20; font-size:18px; color:#555;}
+#handCursor{position:fixed; width:28px; height:28px; border-radius:50%; border:var(--line) solid var(--red); mix-blend-mode:multiply;
+  pointer-events:none; z-index:2147483000; transform:translate(-50%,-50%); display:none;}
+#handCursor.ready, #handCursor.fist{background:rgba(167,0,0,.45);}
 
-  /* 각 점(공) 위에 떠 있는 반투명 말풍선 — 매 프레임 JS가 실제 화면 좌표로 위치를 옮겨준다 */
-  #globeLabels{position:absolute; inset:0; z-index:4; pointer-events:none; overflow:hidden;}
-  .globe-label{
-    --bubble-color: var(--accent);
-    position:absolute; top:0; left:0; transform:translate(-50%,-100%);
-    background:rgba(22,22,26,0.62); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
-    border:0.5px solid var(--bubble-color); border-radius:100px;
-    padding:4px 10px; white-space:nowrap; pointer-events:none;
-    display:flex; align-items:center; gap:5px;
-    transition:opacity 0.15s ease;
-  }
-  .globe-label::after{
-    content:''; position:absolute; left:50%; bottom:-4px; transform:translateX(-50%);
-    width:6px; height:6px; background:rgba(22,22,26,0.62); border-right:0.5px solid var(--bubble-color); border-bottom:0.5px solid var(--bubble-color);
-    rotate:45deg;
-  }
-  .globe-label .dot2{width:6px;height:6px;border-radius:50%;background:var(--bubble-color);flex:none;}
-  .globe-label .name{font-size:16px;color:var(--text);letter-spacing:0.01em;}
-  .globe-label .nick{font-size:14px;color:var(--text-faint);}
-
-  /* 다시 테스트하러 가기 — 전시 화면에서 항상 보이는 버튼. 카메라 주먹(dwellable)과 마우스 클릭 둘 다 동작 */
-  .back-to-test-btn{
-    position:fixed; right:5vw; bottom:5vh; z-index:15;
-    appearance:none; border:1px solid var(--line-strong); background:transparent;
-    color:var(--text); font-family:var(--sans); font-size:21px; letter-spacing:0.02em;
-    padding:12px 20px; border-radius:100px; cursor:pointer;
-    transition:border-color .2s ease, background .2s ease, transform .2s ease;
-  }
-  .back-to-test-btn:hover{border-color:var(--text);}
-  .back-to-test-btn.dwell-hover{border-color:var(--accent); background:rgba(0,0,0,0.08); transform:scale(1.04);}
-
-  /* 관리자용 도구 — 전시 화면에는 노출하지 않는다 (기록 초기화의 confirm() 등 네이티브 팝업은 카메라로 조작 불가) */
-  .admin-only{display:none;}
-  .btn{
-    appearance:none;border:0.5px solid var(--line-strong);background:transparent;color:var(--text-dim);
-    font-family:var(--sans);font-size:19px;padding:9px 16px;border-radius:2px;cursor:pointer;
-  }
-  .btn:hover{color:var(--text); border-color:var(--text);}
-  input[type=file]{display:none;}
-
-  body.debug .cam-status{display:block;}
-
-/* 정면 칸 정보 — 칸(색 픽셀) 아래에 영웅명/닉네임/시리즈 */
-.focus-info{position:absolute; left:0; right:0; bottom:17vh; z-index:6; text-align:center; pointer-events:none; display:flex; flex-direction:column; gap:4px; align-items:center;}
-.focus-info .fi-name{font-size:clamp(26px,2.6vw,48px); color:var(--text);}
-.focus-info .fi-nick{font-size:clamp(18px,1.6vw,30px); color:var(--text-dim);}
-.focus-info .fi-series{font-size:clamp(16px,1.3vw,24px); color:var(--text-faint);}
-
-#fxCanvas{position:fixed; inset:0; z-index:2147482000; pointer-events:none; image-rendering:pixelated; mix-blend-mode:multiply;}
+.admin-only{display:none;}
+.btn{appearance:none; border:var(--line) solid #000; background:transparent; color:#000; font-family:var(--sans); font-size:19px; padding:9px 16px; cursor:pointer;}
+input[type=file]{display:none;}
+body.debug .cam-status{display:block;}

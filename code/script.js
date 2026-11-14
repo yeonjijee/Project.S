@@ -1422,6 +1422,13 @@ function showResult(){
   matched = runMatch();
   document.getElementById('resultName').textContent = matched.name;
   document.getElementById('resultSummary').textContent = matched.summary || matched.description || '';
+  document.getElementById('resultSeries').textContent = matched.series || '';
+  document.getElementById('screen-result').dataset.step = '1';   // 1 수호 영웅 → 2 닮은 이유
+  // 영웅 이름 — AG를 칸에 맞게 늘린다 (다른 화면 제목과 같은 방식)
+  const nameSvg = document.getElementById('resultNameSvg');
+  nameSvg.innerHTML = ''; delete nameSvg.dataset.built;
+  nameSvg.dataset.text = matched.name;
+  document.fonts.load('1000px AGSuperBlack').then(() => buildStretchLine(nameSvg));
   showFinalFrame(document.getElementById('resultCanvas'), matched, RESULT_RATE, RESULT_COLOR_MIX);
   renderResultKeywords();
   saveToArchive();
@@ -1450,6 +1457,17 @@ function renderResultKeywords(){
 // 화면이 멈춘 게 아니라 기다리면 된다는 걸 알 수 있게 한다.
 // 전시 중 서버/인터넷이 안 되는 경우에도 퀴즈 자체는 끊기면 안 되므로, 실패하면 그냥 조용히
 // 문구를 지우고 결과 화면은 정상 진행한다 (에러를 사용자에게 보여주지 않음).
+/* 결과 2단계 — AI 글이 길어도 한 화면(스크롤 없이)에 들어가도록 글자 크기를 줄여 맞춘다 */
+function fitResultStep2(){
+  const box = document.querySelector('.res-step-2');
+  if(!box || document.getElementById('screen-result').dataset.step !== '2') return;
+  const vh = window.innerHeight / 100;
+  let size = 5;                                   // 시작: 5vh (design.css --res-body-size와 같게)
+  const apply = () => { box.style.setProperty('--res2-body', size + 'vh'); box.style.setProperty('--res2-k', (size / 5).toFixed(3)); };
+  apply();
+  while(size > 2.6 && box.scrollHeight > box.clientHeight + 1){ size -= 0.2; apply(); }
+}
+window.addEventListener('resize', fitResultStep2);
 async function fetchAiInterpretation(){
   const explEl = document.getElementById('aiExplanation');
   const lineEl = document.getElementById('aiInterpretation');
@@ -1485,6 +1503,7 @@ async function fetchAiInterpretation(){
     explEl.textContent = (data && data.explanation) ? data.explanation : '';
     lineEl.textContent = (data && data.oneLiner) ? data.oneLiner : '';
     if(identityEl) identityEl.textContent = (data && data.identityCompare) ? data.identityCompare : '';
+    fitResultStep2();
   }catch(err){
     console.warn('AI 해석 불러오기 실패 — 인터넷 없이 만든 기본 문장으로 대신:', err);
     // 전시장 인터넷이 끊겨도 빈칸이 되지 않게, 실제로 겹친 키워드로 문장을 만든다
@@ -1624,6 +1643,13 @@ function handleAction(action){
     refreshStartBtn();
     refreshFinishBtn();
     goto('camstart');   // 처음으로 = 맨 첫 화면(로고 + 엔터키)
+  } else if(action==='result-next'){
+    const scr = document.getElementById('screen-result');
+    if(scr.dataset.step === '1'){ scr.dataset.step = '2'; typeSound.whoosh(); fitResultStep2(); }   // 1 → 2 닮은 이유
+    else handleAction('restart');                                                   // 2 → 처음으로
+  } else if(action==='result-prev'){
+    const scr = document.getElementById('screen-result');
+    if(scr.dataset.step === '2'){ scr.dataset.step = '1'; typeSound.whoosh(); }
   } else if(action==='reset-q5'){
     resetQ5();
   } else if(action==='reset'){

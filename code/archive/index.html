@@ -12,38 +12,39 @@
 <div class="cam-status" id="camStatus"></div>
 <div id="handCursor"></div>
 
-<section class="globe-section">
-  <div class="globe-stage" id="globeStage"></div>
-  <div id="globeLabels"></div>
+<!-- 테스트 화면 규칙: 왼쪽 세로로 늘인 ARCHIVE(AG 빨강) / 오른쪽 기록 나선 / 오른쪽 끝 10vw NEXT 띠(테스트로) -->
+<div class="bg-logo" aria-hidden="true"></div>
+<a class="bg-word" id="heroListLink" href="../list/index.html">HERO LIST</a>
 
-  <div class="globe-overlay-top">
-    <div class="kicker">Project.S · 기록의 벽</div>
-    <h1>멸종된 것은 파워레인저가 아니라,<br>어쩌면 우리 안의 영웅성이었을지도 모릅니다</h1>
+<section class="globe-section">
+  <svg class="ar-title" data-text="ARCHIVE" preserveAspectRatio="none" aria-label="ARCHIVE"></svg>
+
+  <div class="ar-side">
+    <p class="ar-lede">멸종된 것은 파워레인저가 아니라,<br>어쩌면 우리 안의 영웅성이었을지도 모릅니다</p>
     <div class="stat-row">
       <div class="stat"><span class="num" id="statCount">0</span><span class="lbl">기록된 이야기</span></div>
-      <div class="stat"><span class="num" id="statHeroes">0</span><span class="lbl">매칭된 서로 다른 영웅</span></div>
+      <div class="stat"><span class="num" id="statHeroes">0</span><span class="lbl">서로 다른 영웅</span></div>
     </div>
   </div>
 
+  <div class="globe-stage" id="globeStage"></div>
+  <div id="globeLabels"></div>
   <div class="focus-info" id="focusInfo"></div>
+
   <div class="globe-overlay-bottom">
     <div class="top-heroes" id="topHeroes"></div>
-    <div class="globe-hint">주먹을 쥐고 좌우로 움직이면 회전 · 위아래로 움직이면 스크롤 · 손을 펴고 위아래로 움직이면 확대·축소</div>
+    <div class="globe-hint">주먹을 쥐고 좌우로 = 회전 · 위아래로 = 스크롤 · 손을 펴고 위아래로 = 확대·축소</div>
   </div>
 
   <div class="empty" id="emptyState" style="display:none;">
     아직 기록이 없습니다.<br>
-    테스트를 끝까지 마치면 지구본 위에 점으로 남습니다.
+    테스트를 끝까지 마치면 여기에 한 칸으로 남습니다.
   </div>
 
-  <button class="back-to-test-btn dwellable" id="backToTestBtn" onclick="location.href='../index.html'">
-    다시 테스트하러 가기 →
-  </button>
+  <button class="back-to-test-btn dwellable" id="backToTestBtn" onclick="location.href='../index.html'" aria-label="다시 테스트하러 가기"><svg viewBox="-0.5 -0.5 5 9" preserveAspectRatio="none" aria-hidden="true"><rect x="-0.5" y="-0.5" width="1" height="1"/><rect x="0.5" y="0.5" width="1" height="1"/><rect x="1.5" y="1.5" width="1" height="1"/><rect x="2.5" y="2.5" width="1" height="1"/><rect x="3.5" y="3.5" width="1" height="1"/><rect x="2.5" y="4.5" width="1" height="1"/><rect x="1.5" y="5.5" width="1" height="1"/><rect x="0.5" y="6.5" width="1" height="1"/><rect x="-0.5" y="7.5" width="1" height="1"/></svg></button>
 </section>
 
-<!-- 관리자용 — 카메라 전시 화면에서는 숨겨둠. 데이터 관리가 필요할 때 style.css의 .admin-only 표시를 바꿔서 쓴다.
-     (기록 초기화는 브라우저 confirm() 팝업을 띄우는데, 이건 카메라 손동작으로 조작할 수 없는 OS/브라우저 네이티브 창이라
-     전시 화면에는 애초에 노출하지 않는다.) -->
+<!-- 관리자용 — 전시 화면에서는 숨김 (style.css .admin-only) -->
 <div class="admin-only">
   <a href="../list/index.html" target="_blank" class="list-link">전체 영웅 리스트 보기 ↗</a>
   <a href="../index.html" target="_blank" class="test-link">수호 영웅 매칭 테스트 하러 가기 ↗</a>
@@ -60,5 +61,18 @@
 <script src="script.js"></script>
 <script src="gallery.js"></script>
 <script src="../fx.js"></script>
+<script>
+/* ARCHIVE 제목 — AG 잉크 영역에 맞춰 칸 크기대로 늘린다 */
+(function(){
+  const svg = document.querySelector('.ar-title'); const text = svg.dataset.text;
+  const c = document.createElement('canvas').getContext('2d');
+  document.fonts.load('1000px AGSuperBlack').then(() => {
+    c.font = '1000px AGSuperBlack'; const m = c.measureText(text);
+    const x0 = -m.actualBoundingBoxLeft, x1 = m.actualBoundingBoxRight, y0 = -m.actualBoundingBoxAscent, y1 = m.actualBoundingBoxDescent;
+    svg.setAttribute('viewBox', `${x0} ${y0} ${x1 - x0} ${y1 - y0}`);
+    svg.innerHTML = '<text x="0" y="0" font-size="1000"></text>'; svg.querySelector('text').textContent = text;
+  });
+})();
+</script>
 </body>
 </html>

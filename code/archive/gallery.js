@@ -92,14 +92,21 @@ function getArchiveForGlobe(){
   function resetGesturePointer(){ lastGX = null; lastGY = null; }
 
   let backBtnPrevFisted = false;
+  // 손으로 누를 수 있는 것: 오른쪽 NEXT 띠(테스트로) + 위쪽 흐린 HERO LIST(영웅 리스트로)
   function updateBackButtonHover(x, y, fisted){
-    const btn = document.getElementById('backToTestBtn');
-    if(!btn) return;
-    const rect = btn.getBoundingClientRect();
-    const hovering = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-    btn.classList.toggle('dwell-hover', hovering);
-    if(hovering && fisted && !backBtnPrevFisted) btn.click();
-    backBtnPrevFisted = hovering && fisted;
+    let anyHover = false;
+    ['backToTestBtn', 'heroListLink'].forEach(id => {
+      const btn = document.getElementById(id);
+      if(!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const hovering = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+      btn.classList.toggle('dwell-hover', hovering);
+      if(hovering){
+        anyHover = true;
+        if(fisted && !backBtnPrevFisted) btn.click();
+      }
+    });
+    backBtnPrevFisted = anyHover && fisted;
   }
 
   function handleGesture(x, y, fisted){

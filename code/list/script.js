@@ -70,11 +70,27 @@ function colorFor(name){
 
 const main = document.getElementById('main');
 
+/* 제목 — AG 글자의 실제 잉크 영역을 재서 viewBox로 쓰면, 칸 크기대로 가로·세로가 늘어난다 (테스트 화면과 같은 방식) */
+const titleMeasure = document.createElement('canvas').getContext('2d');
+function stretchTitle(svg){
+  if(!svg) return;
+  const text = svg.dataset.text || '';
+  document.fonts.load('1000px AGSuperBlack').then(() => {
+    titleMeasure.font = '1000px AGSuperBlack';
+    const m = titleMeasure.measureText(text);
+    const x0 = -m.actualBoundingBoxLeft, x1 = m.actualBoundingBoxRight, y0 = -m.actualBoundingBoxAscent, y1 = m.actualBoundingBoxDescent;
+    svg.setAttribute('viewBox', `${x0} ${y0} ${x1 - x0} ${y1 - y0}`);
+    svg.innerHTML = `<text x="0" y="0" font-size="1000"></text>`;
+    svg.querySelector('text').textContent = text;
+  });
+}
+stretchTitle(document.querySelector('.hl-title'));
+
 function render(){
   main.innerHTML = ROWS.map(row=>{
     const cards = row.members.map(c=>{
       const c1 = colorFor(c.color);
-      return `<div class="hero-card" data-search="${(c.name+' '+c.series+' '+row.label).toLowerCase()}" onclick="openModal('${row.seriesNo}','${c.imageSlug}')">
+      return `<div class="hero-card" data-slug="${c.imageSlug}" data-search=""${(c.name+' '+c.series+' '+row.label).toLowerCase()}" onclick="openModal('${row.seriesNo}','${c.imageSlug}')">
         <div class="hero-img-wrap" style="--card-color:${c1}">
           ${(c.rare || c.leader || c.legend) ? `<div class="badge-stack">${c.rare ? '<span class="rare-badge">RARE</span>' : ''}${c.leader ? '<span class="leader-badge">LEADER</span>' : ''}${c.legend ? '<span class="legend-badge">LEGEND</span>' : ''}</div>` : ''}
         </div>
@@ -103,10 +119,11 @@ const HERO_IMAGE_BASE = '../../files/'; // hero-images.json 안의 경로는 이
 let HERO_IMAGES = {};
 const heroRenderers = []; // 슬라이더 움직일 때 전부 다시 그리기 위해 MosaicRenderer 인스턴스를 모아둔다
 const CARD_W = 180, CARD_H = 240; // hero-img-wrap의 3:4 비율에 맞춘 캔버스 내부 해상도
-let currentRate = 0.1;
+let currentRate = 0.45;          // 평소엔 모자이크 (테스트처럼 '흐릿한 영웅')
+const HOVER_RATE = 0.06;          // 손/마우스를 올리면 선명하게
 
 function withCacheBust(path){
-  return path + (path.includes('?') ? '&' : '?') + 'v=' + Date.now();
+  return path;   // 예전엔 매번 새로 받았는데(렉 원인) — 브라우저가 저장해둔 사진을 그대로 쓴다
 }
 function heroPhotoCanvasFor(imgs){
   const c = document.createElement('canvas');
@@ -137,6 +154,12 @@ function mountCanvas(wrap, source){
   const m = new MosaicRenderer(canvas, source, { minCell: 2, maxCell: 16, bg: 'transparent' });
   heroRenderers.push(m);
   m.render(currentRate);
+  wrap._source = source;
+  const card = wrap.closest('.hero-card');
+  if(card){
+    card.addEventListener('mouseenter', () => m.render(HOVER_RATE));
+    card.addEventListener('mouseleave', () => m.render(currentRate));
+  }
 }
 function loadHeroCanvas(wrap, ranger){
   const src = HERO_IMAGES[ranger.name];
@@ -177,7 +200,7 @@ fetch('../../files/data/hero-images.json').then(r => r.json()).then(manifest => 
 
 const rateSlider = document.getElementById('rateSlider');
 const rateLabel = document.getElementById('rateLabel');
-rateSlider.addEventListener('input', () => {
+if(rateSlider) rateSlider.addEventListener('input', () => {
   currentRate = parseFloat(rateSlider.value);
   rateLabel.textContent = `모자이크 rate: ${currentRate.toFixed(2)}` + (currentRate <= 0.15 ? ' (원본에 가까움)' : currentRate >= 0.9 ? ' (완전 추상)' : '');
   heroRenderers.forEach(m => m.render(currentRate));
@@ -193,16 +216,23 @@ function openModal(seriesNo, slug){
   const c = findChar(seriesNo, slug);
   if(!c) return;
   const col = colorFor(c.color);
+  const badges = [c.rare ? 'RARE' : '', c.leader ? 'LEADER' : '', c.legend ? 'LEGEND' : ''].filter(Boolean).map(t => `<b>${t}</b>`).join('');
   document.getElementById('modalBody').innerHTML = `
-    <div class="modal-kicker">${c.series} · ${c.color}${c.rare ? ' · <span style="color:#b8901f">RARE</span>' : ''}${c.leader ? ' · <span style="color:#e8564a">LEADER</span>' : ''}${c.legend ? ' · <span style="color:#111">LEGEND</span>' : ''}</div>
-    <h2 class="modal-title" style="color:${col}">${c.name}</h2>
-    <div class="modal-sub">${c.summary || ''}</div>
+    <div class="modal-kicker">${c.seriesNo || seriesNo}. ${c.series} · ${c.color}${badges}</div>
+    <svg class="modal-title" id="modalTitleSvg" data-text="${c.name}" preserveAspectRatio="none" aria-label="${c.name}"></svg>
+    ${c.summary ? `<div class="modal-sub">${c.summary}</div>` : ''}
     ${c.description ? `<p class="modal-summary">${c.description}</p>` : ''}
     ${c.personalityCanon && c.personalityCanon.length ? `<div class="modal-kw-title">성격</div><div class="modal-kw-wrap">${c.personalityCanon.map(k=>`<span>${k}</span>`).join('')}</div>` : ''}
     ${c.weaknessCanon && c.weaknessCanon.length ? `<div class="modal-kw-title">약점</div><div class="modal-kw-wrap weak">${c.weaknessCanon.map(k=>`<span>${k}</span>`).join('')}</div>` : ''}
     <div class="modal-story">${c.story || ''}</div>
-    <div style="font-size:10px;color:var(--text-faint);margin-top:1.2rem;">ID: ${c.imageSlug}</div>
   `;
+  stretchTitle(document.getElementById('modalTitleSvg'));
+  // 왼쪽 큰 레인저 — 카드에 쓰던 사진을 선명하게
+  const card = document.querySelector(`.hero-card[data-slug="${slug}"]`);
+  const src = card && card.querySelector('.hero-img-wrap')._source;
+  const mc = document.getElementById('modalCanvas');
+  mc.getContext('2d').clearRect(0, 0, mc.width, mc.height);
+  if(src) new MosaicRenderer(mc, src, { minCell: 2, maxCell: 16, bg: 'transparent' }).render(0.04);
   document.getElementById('modalOverlay').classList.add('active');
 }
 function closeModal(){

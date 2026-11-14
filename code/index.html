@@ -178,32 +178,37 @@
   <div class="title">당신의 약점과<br>가장 닮은 영웅을 찾는 중…</div>
 </div>
 
-<div class="screen" id="screen-result">
-  <div class="result-layout">
-    <div class="result-text">
-      <img class="q-title-img result-title-img" src="../files/images/ui/icons/page-header-7.png" alt="매칭된 영웅">
-      <div class="title" id="resultName">-</div>
-      <div class="sub" id="resultSummary">-</div>
+<div class="screen" id="screen-result" data-step="1">
+  <!-- 결과 — 한 화면에 한 단계: 1 당신의 수호 영웅(이름·레인저) → 2 닮은 이유(AI 해석) -->
+  <div class="res-logo" aria-hidden="true"></div>
+  <div class="res-hero"><canvas id="resultCanvas" width="600" height="600"></canvas></div>
 
-      <div class="result-section-label">영웅의 키워드</div>
-      <div class="result-kw-wrap" id="resultKeywords"></div>
-
-      <div class="result-section-label">영웅과 내가 닮은 이유</div>
-      <div class="result-explanation" id="aiExplanation"></div>
-
-      <div class="ai-quote" id="aiInterpretation"></div>
-
-      <div class="result-section-label">스스로 생각한 모습과 실제 내면</div>
-      <div class="result-explanation" id="aiIdentityCompare"></div>
-
-      <button class="btn dwellable" data-action="restart">처음부터 다시</button>
-      <div class="nav-links">
-        <a class="btn btn-small dwellable" href="archive/index.html">기록의 벽에서 확인하기</a>
-        <a class="btn btn-small dwellable" href="list/index.html">전체 영웅 리스트 보기</a>
-      </div>
-    </div>
-    <div class="hero-stage"><canvas id="resultCanvas" width="600" height="600"></canvas></div>
+  <!-- 1단계 -->
+  <div class="res-step res-step-1">
+    <p class="res-kicker">당신의 수호 영웅은</p>
+    <svg class="res-name" id="resultNameSvg" preserveAspectRatio="none" aria-hidden="true"></svg>
+    <div class="title res-name-text" id="resultName">-</div>
+    <p class="res-series" id="resultSeries"></p>
+    <p class="res-summary sub" id="resultSummary">-</p>
+    <div class="res-kw-label">영웅의 키워드 <span>— 빨간 칸은 당신이 고른 것</span></div>
+    <div class="result-kw-wrap" id="resultKeywords"></div>
   </div>
+
+  <!-- 2단계 -->
+  <div class="res-step res-step-2">
+    <p class="res-kicker">영웅과 당신이 닮은 이유</p>
+    <div class="ai-quote" id="aiInterpretation"></div>
+    <div class="result-explanation" id="aiExplanation"></div>
+    <div class="res-kw-label res-identity-label">스스로 생각한 모습과 실제 내면</div>
+    <div class="result-explanation res-identity" id="aiIdentityCompare"></div>
+  </div>
+
+  <nav class="res-links">
+    <a class="text-btn dwellable" href="archive/index.html"><span>ARCHIVE</span></a>
+    <a class="text-btn dwellable" href="list/index.html"><span>HERO LIST</span></a>
+  </nav>
+  <button class="q-chev q-chev-prev dwellable res-prev" data-action="result-prev" aria-label="이전"><svg viewBox="-0.5 -0.5 5 5" aria-hidden="true"><polygon points="0,-0.5 0.5,0 0,0.5 -0.5,0"/><polygon points="1,-0.5 1.5,0 1,0.5 0.5,0"/><polygon points="2,-0.5 2.5,0 2,0.5 1.5,0"/><polygon points="3,-0.5 3.5,0 3,0.5 2.5,0"/><polygon points="4,-0.5 4.5,0 4,0.5 3.5,0"/><polygon points="0,0.5 0.5,1 0,1.5 -0.5,1"/><polygon points="0,1.5 0.5,2 0,2.5 -0.5,2"/><polygon points="0,2.5 0.5,3 0,3.5 -0.5,3"/><polygon points="0,3.5 0.5,4 0,4.5 -0.5,4"/></svg></button>
+  <button class="q-chev q-chev-next dwellable res-next" data-action="result-next" aria-label="다음 / 처음으로"><svg viewBox="-0.5 -0.5 5 9" preserveAspectRatio="none" aria-hidden="true"><rect x="-0.5" y="-0.5" width="1" height="1"/><rect x="0.5" y="0.5" width="1" height="1"/><rect x="1.5" y="1.5" width="1" height="1"/><rect x="2.5" y="2.5" width="1" height="1"/><rect x="3.5" y="3.5" width="1" height="1"/><rect x="2.5" y="4.5" width="1" height="1"/><rect x="1.5" y="5.5" width="1" height="1"/><rect x="0.5" y="6.5" width="1" height="1"/><rect x="-0.5" y="7.5" width="1" height="1"/></svg></button>
 </div>
 
 
