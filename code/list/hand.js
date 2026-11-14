@@ -86,7 +86,7 @@
     const card = el ? el.closest('.hero-card') : null;
     if(card !== hoverCard){
       if(hoverCard){ hoverCard.dispatchEvent(new MouseEvent('mouseleave')); hoverCard.classList.remove('hand-hover'); }
-      if(card){ card.dispatchEvent(new MouseEvent('mouseenter')); card.classList.add('hand-hover'); }
+      if(card){ card.dispatchEvent(new MouseEvent('mouseenter')); card.classList.add('hand-hover'); if(window.typeSound && !(down && down.dragging)) typeSound.click('key'); }
       hoverCard = card;
     }
     const link = el ? el.closest('a, button') : null;
@@ -104,6 +104,10 @@
     if(e.key === ']') FIST_CLOSE = Math.min(1.5, +(FIST_CLOSE + 0.05).toFixed(2));
   });
   let camOn = false, video = null, landmarker = null, lastVideoTime = -1;
+  // 손 인식 상태 — 왼쪽 아래 작은 글씨 (손이 잡히면 사라짐, 문제가 있으면 이유를 보여줌)
+  const chip = document.getElementById('camChip');
+  let handSeenOnce = false;
+  function setChip(text, bad){ if(!chip) return; chip.textContent = text; chip.classList.toggle('bad', !!bad); chip.style.display = text ? 'block' : 'none'; }
   let fistFrames = 0, openFrames = 0, fisted = false, sx = null, sy = null;
 
   async function startCam(){
@@ -124,6 +128,7 @@
     video.srcObject = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 } });
     await video.play();
     camOn = true;
+    setChip('손을 화면 앞에 펴서 보여주세요');
     requestAnimationFrame(track);
   }
 
@@ -144,6 +149,7 @@
         if(open <= FIST_CLOSE){ fistFrames++; openFrames = 0; } else { openFrames++; fistFrames = 0; }
         cursor.style.display = 'block';
         cursor.style.left = sx + 'px'; cursor.style.top = sy + 'px';
+        if(!handSeenOnce){ handSeenOnce = true; setChip(''); }
         if(!fisted && fistFrames >= 2){ fisted = true; pointerDown(sx, sy, 'hand'); }
         else if(fisted && openFrames >= 2){ fisted = false; pointerUp(); }
         cursor.classList.toggle('fist', fisted);
@@ -162,7 +168,15 @@
   let started = false;
   function tryStart(){
     if(started) return; started = true;
-    startCam().catch(err => { console.warn('camera unavailable:', err); started = false; });
+    setChip('손 인식 준비 중…');
+    startCam().catch(err => {
+      console.warn('camera unavailable:', err); started = false;
+      const why = err && err.name === 'NotAllowedError' ? '카메라 권한이 막혀 있어요 (주소창 자물쇠 → 카메라 허용)'
+        : err && err.name === 'NotReadableError' ? '다른 탭/앱이 카메라를 쓰고 있어요'
+        : err && err.name === 'NotFoundError' ? '카메라를 찾지 못했어요'
+        : '손 인식을 켜지 못했어요 (' + (err && (err.name || err.message) || err) + ')';
+      setChip(why + ' — 화면을 한 번 누르면 다시 시도', true);
+    });
   }
   tryStart();
   ['click','keydown','touchstart'].forEach(ev => document.addEventListener(ev, tryStart));

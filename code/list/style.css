@@ -89,3 +89,7 @@ main, .hl-head, .modal-overlay{user-select:none; -webkit-user-select:none;}
 body.grabbing, body.grabbing *{cursor:grabbing !important;}
 .hl-links a.hand-hover{text-decoration:underline;}
 .hl-back.hand-hover polygon, .modal-close.hand-hover polygon{fill:var(--red);}
+
+/* 손 인식 상태 (왼쪽 아래 작게) */
+.cam-chip{position:fixed; left:1.5vw; bottom:1.5vh; z-index:2147482500; font-size:2.6vh; color:#555; pointer-events:none;}
+.cam-chip.bad{color:var(--red);}

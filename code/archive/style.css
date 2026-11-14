@@ -165,3 +165,6 @@ body.detail-open .ar-detail{transform:none;}
 .ar-title{top:9.5vh; height:54vh;}
 body.detail-open .ar-nav{transform:translateX(calc(-1 * var(--detail-w) + 8vw)); opacity:0; pointer-events:none;}
 .ar-nav{transition:transform var(--slide), opacity .4s;}
+
+.cam-chip{position:fixed; left:1.5vw; bottom:1.5vh; z-index:2147482500; font-size:2.6vh; color:#555; pointer-events:none; display:none;}
+.cam-chip.bad{color:var(--red);}

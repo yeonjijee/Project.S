@@ -86,11 +86,21 @@ function stretchTitle(svg){
 }
 stretchTitle(document.querySelector('.hl-title'));
 
+/* 검색 — 이름이 일본어 읽기(아카·아오·키…)라서, 한국식 색 이름(레드·블루·옐로…)으로 쳐도 나오게 한다.
+   띄어쓰기는 무시. files/data/korean-names.json에 적은 별칭(한국판 이름 등)도 같이 검색된다. */
+const JP_COLOR_WORDS = { '아카':'레드', '아오':'블루', '키':'옐로', '모모':'핑크', '미도':'그린', '시로':'화이트', '쿠로':'블랙' };
+let KOREAN_ALIASES = {};
+function normSearch(t){ return String(t || '').toLowerCase().replace(/\s+/g, ''); }
+function searchTextFor(c, row){
+  const koName = c.name.split(' ').map(w => JP_COLOR_WORDS[w] || w).join(' ');   // 아카 레인저 → 레드 레인저
+  const extra = [].concat(KOREAN_ALIASES[c.name] || [], KOREAN_ALIASES[c.series] || [], KOREAN_ALIASES[row.label] || []);
+  return normSearch([c.name, koName, c.color, c.series, row.label, ...extra].join('|')).replace(/"/g, '');
+}
 function render(){
   main.innerHTML = ROWS.map(row=>{
     const cards = row.members.map(c=>{
       const c1 = colorFor(c.color);
-      return `<div class="hero-card" data-slug="${c.imageSlug}" data-search=""${(c.name+' '+c.series+' '+row.label).toLowerCase()}" onclick="openModal('${row.seriesNo}','${c.imageSlug}')">
+      return `<div class="hero-card" data-slug="${c.imageSlug}" data-search="${searchTextFor(c, row)}" onclick="openModal('${row.seriesNo}','${c.imageSlug}')">
         <div class="hero-img-wrap" style="--card-color:${c1}">
           ${(c.rare || c.leader || c.legend) ? `<div class="badge-stack">${c.rare ? '<span class="rare-badge">RARE</span>' : ''}${c.leader ? '<span class="leader-badge">LEADER</span>' : ''}${c.legend ? '<span class="legend-badge">LEGEND</span>' : ''}</div>` : ''}
         </div>
@@ -254,7 +264,7 @@ searchInput.addEventListener('input', ()=>{
     const cards = row.querySelectorAll('.hero-card');
     let rowHasMatch = false;
     cards.forEach(card=>{
-      const match = !q || card.getAttribute('data-search').includes(q);
+      const match = !q || card.getAttribute('data-search').includes(normSearch(q));
       card.style.display = match ? '' : 'none';
       if(match){ rowHasMatch = true; visibleCards++; }
     });
@@ -264,3 +274,30 @@ searchInput.addEventListener('input', ()=>{
   document.getElementById('searchCount').textContent = q ? `${visibleCards}명 · ${visibleRows}개 시리즈` : '';
   document.getElementById('emptyFilter').style.display = (q && visibleRows===0) ? 'block' : 'none';
 });
+
+// 한국어 별칭 파일을 읽어오면 카드의 검색어를 다시 만든다
+fetch('../../files/data/korean-names.json').then(r => r.json()).then(m => {
+  KOREAN_ALIASES = m || {};
+  document.querySelectorAll('.series-row').forEach(rowEl => {
+    rowEl.querySelectorAll('.hero-card').forEach(card => {
+      const m2 = /openModal\('([^']*)','([^']*)'\)/.exec(card.getAttribute('onclick') || '');
+      if(!m2) return;
+      const row = ROWS.find(r => r.seriesNo === m2[1]); const c = row && row.members.find(x => x.imageSlug === m2[2]);
+      if(c) card.setAttribute('data-search', searchTextFor(c, row));
+    });
+  });
+  if(searchInput.value) searchInput.dispatchEvent(new Event('input'));
+}).catch(() => {});
+
+// 효과음 — 카드 열기/닫기 달칵 + 슈욱, 검색 칠 때 타자 소리
+if(window.typeSound){
+  const _open = openModal, _close = closeModal;
+  window.openModal = function(...a){ typeSound.clack('next'); typeSound.whoosh(); return _open.apply(this, a); };
+  window.closeModal = function(...a){ if(document.getElementById('modalOverlay').classList.contains('active')){ typeSound.clack('next'); } return _close.apply(this, a); };
+  searchInput.addEventListener('keydown', () => typeSound.click('key'));
+  // 링크(TEST/ARCHIVE/뒤로) — 달칵 소리가 들리게 살짝 뒤에 이동
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href]'); if(!a) return;
+    e.preventDefault(); typeSound.clack('start'); setTimeout(() => { location.href = a.href; }, 160);
+  });
+}

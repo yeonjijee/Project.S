@@ -278,9 +278,10 @@ function getArchiveForGlobe(){
       const cx = c.getContext('2d'); cx.imageSmoothingEnabled = false; cx.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h);
     });
     document.body.classList.add('detail-open');
-    if(typeof typeSound !== 'undefined' && typeSound.whoosh) typeSound.whoosh();
+    if(window.typeSound){ typeSound.clack('next'); typeSound.whoosh(); }
   }
   function closeDetail(){
+    if(detailItem && window.typeSound) typeSound.whoosh();
     detailItem = null;
     document.body.classList.remove('detail-open');
   }
@@ -307,6 +308,7 @@ function getArchiveForGlobe(){
         else { searchIdx = (searchIdx + 1) % searchHits.length; searchLock = searchHits[searchIdx]; nickCount.textContent = `${searchIdx + 1}/${searchHits.length}`; }
       }
       e.stopPropagation();
+      if(window.typeSound) typeSound.click('key');
     });
   }
 
@@ -383,6 +385,7 @@ function getArchiveForGlobe(){
   let hoverLink = null;
   function hoverAt(x, y){
     const it = x < 0 ? null : pickAt(x, y);
+    if(it && it !== hovered && window.typeSound) typeSound.click('key');   // 기록 위에 올라가면 톡
     hovered = it;
     const onHL = !it && x >= 0 && overHeroList(x, y);
     if(heroLink) heroLink.classList.toggle('dwell-hover', onHL);
@@ -437,6 +440,7 @@ function getArchiveForGlobe(){
         const open = [lm[8],lm[12],lm[16],lm[20]].reduce((s,t)=>s+Math.hypot(t.x-palm.x, t.y-palm.y),0) / 4 / (Math.hypot(w.x-c.x, w.y-c.y) || 0.1);
         if(open <= FIST_CLOSE){ fistF++; openF = 0; } else { openF++; fistF = 0; }
         cursor.style.display = 'block'; cursor.style.left = hx + 'px'; cursor.style.top = hy + 'px';
+        if(chip && chip.style.display !== 'none' && !chip.classList.contains('bad')) setChip('');
         if(!fisted && fistF >= 2){ fisted = true; down(hx, hy, 'hand'); }
         else if(fisted && openF >= 2){ fisted = false; up(hx, hy); }
         cursor.classList.toggle('fist', fisted);
@@ -451,10 +455,24 @@ function getArchiveForGlobe(){
     }
     requestAnimationFrame(track);
   }
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href]'); if(!a || !window.typeSound) return;
+    e.preventDefault(); typeSound.clack('start'); setTimeout(() => { location.href = a.href; }, 160);
+  });
+  const chip = document.getElementById('camChip');
+  function setChip(text, bad){ if(!chip) return; chip.textContent = text; chip.classList.toggle('bad', !!bad); chip.style.display = text ? 'block' : 'none'; }
   let camStarted = false;
   function tryStartCam(){
     if(camStarted) return; camStarted = true;
-    startCam().catch(err => { console.warn('camera unavailable:', err); camStarted = false; });
+    setChip('손 인식 준비 중…');
+    startCam().then(() => setChip('손을 화면 앞에 펴서 보여주세요')).catch(err => {
+      console.warn('camera unavailable:', err); camStarted = false;
+      const why = err && err.name === 'NotAllowedError' ? '카메라 권한이 막혀 있어요 (주소창 자물쇠 → 카메라 허용)'
+        : err && err.name === 'NotReadableError' ? '다른 탭/앱이 카메라를 쓰고 있어요'
+        : err && err.name === 'NotFoundError' ? '카메라를 찾지 못했어요'
+        : '손 인식을 켜지 못했어요 (' + (err && (err.name || err.message) || err) + ')';
+      setChip(why + ' — 화면을 한 번 누르면 다시 시도', true);
+    });
   }
   tryStartCam();
   ['click','keydown','touchstart'].forEach(ev => document.addEventListener(ev, tryStartCam));

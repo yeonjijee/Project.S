@@ -83,4 +83,22 @@ function loadSample(){
   render();
 }
 
+// 주소 뒤에 ?keep=닉네임 을 붙여 열면: 그 닉네임 기록만 남기고 나머지를 지운다.
+// 지우기 전에 전체 기록을 JSON 파일로 먼저 내려받아 두고(백업), 확인창에서 '확인'을 눌러야만 지운다.
+(function(){
+  const keep = new URLSearchParams(location.search).get('keep');
+  if(!keep) return;
+  const all = getArchive();
+  const kept = all.filter(r => (r.nickname || '').trim() === keep.trim());
+  const gone = all.length - kept.length;
+  if(!gone){ alert(`지울 기록이 없어요. ('${keep}' ${kept.length}개 / 전체 ${all.length}개)`); return; }
+  if(!kept.length && !confirm(`'${keep}' 닉네임 기록이 하나도 없어요. 그래도 전체 ${all.length}개를 모두 지울까요?`)) return;
+  if(!confirm(`'${keep}' 기록 ${kept.length}개만 남기고 나머지 ${gone}개를 지울까요?\n(지우기 전에 전체 기록을 백업 파일로 내려받아요. 지운 뒤에는 되돌릴 수 없어요)`)) return;
+  exportArchive();
+  setArchive(kept);
+  history.replaceState(null, '', location.pathname);
+  render();
+  if(window.refreshGlobePoints) window.refreshGlobePoints();
+  alert(`정리 완료 — ${kept.length}개 남음, ${gone}개 삭제. 백업 파일은 다운로드 폴더에 있어요.`);
+})();
 render();
