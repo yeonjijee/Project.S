@@ -236,16 +236,21 @@
 
 /* ---- 7. 결과 화면 ---- */
 :root{
-  --res-left:2vw; --res-top:5vh; --res-w:50vw; --res-bottom:4vh; --res-gap:2vh;   /* 왼쪽 글 칸 */
-  --res-kicker-size:3.6vh;      /* "당신의 수호 영웅은" 등 작은 제목 — AG 초특태고딕 */
-  --res-label-size:2.8vh;       /* "영웅의 키워드" 등 라벨 — AG */
-  --res-name-h:24vh;            /* 영웅 이름 AG 높이 — 가로는 칸 폭에 맞게 늘어남 */
-  --res-meta-size:4.4vh;        /* 시리즈·라벨 */
-  --res-body-size:5vh; --res-body-lh:1.12;   /* 본문 (AI 설명·요약) */
-  --res-chip-size:4vh;          /* 키워드 칸 */
+  /* ① 룰렛 (가운데) */
+  --res-spin-top:5vh; --res-spin-w:64vw; --res-spin-hero:min(52vh, 40vw);
+  --res-series-size:3.6vh;      /* 전대 이름 (AG) */
+  --res-name-h:15vh;            /* 레인저 이름 (AG, 칸 폭에 맞게 늘림) */
+  --res-summary-size:5.4vh;     /* 특성 한 줄 (을유 — 61.7% 보정) */
+  --res-meta-size:4.4vh;
+  --res-slide:.9s;              /* 왼쪽으로 밀리는 시간 */
+  /* ② 자세히 — 왼쪽 카드 / 오른쪽 내용 */
+  --res-left:2vw; --res-card-w:30vw; --res-detail-top:5vh; --res-detail-hero:min(46vh, 26vw); --res-detail-name-h:10vh;
+  --res-detail-left:35vw; --res-gap:1.8vh; --res2-bottom:14vh;
+  --res-kicker-size:3.6vh;      /* 작은 제목 (AG) */
+  --res-label-size:2.8vh;       /* 라벨 (AG) */
+  --res-body-size:5vh; --res-body-lh:1.12;   /* 본문 — 넘치면 script.js가 줄임 */
+  --res-chip-size:4vh;
   --res-quote-size:4.2vh;       /* 한 줄 해석 (AG 빨강) */
-  --res-link-size:6vh;          /* ARCHIVE / HERO LIST */
-  --res-links-bottom:4vh; --res2-bottom:14vh;
-  --res-hero-x:71vw; --res-hero-size:min(36vw, 88vh);   /* 레인저 (가운데 ~ NEXT 띠 사이) */
-  --res2-w:60vw; --res2-hero-x:76.5vw; --res2-hero-size:min(25vw, 80vh);   /* 2단계: 글 칸 넓게, 레인저 작게 */
+  --res-link-size:6vh; --res-links-bottom:4vh;
+  /* 룰렛 속도 — script.js ROULETTE_* 에서 */
 }

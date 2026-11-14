@@ -1417,22 +1417,67 @@ function runMatch(){
   return best[Math.floor(Math.random()*best.length)];
 }
 
+/* 결과 — ① 룰렛(레인저가 타다다닥 바뀌다 점점 느려지며 매칭된 레인저로 짜잔) → ② AI 답이 오면 왼쪽으로 밀리고 자세히.
+   AI 답은 룰렛과 동시에 받기 시작해서, 기다리는 시간을 룰렛이 채운다. */
+const ROULETTE_TICKS = 24;        // 바뀌는 횟수
+const ROULETTE_START_MS = 55;     // 처음 간격 (빠르게 타다다닥)
+const ROULETTE_SLOW = 1.12;       // 한 번 바뀔 때마다 간격이 이만큼 길어짐 (점점 느려짐)
+const RESULT_HOLD_MS = 1600;      // 짜잔 하고 나타난 뒤, 왼쪽으로 밀리기 전 최소 보여주는 시간
+let resSpinDone = false, resAiDone = false, resTimers = [];
+const resNameMeasure = document.createElement('canvas').getContext('2d');
+function setResultCard(r){
+  document.getElementById('resultSeries').textContent = r.series || '';
+  document.getElementById('resultSummary').textContent = r.summary || r.description || '';
+  const svg = document.getElementById('resultNameSvg');
+  resNameMeasure.font = '1000px AGSuperBlack';
+  const m = resNameMeasure.measureText(r.name);
+  const x0 = -m.actualBoundingBoxLeft, x1 = m.actualBoundingBoxRight, y0 = -m.actualBoundingBoxAscent, y1 = m.actualBoundingBoxDescent;
+  svg.setAttribute('viewBox', `${x0} ${y0} ${Math.max(1, x1 - x0)} ${Math.max(1, y1 - y0)}`);
+  svg.innerHTML = '<text x="0" y="0" font-size="1000"></text>';
+  svg.querySelector('text').textContent = r.name;
+  renderCandidateFrame(document.getElementById('resultCanvas'), r, RESULT_RATE, RESULT_COLOR_MIX);
+}
+function maybeShowDetail(){
+  if(!resSpinDone || !resAiDone) return;
+  const scr = document.getElementById('screen-result');
+  if(scr.dataset.phase === 'detail') return;
+  scr.dataset.phase = 'detail';
+  typeSound.whoosh();
+  setTimeout(fitResultStep2, 50);
+  setTimeout(fitResultStep2, 1300);   // 밀려 들어온 뒤 한 번 더
+}
 function showResult(){
   stopCandidateCycle();
+  resTimers.forEach(clearTimeout); resTimers = [];
   matched = runMatch();
+  resSpinDone = false; resAiDone = false;
+  const scr = document.getElementById('screen-result');
+  scr.dataset.phase = 'spin';
+  scr.classList.remove('landed'); scr.classList.add('spinning');
   document.getElementById('resultName').textContent = matched.name;
-  document.getElementById('resultSummary').textContent = matched.summary || matched.description || '';
-  document.getElementById('resultSeries').textContent = matched.series || '';
-  document.getElementById('screen-result').dataset.step = '1';   // 1 수호 영웅 → 2 닮은 이유
-  // 영웅 이름 — AG를 칸에 맞게 늘린다 (다른 화면 제목과 같은 방식)
-  const nameSvg = document.getElementById('resultNameSvg');
-  nameSvg.innerHTML = ''; delete nameSvg.dataset.built;
-  nameSvg.dataset.text = matched.name;
-  document.fonts.load('1000px AGSuperBlack').then(() => buildStretchLine(nameSvg));
-  showFinalFrame(document.getElementById('resultCanvas'), matched, RESULT_RATE, RESULT_COLOR_MIX);
   renderResultKeywords();
   saveToArchive();
-  fetchAiInterpretation();
+  fetchAiInterpretation().finally(() => { resAiDone = true; maybeShowDetail(); });
+  // 룰렛 — 사진이 있는 레인저 중에서 무작위로, 간격이 점점 길어지다 마지막에 매칭된 레인저
+  const pool = RANGERS.filter(r => r !== matched && heroImageCache[r.name]);
+  document.fonts.load('1000px AGSuperBlack').finally(() => {
+    let t = 0, gap = ROULETTE_START_MS;
+    for(let i = 0; i < ROULETTE_TICKS; i++){
+      const last = i === ROULETTE_TICKS - 1;
+      t += gap; gap *= ROULETTE_SLOW;
+      resTimers.push(setTimeout(() => {
+        if(last){
+          setResultCard(matched);
+          scr.classList.remove('spinning'); scr.classList.add('landed');
+          typeSound.clack('start');   // 짜잔
+          resTimers.push(setTimeout(() => { resSpinDone = true; maybeShowDetail(); }, RESULT_HOLD_MS));
+        } else {
+          setResultCard(pool[Math.floor(Math.random() * pool.length)] || matched);
+          typeSound.click('key');     // 타다다닥
+        }
+      }, t));
+    }
+  });
 }
 
 // "영웅의 키워드" — AI를 기다릴 필요 없이 바로 보여줄 수 있는 부분. 매칭된 히어로 자신의
@@ -1459,8 +1504,8 @@ function renderResultKeywords(){
 // 문구를 지우고 결과 화면은 정상 진행한다 (에러를 사용자에게 보여주지 않음).
 /* 결과 2단계 — AI 글이 길어도 한 화면(스크롤 없이)에 들어가도록 글자 크기를 줄여 맞춘다 */
 function fitResultStep2(){
-  const box = document.querySelector('.res-step-2');
-  if(!box || document.getElementById('screen-result').dataset.step !== '2') return;
+  const box = document.getElementById('resDetail');
+  if(!box || document.getElementById('screen-result').dataset.phase !== 'detail') return;
   const vh = window.innerHeight / 100;
   let size = 5;                                   // 시작: 5vh (design.css --res-body-size와 같게)
   const apply = () => { box.style.setProperty('--res2-body', size + 'vh'); box.style.setProperty('--res2-k', (size / 5).toFixed(3)); };
@@ -1616,8 +1661,7 @@ function handleAction(action){
   } else if(action==='finish'){
     subjectiveText = (document.getElementById('subjectiveInput').value || '').trim();
     if(!subjectiveText) return; // 미기입 시 넘어가지 않음
-    goto('loading');
-    setTimeout(() => { showResult(); goto('result'); }, 900);
+    showResult(); goto('result');   // 로딩 화면 대신 결과의 룰렛이 기다리는 시간을 채운다
   } else if(action==='prev'){
     // Q6(주관식)은 별도 화면이라 Q5로 돌아갈 땐 화면 자체를 바꿔줘야 한다.
     // Q1~Q5는 같은 화면(screen-q) 안에서 qIndex만 하나 줄이고 다시 그린다.
@@ -1644,12 +1688,7 @@ function handleAction(action){
     refreshFinishBtn();
     goto('camstart');   // 처음으로 = 맨 첫 화면(로고 + 엔터키)
   } else if(action==='result-next'){
-    const scr = document.getElementById('screen-result');
-    if(scr.dataset.step === '1'){ scr.dataset.step = '2'; typeSound.whoosh(); fitResultStep2(); }   // 1 → 2 닮은 이유
-    else handleAction('restart');                                                   // 2 → 처음으로
-  } else if(action==='result-prev'){
-    const scr = document.getElementById('screen-result');
-    if(scr.dataset.step === '2'){ scr.dataset.step = '1'; typeSound.whoosh(); }
+    handleAction('restart');   // 결과 → 처음으로
   } else if(action==='reset-q5'){
     resetQ5();
   } else if(action==='reset'){

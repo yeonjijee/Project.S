@@ -702,47 +702,53 @@ body[data-cur="fist"] #handCursor{width:var(--q5-fist-w); height:calc(var(--q5-f
 body[data-cur]:not([data-cur=""]) #handCursor{image-rendering:pixelated;}
 
 /* =====================================================================
-   7. 결과 (#screen-result) — 한 화면에 한 단계: 1 수호 영웅 → 2 닮은 이유
-   왼쪽 글(AG 제목 + 을유 본문) / 가운데~오른쪽 큰 레인저 / 오른쪽 끝 10vw NEXT 띠. 숫자는 design.css --res-*
+   7. 결과 (#screen-result) — ① spin: 가운데 룰렛 카드  ② detail: 카드가 왼쪽으로, 오른쪽에 자세한 내용
+   숫자는 design.css --res-*
    ===================================================================== */
 #screen-result.active{display:block; padding:0; overflow:hidden; text-align:left;}
-/* 뒤에 흐린 "Page" 로고 — 질문 화면과 같은 20% 빨강 */
 .res-logo{position:absolute; left:47vw; top:55vh; height:25.41vw; aspect-ratio:1876/501; background:var(--red); opacity:var(--q-bglogo-op);
   -webkit-mask:url('../files/images/ui/icons/page-header-7.png') center/contain no-repeat; mask:url('../files/images/ui/icons/page-header-7.png') center/contain no-repeat;
   transform:translate(-50%,-50%) rotate(21.3deg); pointer-events:none; z-index:0;}
-.res-hero{position:absolute; left:var(--res-hero-x); top:50vh; transform:translate(-50%,-50%); width:var(--res-hero-size); height:var(--res-hero-size); z-index:1; pointer-events:none;}
-.res-hero canvas{width:100% !important; height:100% !important; display:block; image-rendering:pixelated;}
 
-.res-step{position:absolute; left:var(--res-left); top:var(--res-top); width:var(--res-w); bottom:var(--res-bottom); z-index:2;
-  display:none; flex-direction:column; gap:var(--res-gap); text-align:left;}
-#screen-result[data-step="1"] .res-step-1, #screen-result[data-step="2"] .res-step-2{display:flex;}
-.res-kicker{margin:0; font-family:var(--font-head); font-weight:400; font-size:var(--res-kicker-size); line-height:1; color:var(--red);}
-.res-name{display:block; width:100%; height:var(--res-name-h); overflow:visible; flex:none;}
+/* 레인저 카드 — spin: 화면 가운데 크게 / detail: 왼쪽 칸 */
+.res-card{position:absolute; z-index:2; display:flex; flex-direction:column; align-items:center; text-align:center;
+  left:50vw; top:var(--res-spin-top); width:var(--res-spin-w); transform:translateX(-50%);
+  transition:left var(--res-slide) cubic-bezier(.7,0,.2,1), top var(--res-slide) cubic-bezier(.7,0,.2,1), width var(--res-slide) cubic-bezier(.7,0,.2,1), transform var(--res-slide) cubic-bezier(.7,0,.2,1);}
+#screen-result[data-phase="detail"] .res-card{left:var(--res-left); top:var(--res-detail-top); width:var(--res-card-w); transform:none; align-items:flex-start; text-align:left;}
+.res-hero{width:var(--res-spin-hero); height:var(--res-spin-hero); flex:none; transition:width var(--res-slide), height var(--res-slide);}
+#screen-result[data-phase="detail"] .res-hero{width:var(--res-detail-hero); height:var(--res-detail-hero);}
+.res-hero canvas{width:100% !important; height:100% !important; display:block; image-rendering:pixelated;}
+.res-series{margin:1.5vh 0 0; font-family:var(--font-head); font-size:var(--res-series-size); line-height:1; color:#000;}
+.res-name{display:block; width:100%; height:var(--res-name-h); margin-top:1vh; overflow:visible; flex:none; transition:height var(--res-slide);}
+#screen-result[data-phase="detail"] .res-name{height:var(--res-detail-name-h);}
 .res-name text{font-family:var(--font-head); fill:var(--red);}
 .res-name-text{display:none;}
-.res-series{margin:0; font-family:var(--font-main); font-size:var(--res-meta-size); line-height:1.1; color:#000;}
-#screen-result .res-summary{margin:0; font-family:var(--font-main); font-size:var(--res-body-size); line-height:var(--res-body-lh); color:#000; max-width:none;}
-.res-kw-label{margin-top:1vh; font-family:var(--font-head); font-weight:400; font-size:var(--res-label-size); color:#000;}
+#screen-result .res-summary{margin:1.2vh 0 0; font-family:var(--font-main); font-weight:600; font-size:var(--res-summary-size); line-height:1.15; color:#000; max-width:none;}
+.res-wait{margin:2vh 0 0; font-family:var(--font-main); font-size:var(--res-meta-size); color:#555; visibility:hidden; animation:caretBlink 1.2s steps(1) infinite;}
+#screen-result.landed[data-phase="spin"] .res-wait{visibility:visible;}   /* 레인저는 나왔는데 AI 답을 아직 기다리는 중 */
+/* 룰렛이 멈추는 순간 — 짜잔 */
+#screen-result.landed .res-hero{animation:resLand .6s cubic-bezier(.2,1.6,.4,1);}
+@keyframes resLand{0%{transform:scale(.82);} 60%{transform:scale(1.08);} 100%{transform:scale(1);}}
+#screen-result.spinning .res-series, #screen-result.spinning .res-summary{opacity:.55;}
+
+/* 오른쪽 자세한 내용 — detail에서 오른쪽에서 들어온다 */
+.res-detail{position:absolute; left:var(--res-detail-left); right:calc(var(--q-next-strip) + 2vw); top:var(--res-detail-top); bottom:var(--res2-bottom); z-index:2;
+  display:flex; flex-direction:column; gap:var(--res-gap); overflow:hidden;
+  opacity:0; transform:translateX(30vw); pointer-events:none; transition:opacity .5s, transform var(--res-slide) cubic-bezier(.2,.8,.2,1);}
+#screen-result[data-phase="detail"] .res-detail{opacity:1; transform:none; pointer-events:auto; transition-delay:.25s;}
+.res-kicker{margin:0; font-family:var(--font-head); font-weight:400; font-size:var(--res-kicker-size); line-height:1; color:var(--red);}
+.res-kw-label{margin-top:.6vh; font-family:var(--font-head); font-weight:400; font-size:var(--res-label-size); color:#000;}
 .res-kw-label span{font-family:var(--font-main);}
-.res-kw-label span{font-weight:400; color:#555;}
-#screen-result .result-kw-wrap{display:flex; flex-wrap:wrap; gap:.6vw;}
-#screen-result .result-kw-wrap span{border:var(--line) solid #000; padding:.6vh .9vw; font-family:var(--font-main); font-size:var(--res-chip-size); line-height:1; color:#000; background:transparent;}
+#screen-result .result-kw-wrap{display:flex; flex-wrap:wrap; gap:.5vw;}
+#screen-result .result-kw-wrap span{border:var(--line) solid #000; padding:.5vh .8vw; font-family:var(--font-main); font-size:calc(var(--res-chip-size) * var(--res2-k, 1)); line-height:1; color:#000; background:transparent;}
 #screen-result .result-kw-wrap span.matched{background:var(--red); border-color:var(--red); color:#fff;}
-/* 2단계 */
 #screen-result .ai-quote{font-family:var(--font-head); font-size:calc(var(--res-quote-size) * var(--res2-k, 1)); line-height:1.3; color:var(--red); max-width:none; margin:0;}
 #screen-result .result-explanation{font-family:var(--font-main); font-size:var(--res2-body, var(--res-body-size)); line-height:var(--res-body-lh); color:#000; max-width:none; margin:0;}
-#screen-result .res-identity-label:empty, #screen-result .res-identity:empty{display:none;}
-.res-links{position:absolute; left:var(--res-left); bottom:var(--res-links-bottom); display:flex; gap:3vw; z-index:3;}
-.res-links .text-btn{font-family:var(--font-head); font-size:var(--res-link-size); line-height:1; color:var(--red); text-decoration:none; transition:transform .15s;}
-.res-links .text-btn:hover, .res-links .text-btn.dwell-hover{transform:scale(1.06); text-decoration:underline;}
-.res-links{display:none;}
-#screen-result[data-step="2"] .res-links{display:flex;}
-.res-links .text-btn{white-space:nowrap;}
-#screen-result[data-step="2"] .res-step{bottom:var(--res2-bottom);}   /* 아래는 ARCHIVE / HERO LIST 자리 */
-/* 결과에서는 이전 버튼을 쓰지 않는다 — 글 칸을 넓게 쓰려고 (되돌아가기는 RE 대신 처음으로) */
-#screen-result .res-prev{display:none;}
+#screen-result .res-identity-label:has(+ .res-identity:empty), #screen-result .res-identity:empty{display:none;}
 
-.res-step-2{overflow:hidden;}   /* 넘치면 script.js fitResultStep2가 글자를 줄여서 한 화면에 맞춘다 */
-/* 2단계 — 글이 길어서 레인저는 작게 오른쪽으로, 글 칸은 넓게 */
-#screen-result[data-step="2"] .res-hero{left:var(--res2-hero-x); width:var(--res2-hero-size); height:var(--res2-hero-size); transition:none;}
-#screen-result[data-step="2"] .res-step-2{width:var(--res2-w);}
+/* 아래 ARCHIVE / HERO LIST, 오른쪽 NEXT 띠(처음으로) — detail에서만 */
+.res-links{position:absolute; left:var(--res-detail-left); bottom:var(--res-links-bottom); display:flex; gap:3vw; z-index:3; visibility:hidden;}
+.res-links .text-btn{font-family:var(--font-head); font-size:var(--res-link-size); line-height:1; color:var(--red); text-decoration:none; white-space:nowrap; transition:transform .15s;}
+.res-links .text-btn:hover, .res-links .text-btn.dwell-hover{transform:scale(1.06); text-decoration:underline;}
+#screen-result .res-next{visibility:hidden;}
+#screen-result[data-phase="detail"] .res-links, #screen-result[data-phase="detail"] .res-next{visibility:visible;}

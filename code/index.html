@@ -178,27 +178,26 @@
   <div class="title">당신의 약점과<br>가장 닮은 영웅을 찾는 중…</div>
 </div>
 
-<div class="screen" id="screen-result" data-step="1">
-  <!-- 결과 — 한 화면에 한 단계: 1 당신의 수호 영웅(이름·레인저) → 2 닮은 이유(AI 해석) -->
+<div class="screen" id="screen-result" data-phase="spin">
+  <!-- 결과 — ① 룰렛: 레인저가 타다다닥 바뀌다 점점 느려지고 매칭된 레인저가 짜잔 (그동안 AI 답을 기다림)
+              ② AI 답이 오면 레인저 카드가 왼쪽으로 밀리고, 오른쪽에 자세한 내용 -->
   <div class="res-logo" aria-hidden="true"></div>
-  <div class="res-hero"><canvas id="resultCanvas" width="600" height="600"></canvas></div>
 
-  <!-- 1단계 -->
-  <div class="res-step res-step-1">
-    <p class="res-kicker">당신의 수호 영웅은</p>
+  <div class="res-card" id="resCard">
+    <div class="res-hero"><canvas id="resultCanvas" width="600" height="600"></canvas></div>
+    <p class="res-series" id="resultSeries"></p>
     <svg class="res-name" id="resultNameSvg" preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="title res-name-text" id="resultName">-</div>
-    <p class="res-series" id="resultSeries"></p>
     <p class="res-summary sub" id="resultSummary">-</p>
-    <div class="res-kw-label">영웅의 키워드 <span>— 빨간 칸은 당신이 고른 것</span></div>
-    <div class="result-kw-wrap" id="resultKeywords"></div>
+    <p class="res-wait" id="resWait">당신과 닮은 이유를 찾는 중…</p>
   </div>
 
-  <!-- 2단계 -->
-  <div class="res-step res-step-2">
+  <div class="res-detail" id="resDetail">
     <p class="res-kicker">영웅과 당신이 닮은 이유</p>
     <div class="ai-quote" id="aiInterpretation"></div>
     <div class="result-explanation" id="aiExplanation"></div>
+    <div class="res-kw-label">영웅의 키워드 <span>— 빨간 칸은 당신이 고른 것</span></div>
+    <div class="result-kw-wrap" id="resultKeywords"></div>
     <div class="res-kw-label res-identity-label">스스로 생각한 모습과 실제 내면</div>
     <div class="result-explanation res-identity" id="aiIdentityCompare"></div>
   </div>
@@ -207,8 +206,7 @@
     <a class="text-btn dwellable" href="archive/index.html"><span>ARCHIVE</span></a>
     <a class="text-btn dwellable" href="list/index.html"><span>HERO LIST</span></a>
   </nav>
-  <button class="q-chev q-chev-prev dwellable res-prev" data-action="result-prev" aria-label="이전"><svg viewBox="-0.5 -0.5 5 5" aria-hidden="true"><polygon points="0,-0.5 0.5,0 0,0.5 -0.5,0"/><polygon points="1,-0.5 1.5,0 1,0.5 0.5,0"/><polygon points="2,-0.5 2.5,0 2,0.5 1.5,0"/><polygon points="3,-0.5 3.5,0 3,0.5 2.5,0"/><polygon points="4,-0.5 4.5,0 4,0.5 3.5,0"/><polygon points="0,0.5 0.5,1 0,1.5 -0.5,1"/><polygon points="0,1.5 0.5,2 0,2.5 -0.5,2"/><polygon points="0,2.5 0.5,3 0,3.5 -0.5,3"/><polygon points="0,3.5 0.5,4 0,4.5 -0.5,4"/></svg></button>
-  <button class="q-chev q-chev-next dwellable res-next" data-action="result-next" aria-label="다음 / 처음으로"><svg viewBox="-0.5 -0.5 5 9" preserveAspectRatio="none" aria-hidden="true"><rect x="-0.5" y="-0.5" width="1" height="1"/><rect x="0.5" y="0.5" width="1" height="1"/><rect x="1.5" y="1.5" width="1" height="1"/><rect x="2.5" y="2.5" width="1" height="1"/><rect x="3.5" y="3.5" width="1" height="1"/><rect x="2.5" y="4.5" width="1" height="1"/><rect x="1.5" y="5.5" width="1" height="1"/><rect x="0.5" y="6.5" width="1" height="1"/><rect x="-0.5" y="7.5" width="1" height="1"/></svg></button>
+  <button class="q-chev q-chev-next dwellable res-next" data-action="result-next" aria-label="처음으로"><svg viewBox="-0.5 -0.5 5 9" preserveAspectRatio="none" aria-hidden="true"><rect x="-0.5" y="-0.5" width="1" height="1"/><rect x="0.5" y="0.5" width="1" height="1"/><rect x="1.5" y="1.5" width="1" height="1"/><rect x="2.5" y="2.5" width="1" height="1"/><rect x="3.5" y="3.5" width="1" height="1"/><rect x="2.5" y="4.5" width="1" height="1"/><rect x="1.5" y="5.5" width="1" height="1"/><rect x="0.5" y="6.5" width="1" height="1"/><rect x="-0.5" y="7.5" width="1" height="1"/></svg></button>
 </div>
 
 
