@@ -8,6 +8,7 @@
 </head>
 <body>
 <canvas id="fxCanvas"></canvas>
+<div id="handCursor"></div>
 
 <!-- 배경: 흐린 Project.S 로고 + 다른 페이지(ARCHIVE) 이름 — 테스트 화면과 같은 규칙 (빨강 #a70000 / 배경 #e2e2dc / AG 제목 + 을유 본문) -->
 <div class="bg-logo" aria-hidden="true"></div>
@@ -21,7 +22,7 @@
     <a href="../archive/index.html">ARCHIVE</a>
   </nav>
   <div class="hl-meta">
-    <p class="hl-lede">50년, 49개 시리즈, 310명. 한 줄이 하나의 전대예요. 옆으로 넘기면 그 전대의 모든 레인저, 카드를 누르면 그 영웅의 이야기.</p>
+    <p class="hl-lede">50년, 49개 시리즈, 310명.<br>한 줄이 하나의 전대예요.<br>옆으로 넘겨 그 전대의 모든 레인저,<br>카드를 눌러 그 영웅의 이야기를 살펴보세요.</p>
     <label class="hl-search"><span>찾기</span><input type="text" id="searchInput" placeholder="이름 또는 시리즈" autocomplete="off"><em id="searchCount"></em></label>
   </div>
 </header>
@@ -38,6 +39,7 @@
 
 <script src="mosaic.js"></script>
 <script src="script.js"></script>
+<script src="hand.js"></script>
 <script src="../fx.js"></script>
 </body>
 </html>

@@ -50,8 +50,8 @@ main{position:relative; z-index:1; padding:1vh 0 8vh;}
 
 /* 카드 — 얇은 테두리 상자, 평소엔 모자이크 → 손/마우스를 올리면 선명하게 */
 .hero-card{flex:0 0 auto; width:var(--card-w); height:var(--card-h); border:var(--line) solid #000; cursor:pointer; position:relative; background:rgba(226,226,220,.55);
-  display:flex; flex-direction:column; transition:border-color .15s, transform .15s;}
-.hero-card:hover{border-color:var(--red); transform:translateY(-.6vh);}
+  display:flex; flex-direction:column; transition:border-color .15s;}
+.hero-card:hover, .hero-card.hand-hover{border-color:var(--red);}
 .hero-img-wrap{flex:1; min-height:0; position:relative; display:flex; align-items:center; justify-content:center; padding:1.2vh .6vw 0;}
 .hero-canvas{width:100%; height:100%; display:block; object-fit:contain; image-rendering:pixelated;}
 .hero-info{padding:.6vh .6vw 1vh;}
@@ -79,3 +79,13 @@ main{position:relative; z-index:1; padding:1vh 0 8vh;}
 .modal-kw-wrap{display:flex; flex-wrap:wrap; gap:.5vw;}
 .modal-kw-wrap span{border:var(--line) solid #000; padding:.6vh .8vw; font-size:3.6vh; line-height:1;}
 .modal-kw-wrap.weak span{border-color:var(--red); color:var(--red);}
+
+/* 손 커서 — 테스트 화면과 같은 빨간 동그라미, 주먹이면 채워짐 */
+#handCursor{position:fixed; width:28px; height:28px; border-radius:50%; border:var(--line) solid var(--red); mix-blend-mode:multiply;
+  pointer-events:none; z-index:2147483000; transform:translate(-50%,-50%); display:none;}
+#handCursor.fist{background:rgba(167,0,0,.45);}
+/* 잡고 끄는 스크롤 — 글자 선택/이미지 끌기 막기 */
+main, .hl-head, .modal-overlay{user-select:none; -webkit-user-select:none;}
+body.grabbing, body.grabbing *{cursor:grabbing !important;}
+.hl-links a.hand-hover{text-decoration:underline;}
+.hl-back.hand-hover polygon, .modal-close.hand-hover polygon{fill:var(--red);}
