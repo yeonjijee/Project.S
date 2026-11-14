@@ -1,0 +1,235 @@
+/* =====================================================================
+   design.css — 디자인 값 파일 (지금은 "뼈대 상태": 기능에 꼭 필요한 숫자만 남김)
+   이전 디자인(피그마 1차 적용본)은 _old-design/ 폴더와 git 기록에 보관돼 있다.
+   새 디자인을 만들 때 색/폰트/이미지 경로 변수를 여기에 다시 추가한다.
+   ===================================================================== */
+:root{
+  /* Q1 레인저/바구니 — 드래그·바구니 판정(script.js)이 이 박스 크기에 맞춰 동작하므로 숫자만 유지 */
+  --h:32.1vh;                   /* 레인저 이미지(page-1 폴더 A·B png) 한 장의 전체 높이 — 시안 5_page1_02 */
+  --q1-box-w:0.204;             /* 레인저 몸이 차지하는 가로 비율 (PNG 1101×1393 중 몸 x113~397) */
+  --q1-box-h:0.489;             /* 세로 비율 (몸 y598~1279) */
+  --q1-img-x:-0.081;            /* 몸 왼쪽 끝을 칸 왼쪽에 맞추는 이미지 이동량 */
+  --q1-img-y:-0.429;            /* 몸 위쪽 끝을 칸 위에 맞추는 이미지 이동량 */
+  --bw:min(450px,34vh,26vw);    /* 바구니 가로 크기 */
+}
+
+/* 폰트 — 본문 전체 을유1945 (fonts/Eulyoo1945-*.woff). 예전 Silver(픽셀 폰트)에 맞춰 둔 크기를 그대로 쓰도록
+   size-adjust로 한글 글자 높이를 Silver와 같게 맞춘다 (실측: Silver 0.58em / 을유 0.94em → 61.7%).
+   Silver로 되돌리려면 --font-main의 'Eulyoo'를 'Silver'로만 바꾸면 된다. */
+@font-face{ font-family:'Eulyoo'; src:url('../files/fonts/Eulyoo1945-Regular.woff') format('woff'); font-weight:400; size-adjust:61.7%; font-display:block; }
+@font-face{ font-family:'Eulyoo'; src:url('../files/fonts/Eulyoo1945-SemiBold.woff') format('woff'); font-weight:600 900; size-adjust:61.7%; font-display:block; }
+@font-face{ font-family:'Silver'; src:url('../files/fonts/Silver.ttf') format('truetype'); font-display:swap; }
+:root{ --font-main:'Eulyoo','Apple SD Gothic Neo','Malgun Gothic',serif; --fs-base:26px; }
+
+/* 헤드라인 폰트 — 시안의 빨간 굵은 한글 (AG 슈퍼블랙고딕) */
+@font-face{ font-family:'AGSuperBlack'; src:url('../files/fonts/AGSuperBlackGothic-Regular_noHint.otf') format('opentype'); font-display:swap; }
+:root{
+  --font-head:'AGSuperBlack','Eulyoo',sans-serif;
+  --red:#a70000;      /* 화면의 모든 빨강은 이 값 하나로 */
+  --red-a45:rgba(167,0,0,.45);  /* 같은 빨강의 반투명 버전 */
+  --red-a60:rgba(167,0,0,.6);
+  --line:1.75px;      /* 화면의 모든 선 두께 */
+  --paper:#e2e2dc;    /* 시안 배경색 */
+}
+
+/* ---- 1. 첫 화면 (design/1main_01.png 기준, 3841×2161 시안을 화면 비율로 환산한 값) ---- */
+:root{
+  --main-logo-w:106vw;       /* 로고 가로 길이(회전 전) — 시안과 겹쳐서 맞춘 값 (일치율 92%) */
+  --main-logo-rot:25.5deg;   /* 로고 기울기 — 시안과 겹쳐서 맞춘 값 */
+  --main-btn-size:min(4.11vw, 7.3vh);  /* HERO LIST · ARCHIVE 글자 크기 (AG 폰트, 시안 글자 높이에 맞춤) */
+  /* 버튼 비율 — 가로(sx)·세로(sy)로 늘이고 줄이기. 1 = 폰트 원래 비율. 예) ARCHIVE를 세로로 길게: --archive-sy:3 */
+  --herolist-sx:1; --herolist-sy:1;
+  --archive-sx:1;  --archive-sy:1;
+  --main-btn-gap:12.2vw;     /* 두 버튼 사이 */
+  --main-btn-top:12.1vh;     /* 버튼 위쪽 여백 */
+  --main-btn-right:4.6vw;    /* ARCHIVE 오른쪽 여백 */
+  --main-enter-size:min(3.45vw, 6.15vh);  /* "엔터키를 눌러 시작하기" 글자 크기 */
+  --main-enter-left:1.25vw;
+  --main-enter-bottom:17.5vh;
+}
+
+/* ---- 2. 튜토리얼 (design/2tutorial_01~03 기준, 3841×2161 시안을 화면 비율로 환산) ---- */
+:root{
+  /* 배경 TUTORIAL — 꽉 찼을 때의 글자 영역 */
+  --tut-word-left:1.33vw; --tut-word-top:2.22vh; --tut-word-w:97.24vw; --tut-word-h:97.18vh;
+  /* 주먹 쥔 횟수별 가로 비율 (0회 → 3회). 시안: 0회 12.45%, 1회 37.5%, 3회 100% / 2회는 중간값 */
+  --tut-sx-0:0.1245; --tut-sx-1:0.375; --tut-sx-2:0.625; --tut-sx-3:1;
+  --tut-sx-speed:.7s;   /* 늘어나는 속도 */
+
+  /* 가운데 텍스트 박스 */
+  --tut-box-left:25.57vw; --tut-box-top:18.23vh; --tut-box-w:48.79vw; --tut-box-h:63.58vh;
+  --tut-box-line:#000;                    /* 박스 테두리 색(시안: 검정) */
+  --tut-box-open:rgba(218,218,213,.5);    /* 손 편 상태 박스 색 #dadad5, 투명도 50 */
+  --tut-box-fist:rgba(226,222,0,.71);     /* 주먹 쥐었을 때 박스 색 — 시안(2tutorial_02)의 실제 픽셀에서 역산한 값 */
+  --tut-fist-fill:var(--paper);            /* 주먹 안쪽 면 색 — 시안: 배경색과 같음(노랑이 안 덮임) */
+
+  /* 손 아이콘 — 중심점과 높이 */
+  --tut-icon-x:37.3vw; --tut-icon-y:49.9vh;
+  --tut-open-h:36.4vh;   /* 편 손 */
+  --tut-fist-h:23.37vh;  /* 주먹 */
+
+  /* 문구 */
+  --tut-cap-left:49.83vw; --tut-cap-top:17.55vh;
+  --tut-cap-size:min(9.87vh, 5.55vw); --tut-cap-lh:1.343;
+
+  /* 다음 버튼(btn-next) — 오른쪽 가운데 */
+  --tut-next-h:43.1vh; --tut-next-right:1.25vw;
+  --tut-next-opacity:1;        /* PNG 자체에 이미 투명도가 들어 있음(A≈72%, B≈48%) → 버튼 전체엔 추가로 안 씀 */
+  --tut-next-press:1.08;       /* 클릭할 때 커지는 배율 */
+  /* 다 채운 뒤 — TUTORIAL은 왼쪽 절반으로, NEXT는 오른쪽 절반 전체 */
+  --tut-done-sx:0.49;          /* TUTORIAL 가로 비율 (꽉 찬 폭 97.24vw × 0.49 ≈ 화면 왼쪽 47.6vw) */
+  --tut-done-next-h:78vh;      /* 오른쪽 절반 가운데 NEXT 화살표 높이 */
+  --tut-done-hover:.08;        /* 손 올렸을 때 오른쪽 절반이 물드는 농도 */
+}
+
+/* ---- 3. 이름 짓기 (design/3ID_01 기준, 3841×2161 시안을 화면 비율로 환산) ---- */
+:root{
+  /* 제목 (AG, 박스에 맞춰 늘림) */
+  --id-title-left:1.48vw; --id-title-top:2.22vh; --id-title-w:60.45vw; --id-title-h:15.46vh;
+
+  /* 안내 문구 (Silver) */
+  --id-label-size:min(3.52vh, 1.98vw); --id-label-lh:1.026; --id-label-indent:.5em;
+  --id-label1-left:1.25vw;  --id-label1-top:24.85vh;
+  --id-label2-left:37.72vw; --id-label2-top:56.83vh;
+  --id-label3-left:calc(100vw * 2 / 3 + 1.25vw); --id-label3-top:84.9vh;   /* 3분할 오른쪽 칸의 왼쪽 끝 + 1번 문구와 같은 여백(1.25vw) */
+
+  /* 색 칸 */
+  --id-grid-left:1.25vw; --id-grid-top:40.9vh;
+  --id-tile:min(7.5vw, 13.33vh);                 /* 칸 한 변 */
+  --id-tile-gap-x:calc(var(--id-tile) * 0.105);  /* 칸 사이 가로 */
+  --id-tile-gap-y:calc(var(--id-tile) * 0.095);  /* 칸 사이 세로 */
+  --id-cell:#c8c8be;        /* 셀 기본 */
+  --id-cell-hover:#9d9d97;  /* 마우스/손 올렸을 때 바깥 8칸 */
+  --id-cell-on:#737370;     /* 선택됐을 때 바깥 8칸 */
+
+  /* 가운데 이름 칸 — 이 안에서 높이는 꽉 채우고 길면 가로로 줄어든다 */
+  --id-name-left:37.96vw; --id-name-top:24.06vh; --id-name-w:23.9vw; --id-name-h:74.92vh;
+  --id-caret-w:0.9vw;       /* 깜빡이는 캐럿 두께 (높이는 이름 칸 높이 그대로) */
+  --id-caret-gap:0.6vw;     /* 글자와 캐럿 사이 */
+  --id-caret-speed:1s;      /* 깜빡임 한 번(켜짐+꺼짐) 시간 */
+  --id-name-color:#e2c536;   /* 기본값. 색을 고르면 JS가 그 색(SWATCH_COLORS)으로 바꾼다 */
+  --id-name-white:#ffffff;   /* '화이트'를 골랐을 때 글자 색 — 칸 색(#e2e2dc)이 배경과 같아서 그대로 쓰면 안 보임 */
+
+  /* 오른쪽 레인저 (정사각 캔버스의 중심과 크기) */
+  --id-hero-x:82.4vw; --id-hero-y:52.1vh; --id-hero-size:76.6vh;
+
+  /* NEXT (회전 전 높이, 회전 후 중심) */
+  --id-next-h:33.46vh; --id-next-x:93.83vw; --id-next-y:11.01vh;
+  /* 한 화면에 한 단계 */
+  --id1-pad-x:1.48vw; --id1-pad-y:2.22vh;   /* 1 제목 — 화면 가장자리 여백 */
+  --id-title-ms:2600;                       /* (script.js OPEN_TITLE_MS) 제목을 보여주는 시간 — 바꾸려면 script.js에서 */
+  --id2-pad:2.2vw; --id2-gap:1.6vw; --id2-cell-gap:.35vw;   /* 2 색 칸 — 바깥 여백 / 칸 사이 / 칸 안 3×3 셀 사이 */
+  --id3-split:70vw; --id3-pad:2vw; --id3-next-w:10vw;   /* 레인저 칸 오른쪽 끝 10vw는 세로 전체 NEXT */          /* 3 이름 칸 : 레인저 = 70 : 30 */
+  --id3-ph-size:9vh;                        /* "닉네임을 입력하세요" 크기 */
+}
+
+/* ---- 4. 시작 스토리 (design/4_01~03 기준, 3841×2161 환산) ---- */
+:root{
+  /* A — 두 단락 (AG) */
+  --story-size:min(9.85vh, 5.54vw); --story-lh:1.374;
+  --story-p1-left:1.33vw;  --story-p1-top:0.65vh;
+  --story-p2-right:1.25vw; --story-p2-top:19.6vh;
+
+  /* B(키 큰 상태) → C(납작) — 세 줄, 가로 위치는 같고 세로만 바뀜 */
+  --story-l1-left:10.39vw; --story-l1-w:76.46vw; --story-l1-top:1.71vh;  --story-l1-h:30.5vh;  --story-l1-top-c:2.17vh;  --story-l1-h-c:5vh;
+  --story-l2-left:4.19vw;  --story-l2-w:89.14vw; --story-l2-top:34.71vh; --story-l2-h:30.4vh;  --story-l2-top-c:7.64vh;  --story-l2-h-c:4.95vh;
+  --story-l3-left:1.59vw;  --story-l3-w:96.41vw; --story-l3-top:67.47vh; --story-l3-h:30.54vh; --story-l3-top-c:13.05vh; --story-l3-h-c:5vh;
+  --story-shrink:.7s;
+
+  /* C — 진짜진짜 시작 + NEXT */
+  --story-go-left:50.01vw; --story-go-top:49.65vh; --story-go-w:36.14vw; --story-go-h:49.33vh;
+  --story-next-h:48.45vh; --story-next-right:1.28vw; --story-next-top:49.73vh;
+  --story-slide:.8s;
+}
+
+/* ---- 5. Page 인트로 (design/5_page1_01 기준 — 시안과 겹쳐 맞춘 값, 일치율 96%) ---- */
+:root{
+  --q-logo-x:45.11vw; --q-logo-y:53.15vh;   /* "Page N" 중심 */
+  --q-logo-h:25.41vw;                       /* 높이 (Page 1 기준 가로 93vw) */
+  --q-logo-rot:21.25deg;                    /* 기울기 */
+  --q-logo-from:150vw;                      /* 출발 거리 — 기울어진 방향으로 이만큼 왼쪽 위 화면 밖에서 */
+  --q-logo-delay:.45s;                      /* 화면이 밀려 들어온 뒤 시작 */
+  --q-logo-dur:.8s;                         /* 들어오는 시간 */
+  --q-sub-left:1.1vw; --q-sub-top:76vh;     /* 질문 위치 (왼쪽 아래) */
+  --q-sub-size:min(6.15vh, 3.46vw); --q-sub-lh:1.208;
+  --q-sub-lag:.08s;                         /* 질문이 "Page N"보다 살짝 늦게 따라 들어오는 시간 (0이면 완전히 동시에) */
+}
+
+/* ---- 6. 질문 화면 Page 1~6 (design/아트보드 9~20 기준, 7681×4321 → vw/vh 환산) ---- */
+:root{
+  --q-white:var(--paper);     /* 질문 화면·인트로 배경 — 오프닝과 같은 색 */
+  --q-slate:#4c6971;          /* Page 2·5 질문 화면 배경 */
+  --q-gray:#aaaaaa;           /* 패널 테두리선·P3 칸·화살표 색 */
+  --q-panel-bg:#f3f3f1;       /* 모자이크 칸 바탕 */
+  --q-dot:#e4e4e2;            /* 모자이크 칸 점 */
+  --q-bglogo-op:.2;           /* 질문 화면 뒤에 남는 "Page N" 농도 (시안 #bc0000 20%) */
+
+  /* 오른쪽 위 정보 패널 */
+  --qi-left:74.39vw; --qi-top:2.24vh; --qi-w:24.27vw; --qi-h:63.72vh;
+  --qi-mosaic-h:46.73vh;      /* 모자이크 칸 높이 */
+  --qi-bar-h:1.5vh;           /* 진행 바 줄 높이 */
+  --qi-bar-in:.18vw;          /* 진행 바 안쪽 여백(좌우) */
+  --qi-bar-thick:1.09vh;      /* 빨간 진행 바 두께 */
+  --qi-split:15.91vw;         /* 질문 | RE 나누는 세로선 위치(패널 왼쪽 기준) */
+  --qi-q-left:.86vw;          /* 질문 글자 왼쪽 여백 */
+  --qi-q-pad:1.55vh;          /* 질문 첫 줄 위 여백 */
+  --qi-q-size:4.8vh; --qi-q-lh:1.17;   /* AG — 글자 높이 4.65vh, 줄 간격 5.62vh */
+  --qi-q-w:14.1vw;            /* 질문에서 가장 긴 줄을 이 폭에 맞춰 가로로 눌러 넣는다 */
+  /* RE (질문 화면 / Page 6) */
+  --qi-re-left:81vw; --qi-re-top:3vh;   /* 오른쪽 10vw 다음 버튼 바로 왼쪽 */ --qi-re-h:9.07vh;     /* 정보 패널을 없애서 RE는 오른쪽 위 모서리 (Page 1~6 같은 자리) */
+  --q6-re-left:81vw; --q6-re-top:3vh;
+
+  /* 오른쪽 아래 안내 (Silver, 검정) / 왼쪽 아래 이야기 */
+  --q-hint-left:74.79vw; --q-hint-bottom:2.6vh; --q-hint-size:3.55vh; --q-hint-lh:1.017;
+  --q-cap-left:.77vw; --q-cap-bottom:1.0vh; --q-cap-size:2.76vh;
+  /* 왼쪽 아래 질문 단락 (한 줄 이야기 바로 위) */
+  --q-qn-left:.77vw; --q-qn-bottom:5.2vh; --q-qn-size:5.6vh; --q-qn-lh:.95; --q-qn-w:36vw;   /* 을유 크기 보정(61.7%) 때문에 실제 글자는 이보다 작게 보임 */
+  /* 다음 버튼 — 오른쪽 세로 띠 전체 (화살표를 띠에 맞게 늘림) */
+  --q-next-strip:10vw; --q-next-pad:3vh;
+
+  /* 이전(왼쪽 위 ⌐) / 다음(오른쪽 아래 >) — 마름모 픽셀 */
+  --q-chev-color:rgba(170,170,170,.72);
+  --q-prev-left:1.73vw; --q-prev-top:3.05vh; --q-prev-w:9.05vw;
+  --q-next-left:89.32vw; --q-next-top:67.97vh; --q-next-w:9.06vw;
+
+  /* Page 1 — 보물상자 + 레인저 9명 */
+  --q1-chest-left:8vw;   /* 화면 전체 사용 — 오른쪽 패널이 빠진 만큼 가운데로 */ --q1-chest-top:10vh; --q1-chest-w:min(35.79vw, 55vh);   /* 화면이 가로로 넓어도(브라우저 창 등) 세로 62vh를 넘지 않게 — 아래 멘트와 안 겹침 */   /* 보물상자 (boxA·B 916×1063) */
+  --q1-shift-x:6vw;            /* 레인저키 9개 전체를 왼쪽으로 — 말풍선(hover)이 오른쪽 정보 패널에 안 닿게 */
+  --q1-dnd-dx:1.19vw; --q1-dnd-dy:8.07vh;   /* Drag and Drop! — 잡은 레인저 오른쪽 */
+
+  /* Page 2 — 회색 반투명 판 + 구슬 */
+  --q2-floor-left:12vw; --q2-floor-top:13.5vh; --q2-floor-w:76vw; --q2-floor-h:66.5vh;   /* 아래 80vh부터는 질문 단락 자리 */   /* 화면 전체 사용 — 위 안내 한 줄 아래, 좌우 화살표 사이 */
+  --q2-floor-bg:rgba(170,170,170,.34);
+  --q2-bead:9.31vw;           /* 구슬 이미지 한 변 (구슬 지름 8.79vw) */
+  --q2-tongs-h:34vh;          /* 집게 커서 높이 */
+  --q2-tongs-rot:-45deg;      /* 집게 기울기 (왼쪽으로 45°) — 바꾸면 script.js의 집는 끝 계산(SQRT1_2)도 같이 */
+
+  /* Page 3 — 칸 (4열 × 7행) + 펜·지우개 */
+  --q3-x0:36vw; --q3-y0:14.33vh; --q3-cell:5.715vw; --q3-pitch-x:6.124vw; --q3-pitch-y:10.86vh;
+  --q3-cell-bg:#aaaaaa; --q3-black:#000; --q3-label:3.5vh;
+  /* 펜·지우개 — 칸과 정보 패널 사이 빈 곳에 세로로 한 줄 (두 아이콘의 가운데를 --q3-tool-x에 맞춤) */
+  --q3-tool-x:76vw;           /* 세로 줄의 가로 중심 */
+  --q3-pen-w:6vw;   --q3-pen-top:34vh;      /* 펜 (원래 12.2vw → 6vw) */
+  --q3-eraser-w:4.2vw; --q3-eraser-top:52vh;  /* 지우개 (원래 5.9vw → 4.2vw) */
+  --q3-pen-cursor:9vw; --q3-eraser-cursor:5vw;
+
+  /* Page 4 — 가장자리가 번지는 검은 판 + 야광봉 */
+  --q4-left:1.77vw; --q4-top:13vh; --q4-w:87vw; --q4-h:67vh;   /* 오른쪽 10vw는 다음 버튼, 아래는 질문 단락 */   /* 화면 전체 — 위 안내 한 줄만 비움 */
+  --q4-feather-x:8vw; --q4-feather-y:12vh;
+  --q4-glow:18.5vw;           /* 야광봉 빨간 빛 네모 한 변 */
+  --q4-hole:8.5vw;            /* 어둠이 걷히는 반지름 */
+  --q4-stick-w:17.67vw; --q4-stick-rot:30deg; --q4-stick-dx:1.7vw; --q4-stick-dy:2.3vh;
+  --q4-word:3.5vh; --q4-word-color:#ececea;
+
+  /* Page 5 — 벽돌 탑 + 건틀렛 */
+  --q5-left:38.74vw;   /* 탑을 화면 가운데로 */ --q5-top:13.47vh;   /* 10개라 시안(9개)보다 반 칸(3.48vh) 위에서 시작 */ --q5-w:19.71vw; --q5-pitch:6.96vh;   /* 벽돌 그림 전체(1536×1024) 기준 — 벽돌 몸통은 19.41vw부터 13.72vw 폭 */
+  --q5-label:5.7vh; --q5-label-color:#f6e3d6; --q5-label-rot:-12deg; --q5-label-x:59%; --q5-label-y:19%;
+  --q5-fist-w:7vw; --q5-fist-rot:-20deg;
+
+  /* Page 6 — 큰 상자 (왼쪽 정보 칸 + 입력 칸) */
+  --q6-left:1.48vw; --q6-top:2.22vh; --q6-w:77vw; --q6-h:68vh;   /* 아래는 질문 단락 */
+  --q6-info-w:24.15vw;
+  --q6-top-white:7.41vh; --q6-mosaic-h:66.72vh; --q6-gap:4.58vh;
+  --q6-pad-x:1.65vw; --q6-pad-y:1.97vh;   /* 캐럿 시작 자리 */
+  --q6-caret-h:41.4vh;        /* 처음 캐럿(=글자 줄) 높이 — 글이 길어지면 상자에 맞춰 줄어든다 */
+}

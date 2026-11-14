@@ -1,0 +1,702 @@
+/* =====================================================================
+   style.css — 뼈대 전용 (디자인 전부 제거)
+   남긴 것: 화면 전환(.screen/.active), 단계별 상태(visible/finished/selected/dwell-hover 등),
+           JS가 직접 위치를 옮기는 요소(커서·Q2 떠다니는 키워드·드래그 고스트·Q4 마스크·Q3 칠하기),
+           Q1 레인저/바구니 배치(판정이 이 크기에 의존).
+   뺀 것: 폰트, 색, 배경, 그라데이션, 장식 애니메이션, 정렬/여백 디자인.
+   이전 디자인: _old-design/style.old.css
+   ===================================================================== */
+*{box-sizing:border-box;}
+body{margin:0; font-family:var(--font-main); font-size:var(--fs-base); color:#111; background:var(--paper);}   /* 텅 빈 흰 공간 느낌(순백 아님) */
+img{image-rendering:pixelated;}
+/* 흰색 그래픽(흰 선 아이콘/버튼)은 배경에서 안 보이므로 검정으로 반전 */
+img[src*="(W)"], img[src*="next-w"], img[src*="tut-fist-off"]{filter:invert(1);}
+img{max-width:100%; height:auto;}
+canvas{width:240px; height:240px;}
+/* 화면 전체 그레인 필터 — 내용 위에 multiply로 씌움(클릭은 통과). 픽셀아트라 확대할 때 뭉개지 않는다 */
+#fxCanvas{position:fixed; inset:0; z-index:2147482000; pointer-events:none; image-rendering:pixelated; mix-blend-mode:multiply;}
+button{font:inherit; cursor:pointer;}
+
+/* ---- 화면 전환 ---- */
+.screen{display:none; position:absolute; inset:0; z-index:1; padding:24px; overflow:auto;}
+/* 모든 화면: 가로·세로 정중앙 정렬 */
+.screen.active{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;}
+.q-intro, .q-body{flex-direction:column; align-items:center; text-align:center; width:100%;}
+.q-layout{justify-content:center; align-items:center;}
+.open-row{justify-content:center;}
+.result-layout{display:flex; align-items:center; justify-content:center; gap:32px; width:100%;}
+.result-text{display:flex; flex-direction:column; align-items:center; text-align:center;}
+.kw-grid{justify-content:center;}
+.q-nav-row{display:flex; justify-content:center; gap:12px;}
+.top-links{position:absolute; top:12px; left:12px; display:flex; gap:12px;}
+
+/* ---- 배경 레이어(사용 안 함 — JS가 참조하므로 요소만 남김) ---- */
+.bg-layer{display:none;}
+.cam-status{display:none;}
+body.debug .cam-status{display:block;}   /* 주소 뒤에 ?debug */
+
+/* ---- 이미지 크기 최소 제한 (원본이 너무 커서 화면을 덮는 것만 방지) ---- */
+/* .logo-img 크기·회전은 아래 "첫 화면" 블록에서 */
+.q-title-img, .q-recap-img{height:24px; width:auto;}
+.btn img, .img-btn img, .pixel-btn img, .tool-btn img{height:40px; width:auto;}
+.q6-genie{width:80px;}
+.bubble-bg{display:none;}
+
+/* ---- 1. 오프닝 / 튜토리얼 / 이름 / 스토리 ---- */
+.enter-cta{cursor:pointer;}
+.tutorial-progress i{display:inline-block; width:24px; height:24px; border:var(--line) solid var(--red); margin-right:6px;}
+.tutorial-progress i.on{background:var(--red);}
+#screen-tutorial.finished .tut-main{display:none;}
+.tutorial-next{visibility:hidden;}
+.tutorial-next.visible{visibility:visible;}
+.open-row{display:flex; align-items:center; gap:16px;}
+.color-grid{display:grid; grid-template-columns:repeat(3,40px); gap:6px;}
+.color-swatch{width:40px; height:40px; background:var(--swatch-color,#888); border:var(--line) solid transparent; cursor:pointer;}
+.color-swatch.selected{border-color:#000;}
+.color-swatch.dwell-hover, .dwell-hover{outline:var(--line) dashed #888;}
+.q-stage{position:relative; width:240px; height:240px;}
+.candidate-stage{width:100%; height:100%;}
+.nickname-input, .subjective-input{font:inherit;}
+
+/* ---- 2. 질문 화면 공통 ---- */
+.q-body{display:none;}                      /* JS(revealAfterIntro)가 보여준다 */
+.q-layout{display:flex; gap:24px;}
+.kw-grid{display:flex; flex-wrap:wrap; gap:8px; max-width:560px;}
+.kw{border:var(--line) solid #111; padding:6px 12px; background:#f3f3f1; color:#111; cursor:pointer; user-select:none;}
+.kw.selected{outline:var(--line) solid var(--red);}
+.kw.picked-source{visibility:hidden;}
+
+
+/* ---- 커서(손 위치) — JS가 left/top/--s를 바꾼다 ---- */
+#handCursor{
+  --s:1; position:fixed; width:28px; height:28px; border-radius:50%; border:var(--line) solid var(--red); mix-blend-mode:multiply;
+  pointer-events:none; z-index:2147483000; display:none; transform:translate(-50%,-50%) scale(var(--s));
+}
+#handCursor.fist{background:var(--red-a45);}
+body.hand-mouse{cursor:none;}
+body.hand-mouse input, body.hand-mouse textarea{cursor:text;}
+
+/* ---- Q1: 레인저 드래그 → 바구니 (크기에 판정이 의존) ---- */
+.kw-grid.q1grid{display:grid; grid-template-columns:repeat(10,1fr); gap:calc(var(--h)*0.02) 2.2vw; width:min(820px,62vw); max-width:none; justify-items:center;}
+.kw-grid.q1grid .kw{grid-column:span 2;}
+.kw-grid.q1grid .kw:nth-child(6){grid-column:2 / span 2;}
+.kw.kw-hero{border:none; background:none; padding:0; display:block; position:relative; flex:none; line-height:0;
+  width:calc(var(--h)*var(--q1-box-w)); height:calc(var(--h)*var(--q1-box-h));}
+.kw.kw-hero:hover, .kw.kw-hero.dwell-hover{z-index:6;}
+.kw.kw-hero img, .drag-ghost img{position:absolute; left:calc(var(--h)*var(--q1-img-x)); top:calc(var(--h)*var(--q1-img-y)); height:var(--h); width:auto; max-width:none; pointer-events:none;}
+.kw.kw-hero .img-b{display:none;}
+.kw.kw-hero:hover .img-a, .kw.kw-hero.dwell-hover .img-a{display:none;}
+.kw.kw-hero:hover .img-b, .kw.kw-hero.dwell-hover .img-b{display:block;}
+.kw.kw-hero .kw-label{position:absolute; width:1px; height:1px; overflow:hidden; opacity:0;}
+.kw.kw-hero.selected{outline:none;}
+.drag-ghost{position:fixed; z-index:50; pointer-events:none; transform:translate(-50%,-50%); white-space:nowrap;}
+.drag-ghost:has(img){width:calc(var(--h)*var(--q1-box-w)); height:calc(var(--h)*var(--q1-box-h)); line-height:0;}
+.drag-ghost .img-a, .drag-ghost .kw-label{display:none;}
+.q-layout.q1 .q-stage{margin-bottom:calc(var(--bw) * 1.16 + 0.5rem);}
+.basket{position:absolute; left:50%; top:calc(100% + 0.4rem); transform:translateX(-50%); width:var(--bw); cursor:pointer;}
+.basket img{width:100%; height:auto; display:block;}
+.basket .bk-open{display:none;}
+.basket.open .bk-closed, .basket.drag-over .bk-closed, .basket.dwell-hover .bk-closed{display:none;}
+.basket.open .bk-open, .basket.drag-over .bk-open, .basket.dwell-hover .bk-open{display:block;}
+#basketFront{position:fixed; z-index:60; display:none; pointer-events:none;}
+#basketFront.on{display:block;}
+.basket.reject{animation:bkShake .45s linear;}
+@keyframes bkShake{0%,100%{transform:translateX(-50%);}25%{transform:translateX(calc(-50% - 12px));}75%{transform:translateX(calc(-50% + 12px));}}
+
+/* ---- Q2: 떠다니는 키워드 (위치는 JS가 left/top으로 이동) ---- */
+.kw-grid.float{position:relative; width:560px; height:380px; display:block;}
+.kw-grid.float .kw{position:absolute; left:0; top:0; white-space:nowrap;}
+
+/* ---- Q3: 칠하기 ---- */
+.kw-paint{position:relative; overflow:hidden;}
+.kw-paint .kw-label{position:relative; z-index:2;}
+.kw-paint .paint-cell{position:absolute; top:0; bottom:0; background:var(--red-a60); clip-path:circle(0% at 50% var(--oy,50%)); transition:clip-path .6s var(--od,0ms); z-index:1;}
+.kw-paint .paint-cell.painted{clip-path:circle(150% at 50% var(--oy,50%));}
+.tool-btn.active{outline:var(--line) solid var(--red);}
+
+/* ---- Q4: 어둡게 가리는 마스크 (JS가 위치/그라데이션 지정) ---- */
+#eyeMask{position:fixed; inset:0; z-index:5; display:none; pointer-events:none; background:rgba(0,0,0,.88);}
+
+/* ---- Q5: 펀치로 날아가는 키워드 ---- */
+.kw.punched{opacity:0; transform:translateX(-60px) scale(.4) !important; transition:opacity .35s, transform .35s;}
+
+/* ---- 리셋 버튼 ---- */
+.reset-fab{position:fixed; right:12px; bottom:12px; z-index:30;}
+.reset-fab{background:none; border:none; padding:0;}
+.reset-fab img{height:40px; width:auto; display:block;}   /* RE 버튼 크기 — 이 숫자만 바꾸면 됨 */
+
+/* ---- 글자 크기 (Silver 기준) ---- */
+.enter-cta{font-size:48px;}
+.title{font-size:44px; margin:0 0 12px;}
+.sub, .q-hint{font-size:30px;}
+.kicker, .open-kicker{font-size:36px;}
+.open-title, .story-text{font-size:52px;}
+.open-label{font-size:30px;}
+.open-op{font-size:48px;}
+.q-recap-text{font-size:36px;}
+.kw{font-size:28px; padding:8px 16px;}
+.result-section-label{font-size:24px; margin-top:16px;}
+.result-explanation, .ai-quote{font-size:26px; line-height:1.5; max-width:640px;}
+.nickname-input{font-size:32px;} .subjective-input{font-size:28px;}
+.btn, .btn-small{font-size:26px;}
+.combined-id{font-size:28px;}
+
+
+
+/* =====================================================================
+   1. 첫 화면 (#screen-camstart) — 시안 1main_01
+   가운데 정렬 대신 화면 위에 직접 배치: 로고는 정중앙에 기울여서, 버튼은 오른쪽 위, 시작 문구는 왼쪽 아래.
+   숫자는 design.css의 --main-* 값으로 조절한다.
+   ===================================================================== */
+#screen-camstart.active{display:block; padding:0; overflow:hidden;}
+#screen-camstart .logo-img{
+  position:absolute; left:50%; top:50%;
+  width:var(--main-logo-w); max-width:none; height:auto;
+  transform:translate(-50%,-50%) rotate(var(--main-logo-rot));
+  pointer-events:none;
+}
+#screen-camstart .main-links{
+  position:absolute; top:var(--main-btn-top); right:var(--main-btn-right);
+  display:flex; align-items:flex-start; gap:var(--main-btn-gap); z-index:2;
+}
+/* HERO LIST · ARCHIVE — 이미지 대신 AG 폰트 글자. 비율은 --*-sx/--*-sy로 늘인다(글자라 늘여도 안 깨짐) */
+#screen-camstart .text-btn{
+  display:block; text-decoration:none; color:var(--red);
+  font-family:var(--font-head); font-size:var(--main-btn-size); line-height:1; white-space:nowrap;
+}
+#screen-camstart .text-btn span{display:inline-block; transform-origin:right top;}
+#btnHeroList span{transform:scale(var(--herolist-sx),var(--herolist-sy));}
+#btnArchive span{transform:scale(var(--archive-sx),var(--archive-sy));}
+#screen-camstart .enter-cta{
+  position:absolute; left:var(--main-enter-left); bottom:var(--main-enter-bottom);
+  font-family:var(--font-head); font-size:var(--main-enter-size); line-height:1;
+  color:var(--red); text-align:left; white-space:nowrap; z-index:2;
+}
+#screen-camstart .enter-cta .accent{color:inherit;}
+#screen-camstart .sub{   /* 카메라 오류 안내(평소엔 비어 있음) */
+  position:absolute; left:var(--main-enter-left); bottom:calc(var(--main-enter-bottom) - 2.6em);
+  font-size:22px; color:var(--red); text-align:left;
+}
+
+/* =====================================================================
+   2. 튜토리얼 (#screen-tutorial) — 시안 2tutorial_01~03
+   층 순서: 배경 TUTORIAL(1) < 텍스트 박스·손·문구(2) < 다음 버튼(3). 숫자는 design.css --tut-*
+   ===================================================================== */
+#screen-tutorial.active{display:block; padding:0; overflow:hidden;}
+#screen-tutorial .tutorial-progress, #screen-tutorial .tut-done{display:none;}
+
+/* 배경 TUTORIAL — 왼쪽 끝을 기준으로 가로만 늘어난다 */
+.tut-bigword{
+  position:absolute; left:var(--tut-word-left); top:var(--tut-word-top);
+  width:var(--tut-word-w); height:var(--tut-word-h); overflow:visible; z-index:1;
+  transform-origin:left center; transform:scaleX(var(--tut-sx-0));
+  transition:transform var(--tut-sx-speed) cubic-bezier(.2,.8,.2,1);
+}
+.tut-bigword text{font-family:var(--font-head); fill:var(--red);}
+#screen-tutorial[data-step="1"] .tut-bigword{transform:scaleX(var(--tut-sx-1));}
+#screen-tutorial[data-step="2"] .tut-bigword{transform:scaleX(var(--tut-sx-2));}
+#screen-tutorial[data-step="3"] .tut-bigword{transform:scaleX(var(--tut-sx-3));}
+
+/* 텍스트 박스 — 손 편 상태 흰색 50%, 주먹 쥐면 노랑 80% */
+.tut-main{position:absolute; inset:0; z-index:2; pointer-events:none;}
+.tut-box{
+  position:absolute; left:var(--tut-box-left); top:var(--tut-box-top);
+  width:var(--tut-box-w); height:var(--tut-box-h);
+  border:var(--line) solid var(--tut-box-line); background:var(--tut-box-open);
+}
+#screen-tutorial.fisted .tut-box{background:var(--tut-box-fist);}
+
+/* 손 아이콘 — PNG 모양을 마스크로 써서 색은 항상 --red로 칠한다 */
+.tut-icon{position:absolute; left:var(--tut-icon-x); top:var(--tut-icon-y); transform:translate(-50%,-50%);}
+.tut-icon-open{
+  height:var(--tut-open-h); aspect-ratio:832/1156; background:var(--red);
+  -webkit-mask:url('../files/images/ui/tutorial/icon-hand-openC.png') center/contain no-repeat;
+          mask:url('../files/images/ui/tutorial/icon-hand-openC.png') center/contain no-repeat;
+}
+.tut-icon-fist{height:var(--tut-fist-h); aspect-ratio:694/739;}   /* 안쪽 면(::before) + 빨간 외곽선(::after) */
+.tut-icon-fist::before{
+  content:''; position:absolute; inset:0; background:var(--tut-fist-fill);
+  -webkit-mask:url('../files/images/ui/tutorial/icon-fistB.png') center/contain no-repeat;
+          mask:url('../files/images/ui/tutorial/icon-fistB.png') center/contain no-repeat;
+}
+.tut-icon-fist::after{
+  content:''; position:absolute; inset:0; background:var(--red);
+  -webkit-mask:url('../files/images/ui/tutorial/icon-fistA.png') center/contain no-repeat;
+          mask:url('../files/images/ui/tutorial/icon-fistA.png') center/contain no-repeat;
+}
+
+/* 문구 */
+.tut-caption{
+  position:absolute; left:var(--tut-cap-left); top:var(--tut-cap-top);
+  font-family:var(--font-head); font-size:var(--tut-cap-size); line-height:var(--tut-cap-lh);
+  color:var(--red); text-align:left; white-space:nowrap;
+}
+
+/* 다음 버튼 위치 — 3번 반복하면 나타남 */
+#tutorialNextBtn{position:absolute; right:var(--tut-next-right); top:50%; transform:translateY(-50%);}
+#tutorialNextBtn{--next-h:var(--tut-next-h);}
+/* 3번 다 채우면: TUTORIAL은 왼쪽 50%로 밀려나고, 오른쪽 50% 전체가 NEXT 버튼이 되어 오른쪽에서 밀려 들어온다 */
+#screen-tutorial.finished .tut-bigword{transform:scaleX(calc(var(--tut-sx-3) * var(--tut-done-sx)));}
+#screen-tutorial #tutorialNextBtn.visible{
+  left:50vw; right:auto; top:0; width:50vw; height:100vh; transform:none;
+  display:flex; align-items:center; justify-content:center; --next-h:var(--tut-done-next-h);
+  animation:tutNextIn var(--tut-sx-speed) cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes tutNextIn{from{transform:translateX(50vw);} to{transform:none;}}
+/* 버튼 면 — 손을 올리면 오른쪽 절반 전체가 옅게 물들어서 '여기 전체가 버튼'인 게 보이게 */
+#screen-tutorial #tutorialNextBtn.visible::before{content:''; position:absolute; inset:0; background:var(--red); opacity:0; transition:opacity .15s; pointer-events:none;}
+#screen-tutorial #tutorialNextBtn.visible:hover::before, #screen-tutorial #tutorialNextBtn.visible.dwell-hover::before{opacity:var(--tut-done-hover);}
+
+/* =====================================================================
+   공통 NEXT 버튼 (.next-btn) — 기본 A(회색 PNG) / hover·손 올림 B(--red) / 클릭·주먹 살짝 커짐
+   버튼 높이는 각 화면에서 --next-h로 지정
+   ===================================================================== */
+.next-btn{
+  z-index:3; background:none !important; border:none; padding:0; opacity:var(--tut-next-opacity);
+}
+.next-btn.dwell-hover{outline:none;}
+.next-btn .next-a{height:var(--next-h); width:auto; max-width:none; display:block; transition:transform .15s ease;}
+/* B 원본이 A보다 1.12배 커서 같은 중심에 그 비율로. PNG 모양을 마스크로 써서 --red로 칠함 */
+.next-btn .next-b{
+  position:absolute; left:50%; top:50%; height:calc(var(--next-h) * 2168 / 1938); aspect-ratio:1098/2168;
+  transform:translate(-50%,-50%); background:var(--red); visibility:hidden; transition:transform .15s ease;
+  -webkit-mask:url('../files/images/ui/button/btn-nextB.png') center/contain no-repeat;
+          mask:url('../files/images/ui/button/btn-nextB.png') center/contain no-repeat;
+}
+.next-btn:hover .next-a, .next-btn.dwell-hover .next-a{visibility:hidden;}
+.next-btn:hover .next-b, .next-btn.dwell-hover .next-b{visibility:visible;}
+/* B 상태일 때 곱하기 — 빨간 타이포 위에서도 보이게. (버튼 안쪽 요소에 걸면 버튼 밖과 섞이지 않아서 버튼 자체에 건다) */
+.next-btn:hover, .next-btn.dwell-hover, .next-btn.pressed{mix-blend-mode:multiply;}
+.next-btn:active .next-b, .next-btn.pressed .next-b{transform:translate(-50%,-50%) scale(var(--tut-next-press));}
+.next-btn:active .next-a, .next-btn.pressed .next-a{transform:scale(var(--tut-next-press));}
+
+/* =====================================================================
+   3. 이름 짓기 (#screen-open) — 시안 3ID_01. 화면 3분할: 왼쪽 색 / 가운데 이름 / 오른쪽 레인저
+   숫자는 design.css --id-*
+   ===================================================================== */
+#screen-open.active{display:block; padding:0; overflow:hidden; text-align:left;}
+
+.id-title{
+  position:absolute; left:var(--id-title-left); top:var(--id-title-top);
+  width:var(--id-title-w); height:var(--id-title-h); overflow:visible; z-index:2;
+}
+.id-title text{font-family:var(--font-head); fill:var(--red);}
+
+/* 안내 문구 — Silver, 번호 뒤로 둘째 줄부터 들여쓰기 */
+.id-label{
+  position:absolute; margin:0; z-index:3;
+  font-family:var(--font-main); font-size:var(--id-label-size); line-height:var(--id-label-lh);
+  color:#000; padding-left:var(--id-label-indent); text-indent:calc(var(--id-label-indent) * -1); white-space:nowrap;
+}
+.id-label-1{left:var(--id-label1-left); top:var(--id-label1-top);}
+.id-label-2{left:var(--id-label2-left); top:var(--id-label2-top);}
+#screen-open.name-dark .id-label-2{color:#fff;}   /* 어두운 색 이름 위에서는 흰 글자 */
+.id-label-3{left:var(--id-label3-left); top:var(--id-label3-top); visibility:hidden;}
+#screen-open.has-id .id-label-3{visibility:visible;}   /* 색 + 이름이 다 있을 때만 */
+.id-result{color:var(--red);}
+
+/* 색 칸 — 3×4, 각 칸은 3×3 회색 셀 + 가운데 색 */
+#screen-open .color-grid{
+  position:absolute; left:var(--id-grid-left); top:var(--id-grid-top); z-index:2;
+  display:grid; grid-template-columns:repeat(3, var(--id-tile)); grid-auto-rows:var(--id-tile);
+  column-gap:var(--id-tile-gap-x); row-gap:var(--id-tile-gap-y);
+}
+#screen-open .color-swatch{
+  width:var(--id-tile); height:var(--id-tile); border:none; outline:none; cursor:pointer;
+  display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
+  gap:calc(var(--id-tile) * 0.0104); background:none !important;
+}
+#screen-open .color-swatch i{background:var(--id-cell);}
+#screen-open .color-swatch i:nth-child(5){background:var(--swatch-color);}
+#screen-open .color-swatch:hover i:not(:nth-child(5)),
+#screen-open .color-swatch.dwell-hover i:not(:nth-child(5)){background:var(--id-cell-hover);}
+#screen-open .color-swatch.selected i:not(:nth-child(5)){background:var(--id-cell-on);}
+
+/* 가운데 이름 칸 */
+.name-cell{
+  position:absolute; left:var(--id-name-left); top:var(--id-name-top);
+  width:var(--id-name-w); height:var(--id-name-h); z-index:2;
+  display:flex; justify-content:center; align-items:stretch;
+}
+.name-type{display:none; height:100%; overflow:visible;}
+/* 캐럿 — 색을 고르면(입력 가능해지면) 나타나서 깜빡임. 글자가 있으면 글자 바로 뒤, 없으면 칸 가운데 */
+.name-caret{
+  display:none; flex:none; width:var(--id-caret-w); height:100%; background:var(--id-name-color);
+  animation:caretBlink var(--id-caret-speed) steps(1) infinite;
+}
+.name-type[style*="block"] + .name-caret{margin-left:var(--id-caret-gap);}
+#screen-open.can-type .name-caret{display:block;}
+@keyframes caretBlink{50%{opacity:0;}}
+.name-type text{font-family:var(--font-head); fill:var(--id-name-color);}
+/* 실제 입력칸은 안 보이게 칸 위에 깔아둔다 (한글 조합 입력용) */
+.nickname-input{
+  position:absolute; inset:0; width:100%; height:100%; opacity:0; border:none; background:none;
+  color:transparent; caret-color:transparent; font-size:16px; pointer-events:none;
+}
+
+/* 오른쪽 레인저 */
+#openCanvas{
+  position:absolute; left:var(--id-hero-x); top:var(--id-hero-y); transform:translate(-50%,-50%);
+  width:var(--id-hero-size); height:var(--id-hero-size); z-index:2;
+}
+
+/* NEXT — 오른쪽 위, btn-next를 45° 돌려서 모서리 모양. 색 + 이름이 다 있을 때만 */
+#startBtn{
+  --next-h:var(--id-next-h); position:absolute; left:var(--id-next-x); top:var(--id-next-y);
+  transform:translate(-50%,-50%) rotate(-45deg); visibility:hidden;
+}
+#startBtn.visible{visibility:visible;}
+
+/* ---- 한 화면에 한 단계 (data-step) — 1 제목이 화면 가득 / 2 색 칸이 화면 가득 / 3 이름 70 : 레인저 30 ---- */
+#screen-open .id-title, #screen-open .color-grid, #screen-open .name-cell, #screen-open #openCanvas,
+#screen-open .id-label, #screen-open #startBtn{transition:opacity .4s;}
+#screen-open:not([data-step="1"]) .id-title{opacity:0; pointer-events:none;}
+#screen-open:not([data-step="2"]) .color-grid{opacity:0; pointer-events:none; visibility:hidden;}
+#screen-open:not([data-step="3"]) .name-cell, #screen-open:not([data-step="3"]) #openCanvas,
+#screen-open:not([data-step="3"]) #startBtn{opacity:0; pointer-events:none; visibility:hidden;}
+#screen-open .id-label-1, #screen-open .id-label-2{display:none;}   /* 안내 문구는 빼고 칸만 */
+#screen-open:not([data-step="3"]) .id-label-3{visibility:hidden;}
+
+/* 1 — 제목 두 줄이 화면 전체 (위 줄 / 아래 줄이 화면 높이를 반씩) */
+#screen-open .id-title{display:none;}
+.id-title-line{position:absolute; left:var(--id1-pad-x); width:calc(100vw - var(--id1-pad-x) * 2); height:calc(50vh - var(--id1-pad-y) * 1.5); overflow:visible; z-index:2; transition:opacity .4s;}
+.id-title-l1{top:var(--id1-pad-y);}
+.id-title-l2{top:calc(50vh + var(--id1-pad-y) / 2);}
+.id-title-line text{font-family:var(--font-head); fill:var(--red);}
+#screen-open:not([data-step="1"]) .id-title-line{opacity:0; pointer-events:none;}
+
+/* 2 — 색 칸 4 × 3이 화면 전체 */
+#screen-open .color-grid{left:var(--id2-pad); top:var(--id2-pad); width:calc(100vw - var(--id2-pad) * 2); height:calc(100vh - var(--id2-pad) * 2);
+  grid-template-columns:repeat(4, 1fr); grid-auto-rows:1fr; column-gap:var(--id2-gap); row-gap:var(--id2-gap);}
+#screen-open .color-swatch{width:auto; height:auto; gap:var(--id2-cell-gap);}
+
+/* 3 — 이름 칸 70% : 레인저 30% */
+#screen-open .name-cell{left:var(--id3-pad); top:var(--id3-pad); width:calc(var(--id3-split) - var(--id3-pad) * 2); height:calc(100vh - var(--id3-pad) * 2);}
+#screen-open #openCanvas{left:calc(var(--id3-split) + (100vw - var(--id3-split) - var(--id3-next-w)) / 2); top:50vh;
+  width:min(calc(100vw - var(--id3-split) - var(--id3-next-w)), 100vh); height:min(calc(100vw - var(--id3-split) - var(--id3-next-w)), 100vh);}
+/* NEXT — 오른쪽 끝 세로 띠 전체. 화살표 그림을 띠에 맞게 늘린다 */
+#screen-open #startBtn{left:calc(100vw - var(--id3-next-w)); top:0; width:var(--id3-next-w); height:100vh; transform:none; padding:var(--q-next-pad) 0;}
+#screen-open #startBtn .next-a{width:100%; height:100%; object-fit:fill;}
+#screen-open #startBtn .next-b{left:0; top:var(--q-next-pad); width:100%; height:calc(100% - var(--q-next-pad) * 2); aspect-ratio:auto; transform:none;
+  -webkit-mask-size:100% 100%; mask-size:100% 100%;}
+#screen-open #startBtn:active .next-b, #screen-open #startBtn.pressed .next-b{transform:scale(var(--tut-next-press));}
+#screen-open .id-label-3{left:calc(var(--id3-split) + 1.25vw);}
+/* 비어 있을 때 — "닉네임을 입력하세요"가 깜빡이며 떠 있다 (캐럿 대신) */
+.name-placeholder{display:none; align-self:center; font-family:var(--font-head); font-size:var(--id3-ph-size); line-height:1; white-space:nowrap;
+  color:var(--id-name-color); animation:caretBlink var(--id-caret-speed) steps(1) infinite;}
+#screen-open.can-type.name-empty .name-placeholder{display:block;}
+#screen-open.name-empty .name-caret{display:none !important;}
+
+/* =====================================================================
+   화면 전환 — 오른쪽에서 밀려 들어오기 (script.js slideTo)
+   ===================================================================== */
+html, body{overflow:hidden;}
+.screen.leaving{display:block;}
+.screen.enter-right{transform:translateX(100%);}
+.screen.exit-left{transform:translateX(-100%);}
+.screen.slide{transition:transform .65s cubic-bezier(.7,0,.2,1);}
+
+/* =====================================================================
+   4. 시작 스토리 (#screen-story) — 시안 4_01 / 4_02 / 4_03. 숫자는 design.css --story-*
+   ===================================================================== */
+#screen-story.active{display:block; padding:0; overflow:hidden;}
+
+/* A — 두 단락 */
+.story-para{
+  position:absolute; margin:0; z-index:2;
+  font-family:var(--font-head); font-size:var(--story-size); line-height:var(--story-lh); color:var(--red); white-space:nowrap;
+}
+.story-para-1{left:var(--story-p1-left); top:var(--story-p1-top); text-align:left;}
+.story-para-2{right:var(--story-p2-right); top:var(--story-p2-top); text-align:right;}
+.story-para .ch{visibility:hidden;}
+.story-para .ch.on{visibility:visible;}
+#screen-story.phase-b .story-para{display:none;}
+
+/* B → C — 세 줄. 기본은 키 큰 상태, phase-c에서 위로 납작하게 */
+.story-line{
+  position:absolute; overflow:visible; z-index:2; display:none;
+  transition:top var(--story-shrink) cubic-bezier(.7,0,.2,1), height var(--story-shrink) cubic-bezier(.7,0,.2,1);
+}
+#screen-story.phase-b .story-line{display:block;}
+.story-line text, .story-go text{font-family:var(--font-head); fill:var(--red);}
+.story-line .ch{visibility:hidden;}
+.story-line .ch.on{visibility:visible;}   /* 바운스 없이 한 글자씩 탕탕 찍힘 */
+.story-line-1{left:var(--story-l1-left); width:var(--story-l1-w); top:var(--story-l1-top); height:var(--story-l1-h);}
+.story-line-2{left:var(--story-l2-left); width:var(--story-l2-w); top:var(--story-l2-top); height:var(--story-l2-h);}
+.story-line-3{left:var(--story-l3-left); width:var(--story-l3-w); top:var(--story-l3-top); height:var(--story-l3-h);}
+#screen-story.phase-c .story-line-1{top:var(--story-l1-top-c); height:var(--story-l1-h-c);}
+#screen-story.phase-c .story-line-2{top:var(--story-l2-top-c); height:var(--story-l2-h-c);}
+#screen-story.phase-c .story-line-3{top:var(--story-l3-top-c); height:var(--story-l3-h-c);}
+
+/* C — 진짜진짜 시작 + NEXT, 오른쪽 화면 밖에서 밀려 나옴 */
+.story-go, .story-next{
+  position:absolute; z-index:3; transform:translateX(100vw); visibility:hidden;
+  transition:transform var(--story-slide) cubic-bezier(.2,.8,.2,1);
+}
+.story-go{left:var(--story-go-left); top:var(--story-go-top); width:var(--story-go-w); height:var(--story-go-h); overflow:visible;}
+.story-next{--next-h:var(--story-next-h); right:var(--story-next-right); top:var(--story-next-top);}
+#screen-story.go .story-go, #screen-story.go .story-next{transform:translateX(0); visibility:visible;}
+#screen-story.go .story-next{transition-delay:.12s;}   /* NEXT는 살짝 늦게 따라 나옴 */
+/* 진짜진짜 시작 — 모든 글자는 왼쪽 50%로 밀려나고, 오른쪽 50% 전체가 NEXT (튜토리얼과 같은 방식) */
+.story-line{transition:top var(--story-shrink) cubic-bezier(.7,0,.2,1), height var(--story-shrink) cubic-bezier(.7,0,.2,1), left var(--story-slide) cubic-bezier(.2,.8,.2,1), width var(--story-slide) cubic-bezier(.2,.8,.2,1);}
+#screen-story.go .story-line-1, #screen-story.go .story-line-2, #screen-story.go .story-line-3{left:1.5vw; width:46.5vw;}
+#screen-story.go .story-go{left:1.5vw; width:46.5vw; top:22vh; height:75vh;}
+#screen-story.go .story-next{left:50vw; right:auto; top:0; width:50vw; height:100vh; display:flex; align-items:center; justify-content:center; --next-h:78vh;}
+#screen-story.go .story-next::before{content:''; position:absolute; inset:0; background:var(--red); opacity:0; transition:opacity .15s; pointer-events:none;}
+#screen-story.go .story-next:hover::before, #screen-story.go .story-next.dwell-hover::before{opacity:var(--tut-done-hover);}
+
+/* =====================================================================
+   5. Page 인트로 (.q-intro) — 시안 5_page1_01. 첫 화면과 같은 배치
+   큰 "Page N"이 좌상단 화면 밖에서 기울어진 방향 그대로 대각선으로 미끄러져 들어온다
+   ===================================================================== */
+.q-intro{position:absolute; inset:0; overflow:hidden; text-align:left;}
+.q-intro .q-logo{
+  position:absolute; left:var(--q-logo-x); top:var(--q-logo-y);
+  height:var(--q-logo-h); aspect-ratio:var(--logo-ratio, 1834/501); background:var(--red);
+  -webkit-mask:var(--logo) center/contain no-repeat; mask:var(--logo) center/contain no-repeat;
+  transform:translate(-50%,-50%) rotate(var(--q-logo-rot));
+}
+/* 기울어진 축을 따라 화면 밖(좌상단)에서 제자리로 */
+.q-intro.play .q-logo{animation:qLogoIn var(--q-logo-dur) cubic-bezier(.15,.85,.25,1) var(--q-logo-delay) both;}
+@keyframes qLogoIn{
+  from{transform:translate(-50%,-50%) rotate(var(--q-logo-rot)) translateX(calc(var(--q-logo-from) * -1));}
+  to{transform:translate(-50%,-50%) rotate(var(--q-logo-rot)) translateX(0);}
+}
+.q-intro .q-sub{
+  position:absolute; left:var(--q-sub-left); top:var(--q-sub-top); max-width:60vw;
+  font-family:var(--font-head); font-size:var(--q-sub-size); line-height:var(--q-sub-lh);
+  color:var(--red); white-space:pre-line; text-align:left;
+}
+/* 질문은 "Page N"과 같은 타이밍에 왼쪽 화면 밖에서 밀려 들어옴 */
+.q-intro.play .q-sub{animation:qSubIn var(--q-logo-dur) cubic-bezier(.15,.85,.25,1) calc(var(--q-logo-delay) + var(--q-sub-lag)) both;}
+@keyframes qSubIn{from{transform:translateX(-110vw);} to{transform:translateX(0);}}
+.q-intro.fade-out{opacity:0; transition:opacity .4s;}
+
+/* =====================================================================
+   6. 질문 화면 Page 1~6 — design/아트보드 9~20. 숫자는 전부 design.css "6." 블록
+   ===================================================================== */
+#screen-q, #screen-q6{padding:0; overflow:hidden; background:var(--q-white); text-align:left;}
+#screen-q.active, #screen-q6.active{display:block;}
+#screen-q .q-body, #screen-q6 .q-body{position:absolute; inset:0; display:none; opacity:0; transition:opacity .4s;}
+#screen-q .q-body.visible, #screen-q6 .q-body.visible{opacity:1;}
+
+/* 인트로의 "Page N" — 페이지마다 글자 폭이 달라 중심을 따로 맞춘다(JS가 --q-logo-x/y를 넣음) */
+.q-intro .q-logo{transition:opacity .4s;}
+.q-intro.dim{z-index:0;}
+.q-intro.dim .q-sub{opacity:0; transition:opacity .4s;}
+.q-intro.dim .q-logo{opacity:var(--q-bglogo-op);}
+#screen-q6 .q-intro.dim .q-logo{opacity:0;}       /* Page 6은 큰 상자가 화면을 덮어서 뒤 로고 없음(시안) */
+/* Page 6 인트로 — 질문이 오른쪽 위(오른쪽 정렬, 오른쪽에서 들어옴) / 왼쪽 아래 */
+#screen-q6 .q-sub-tr{left:auto; right:1.39vw; top:10.18vh; text-align:right; max-width:none; transform-origin:right;}
+#screen-q6 .q-intro.play .q-sub-tr{animation-name:qSubInR;}
+@keyframes qSubInR{from{transform:translateX(110vw);} to{transform:translateX(0);}}
+#screen-q6 .q-sub-bl{top:76vh; max-width:none;}
+
+/* ---- 오른쪽 위 정보 패널 (Page 1~5) ---- */
+.q-info, .q6-info{background:#fff; border:var(--line) solid var(--q-gray); display:flex; flex-direction:column; box-sizing:border-box; z-index:6;}
+.q-info{position:absolute; left:var(--qi-left); top:var(--qi-top); width:var(--qi-w); height:var(--qi-h);}
+.q-info-mosaic{
+  height:var(--qi-mosaic-h); flex:none; position:relative; display:flex; align-items:center; justify-content:center;
+  background-color:var(--q-panel-bg);
+  background-image:radial-gradient(var(--q-dot) 0 .13vw, transparent .14vw);
+  background-size:1.27vw 1.27vw; background-position:.12vw .1vw;
+  border-bottom:var(--line) solid var(--q-gray);
+}
+.q-info-mosaic .candidate-stage{position:static; width:auto; height:94%; aspect-ratio:1; border:none;}
+.q-info-mosaic canvas{width:100% !important; height:100% !important; display:block;}
+.q-info-bar{height:var(--qi-bar-h); flex:none; position:relative; border-bottom:var(--line) solid var(--q-gray); padding:0 var(--qi-bar-in); display:flex; align-items:center;}
+.q-info-bar i{display:block; height:var(--qi-bar-thick); width:var(--qi-progress, 10%); background:var(--red); transition:width .6s cubic-bezier(.2,.8,.2,1);}
+.q-info-row{flex:1; display:flex; min-height:0;}
+.q-info-row .q-recap-text{
+  position:static; width:var(--qi-split); flex:none; box-sizing:border-box; padding:var(--qi-q-pad) 0 0 var(--qi-q-left);
+  border-right:var(--line) solid var(--q-gray); overflow:visible;
+  font-family:var(--font-head); font-size:var(--qi-q-size); line-height:var(--qi-q-lh); color:var(--red);
+  white-space:pre; text-align:left;
+}
+.q-info-row .q-recap-text > span{display:block; transform-origin:left top; transform:scaleX(var(--sx,1)); width:max-content;}
+.q-info-re{flex:1;}
+
+/* RE — 정보 패널의 오른쪽 칸 위 */
+.reset-fab{left:var(--qi-re-left); top:var(--qi-re-top); right:auto; bottom:auto; z-index:40;}
+.reset-fab img{height:var(--qi-re-h);}
+.reset-fab.on-q6{left:var(--q6-re-left); top:var(--q6-re-top);}
+body.q-intro-on .reset-fab{visibility:hidden;}
+.reset-fab.dwell-hover, .reset-fab:hover{transform:scale(1.06);}
+
+/* ---- 안내 (오른쪽 아래) / 이야기 (왼쪽 아래) ---- */
+/* 안내 — 화면 맨 위 가운데 한 줄 (정보 패널을 없애고 한 화면에 한 단계) */
+#screen-q .q-hint{
+  display:block; position:absolute; left:50%; top:3.2vh; transform:translateX(-50%); z-index:6; max-width:76vw;
+  font-family:var(--font-main); font-size:var(--q-hint-size); line-height:1.1; color:#000; white-space:nowrap; text-align:center;
+}
+/* 정보 패널(모자이크·진행 바·질문)은 쓰지 않는다 — 모자이크는 페이지 사이 한 화면으로 */
+.q-info, .q6-info{display:none !important;}
+/* 페이지 사이 모자이크 화면 */
+.mosaic-stage{position:fixed; inset:0; z-index:900; background:var(--paper); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4vh;
+  opacity:0; visibility:hidden; transition:opacity .3s, visibility 0s .3s;}
+.mosaic-stage.on{opacity:1; visibility:visible; transition:opacity .3s;}
+.mosaic-stage canvas{width:72vh !important; height:72vh !important; image-rendering:pixelated;}
+.stage-bar{width:40vw; height:1.1vh; border:var(--line) solid var(--q-gray); box-sizing:content-box;}
+.stage-bar i{display:block; height:100%; width:0; background:var(--red); transition:width .9s cubic-bezier(.2,.8,.2,1) .2s;}
+.q-question{
+  position:absolute; left:var(--q-qn-left); bottom:var(--q-qn-bottom); width:var(--q-qn-w); z-index:6; margin:0;
+  font-family:var(--font-main); font-weight:600; font-size:var(--q-qn-size); line-height:var(--q-qn-lh); color:var(--red); text-align:left; word-break:keep-all; white-space:pre-line;
+}
+.q-caption{
+  position:absolute; left:var(--q-cap-left); bottom:var(--q-cap-bottom); z-index:6;
+  font-family:var(--font-main); font-size:var(--q-cap-size); line-height:1; color:#000; white-space:nowrap;
+}
+
+
+/* ---- 이전 / 다음 화살표 ---- */
+.q-chev{position:absolute; z-index:8; padding:0; border:none; background:none !important; cursor:pointer; line-height:0;
+  transition:transform .15s; transform-origin:center;}
+.q-chev svg{display:block; width:100%; height:auto; overflow:visible;}
+.q-chev polygon, .q-chev rect{fill:var(--q-chev-color); transition:fill .15s;}
+.q-chev-prev{left:var(--q-prev-left); top:var(--q-prev-top); width:var(--q-prev-w);}
+.q-chev-next{left:calc(100vw - var(--q-next-strip)); top:0; width:var(--q-next-strip); height:100vh; padding:var(--q-next-pad) 1vw; box-sizing:border-box;}
+.q-chev-next svg{height:100%;}   /* 화살표를 세로 전체로 늘림 (preserveAspectRatio none) */
+.q-chev-next::before{content:''; position:absolute; inset:0; background:var(--red); opacity:0; transition:opacity .15s; pointer-events:none;}
+.q-chev-next:not(:disabled):hover::before, .q-chev-next:not(:disabled).dwell-hover::before{opacity:var(--tut-done-hover);}
+.q-chev:not(:disabled) rect{fill:var(--red);}                  /* 다음: 3개를 채우면 빨갛게 켜짐 */
+.q-chev-prev polygon{fill:var(--q-chev-color) !important;}
+.q-chev:not(:disabled):hover, .q-chev:not(:disabled).dwell-hover{transform:scale(1.06);}
+.q-chev-prev:hover polygon, .q-chev-prev.dwell-hover polygon{fill:var(--red) !important;}
+.q-chev:disabled{cursor:default;}
+.q-chev.pressed{transform:scale(1.1);}
+
+/* ---- 공통으로 꺼둘 예전 요소 ---- */
+#screen-q .q-layout{display:block; position:static;}
+#screen-q .q-stage{position:static; width:auto; height:auto;}
+#screen-q .kw-grid{max-width:none;}
+.q-floor{display:none; position:absolute; z-index:1; pointer-events:none;}
+#eyeMask{display:none; position:absolute; z-index:4; pointer-events:none;}
+.q-dnd{display:none;}
+.basket{display:none;}
+
+/* =========== Page 1 — 보물상자 + 레인저 =========== */
+#screen-q.q1 .basket{display:block; position:absolute; left:var(--q1-chest-left); top:var(--q1-chest-top); width:var(--q1-chest-w); transform:none; z-index:2;}
+#screen-q.q1 .basket.reject{animation:bkShakeQ1 .45s linear;}
+@keyframes bkShakeQ1{0%,100%{transform:none;}25%{transform:translateX(-12px);}75%{transform:translateX(12px);}}
+#screen-q.q1 .kw-grid{display:block; position:absolute; inset:0; width:auto; z-index:3; pointer-events:none;}
+#screen-q.q1 .kw.kw-hero{position:absolute; left:calc(var(--x) + var(--q1-shift-x)); top:var(--y); pointer-events:auto;}
+.q-dnd{position:fixed; z-index:55; pointer-events:none; font-family:var(--font-main); font-size:var(--q-hint-size); line-height:1; color:#000; white-space:nowrap;}
+.q-dnd.on{display:block;}
+
+/* =========== Page 2 — 떠다니는 구슬 =========== */
+#screen-q.q2 .q-floor{display:block; left:var(--q2-floor-left); top:var(--q2-floor-top); width:var(--q2-floor-w); height:var(--q2-floor-h); background:var(--q2-floor-bg);}
+#screen-q.q2 .kw-grid.float{position:absolute; left:var(--q2-floor-left); top:var(--q2-floor-top); width:var(--q2-floor-w); height:var(--q2-floor-h); z-index:3;}
+.kw.bead{width:var(--q2-bead); height:var(--q2-bead); padding:0; border:none !important; background:none !important; border-radius:50%; line-height:0;}
+.kw.bead img{width:100%; height:100%; display:block; pointer-events:none;}
+.kw.bead .kw-label{position:absolute; width:1px; height:1px; overflow:hidden; opacity:0;}
+.kw.bead{position:absolute; --glow:0;}
+/* 빛은 구슬 바깥으로 퍼진다 — 구슬 그림(글자) 위는 덮지 않고, 뒤에서 하얀 후광이 붙들수록(--glow 0→1) 커지고 밝아진다 */
+.kw.bead::before{content:''; position:absolute; inset:-38%; border-radius:50%; pointer-events:none; z-index:-1;
+  background:radial-gradient(circle, rgba(255,255,255,.95) 0, rgba(255,255,255,.75) 36%, rgba(255,255,255,.25) 55%, rgba(255,255,255,0) 70%);
+  opacity:var(--glow); transform:scale(calc(.75 + var(--glow) * .25));}
+.kw.bead.selected{outline:none; filter:drop-shadow(0 0 .5vw rgba(255,255,255,.95)) drop-shadow(0 0 1.6vw rgba(255,255,255,.8));}
+.kw.bead.selected::before{opacity:1; transform:scale(1);}
+/* 선택되는 순간 — 구슬 테두리에서 하얀 고리가 바깥으로 터져 나간다 */
+.kw.bead.selected::after{content:''; position:absolute; inset:2%; border-radius:50%; pointer-events:none; border:.45vw solid #fff;
+  animation:beadBurst .8s cubic-bezier(.2,.8,.2,1) both;}
+@keyframes beadBurst{0%{transform:scale(1); opacity:1;} 100%{transform:scale(1.9); opacity:0;}}
+
+/* =========== Page 3 — 칸 칠하기 + 펜·지우개 =========== */
+#screen-q.q3 .kw-grid{display:block; position:absolute; inset:0; width:auto; z-index:3; pointer-events:none;}
+.q3-cell{position:absolute; left:calc(var(--q3-x0) + var(--c) * var(--q3-pitch-x)); top:calc(var(--q3-y0) + var(--r) * var(--q3-pitch-y));
+  width:var(--q3-cell); height:var(--q3-cell); box-sizing:border-box;}
+.q3-black{background:var(--q3-black);}
+.kw.q3-cell{pointer-events:auto; padding:0; border:none; background:var(--q3-cell-bg); color:#000; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-main); font-size:var(--q3-label); line-height:1;}
+.kw.q3-cell .paint-canvas{position:absolute; inset:0; width:100% !important; height:100% !important; image-rendering:pixelated; z-index:1; pointer-events:none;}
+.kw.q3-cell .kw-label{position:relative; z-index:2;}
+.kw.q3-cell.selected{outline:none;}
+.kw.q3-cell.selected.ink-dark{color:#fff;}   /* 어두운 아이디 색으로 칠해지면 글씨를 흰색으로 */
+/* 얼마나 칠했는지 — 칸 아래 막대가 선택 기준(60%)까지 차오른다. 다 차면 선택(빨간 테두리 + 번쩍 + 달칵) */
+.kw.q3-cell.just-picked{animation:q3Pick .45s cubic-bezier(.2,.8,.2,1);}
+@keyframes q3Pick{0%{transform:scale(1);} 35%{transform:scale(1.1);} 100%{transform:scale(1);}}   /* 선택 = 칸 전체가 칠하는 색으로 채워지며 톡 */
+#screen-q.q3 .paint-tools{display:block !important; position:absolute; inset:0; pointer-events:none; z-index:3;}
+#screen-q.q3 .tool-btn{position:absolute; pointer-events:auto; padding:0; border:none; background:none !important; outline:none; line-height:0; opacity:.45; transition:opacity .15s, transform .15s;}
+#screen-q.q3 .tool-btn img{height:auto; width:100%;}
+#screen-q.q3 .tool-btn.active, #screen-q.q3 .tool-btn:hover, #screen-q.q3 .tool-btn.dwell-hover{opacity:1;}
+#screen-q.q3 .tool-btn.active{transform:scale(1.04);}
+#brushTool{left:calc(var(--q3-tool-x) - var(--q3-pen-w) / 2); top:var(--q3-pen-top); width:var(--q3-pen-w);}
+#eraseTool{left:calc(var(--q3-tool-x) - var(--q3-eraser-w) / 2); top:var(--q3-eraser-top); width:var(--q3-eraser-w);}
+
+/* =========== Page 4 — 어둠 속 야광봉 =========== */
+#screen-q.q4 .q-floor, #screen-q.q4 #eyeMask{
+  left:var(--q4-left); top:var(--q4-top); width:var(--q4-w); height:var(--q4-h); background-color:#000;
+  /* 가장자리 번짐 — 시안처럼 바깥쪽은 천천히, 안쪽에서 빨리 진해지게(가우시안 블러 모양) */
+  -webkit-mask-image:linear-gradient(to right, transparent, rgba(0,0,0,.18) calc(var(--q4-feather-x) * .35), rgba(0,0,0,.6) calc(var(--q4-feather-x) * .6), #000 var(--q4-feather-x), #000 calc(100% - var(--q4-feather-x)), rgba(0,0,0,.6) calc(100% - var(--q4-feather-x) * .6), rgba(0,0,0,.18) calc(100% - var(--q4-feather-x) * .35), transparent),
+                     linear-gradient(to bottom, transparent, rgba(0,0,0,.18) calc(var(--q4-feather-y) * .35), rgba(0,0,0,.6) calc(var(--q4-feather-y) * .6), #000 var(--q4-feather-y), #000 calc(100% - var(--q4-feather-y)), rgba(0,0,0,.6) calc(100% - var(--q4-feather-y) * .6), rgba(0,0,0,.18) calc(100% - var(--q4-feather-y) * .35), transparent);
+  -webkit-mask-composite:source-in; mask-composite:intersect;
+}
+#screen-q.q4 .q-floor{display:block;}
+#screen-q.q4 .kw-grid{display:block; position:absolute; left:var(--q4-left); top:var(--q4-top); width:var(--q4-w); height:var(--q4-h); z-index:auto;}   /* z-index를 안 줘야 고른 글자(z5)가 어둠(z4) 위로 올라온다 */
+.kw.q4-word{position:absolute; z-index:2; left:var(--x); top:var(--y); transform:translate(-50%,-50%); padding:.4vh .5vw; border:none; background:none;
+  font-family:var(--font-main); font-size:var(--q4-word); line-height:1; color:var(--q4-word-color); white-space:nowrap;}
+.kw.q4-word.selected{outline:none; color:var(--red); z-index:5; text-shadow:0 0 1vh rgba(255,60,60,.9), 0 0 .3vh #fff;}
+
+/* =========== Page 5 — 벽돌 탑 =========== */
+#screen-q.q5 .kw-grid{display:block; position:absolute; inset:0; width:auto; z-index:3; pointer-events:none;}
+/* 벽돌 칸(.kw) = 벽돌에서 실제로 보이는 띠(위 벽돌에 안 가려진 아래쪽 6.96vh)만 — 펀치 판정이 옆 벽돌로 새지 않게.
+   그림은 이 띠를 기준으로 왼쪽 위로 빼서 그린다 (벽돌 몸통: 그림의 x 343~1412, y 100~779 / 1536×1024) */
+.kw.brick{position:absolute; left:calc(var(--q5-left) + var(--q5-w) * 343 / 1536);
+  top:calc(var(--q5-top) + var(--q5-w) * 779 / 1536 - var(--q5-pitch) + var(--i) * var(--q5-pitch));
+  width:calc(var(--q5-w) * 1069 / 1536); height:var(--q5-pitch);
+  padding:0; border:none !important; background:none !important; pointer-events:auto; line-height:0; z-index:calc(20 - var(--i));}
+.kw.brick img{position:absolute; left:calc(var(--q5-w) * -343 / 1536); top:calc(var(--q5-pitch) - var(--q5-w) * 779 / 1536);
+  width:var(--q5-w); height:calc(var(--q5-w) * 1024 / 1536); max-width:none; pointer-events:none;}
+.kw.brick .b-b, .kw.brick .b-c{opacity:0;}
+.kw.brick .kw-label{position:absolute; left:var(--q5-label-x); top:var(--q5-label-y); transform:translate(-50%,-50%) rotate(var(--q5-label-rot));
+  font-family:var(--font-main); font-size:var(--q5-label); line-height:1; color:var(--q5-label-color); white-space:nowrap; pointer-events:none;}
+.kw.brick.selected{outline:none;}
+/* 펀치 — 금 간 벽돌(B) → 부서진 벽돌(C) → 사라짐. 예전 .punched(옆으로 날아감)는 덮어쓴다 */
+.kw.brick.hit1 .b-a{opacity:0;} .kw.brick.hit1 .b-b{opacity:1;}          /* 1번 — 금 감 */
+.kw.brick.hit2 .b-a, .kw.brick.hit2 .b-b{opacity:0;} .kw.brick.hit2 .b-c{opacity:1;}   /* 2번 — 부서짐 */
+.kw.brick.shake{animation:brickShake .28s linear;}
+@keyframes brickShake{0%,100%{translate:0 0;} 20%{translate:-.5vw .3vh;} 45%{translate:.45vw -.25vh;} 70%{translate:-.25vw .15vh;}}
+.kw.brick.punched{opacity:1 !important; transform:none !important; pointer-events:none;}
+.kw.brick.punched .b-a, .kw.brick.punched .kw-label{opacity:0;}
+.kw.brick.punched .b-b{opacity:0;}
+.kw.brick.punched .b-c{animation:brickC .8s ease-in both;}   /* 3번 — 부서진 조각이 떨어지며 사라짐 */
+@keyframes brickC{0%{opacity:1; transform:none;} 100%{opacity:0; transform:translateY(6vh);}}
+
+/* =========== Page 6 — 큰 상자 + 입력 =========== */
+.q6-box{position:absolute; left:var(--q6-left); top:var(--q6-top); width:var(--q6-w); height:var(--q6-h); border:var(--line) solid var(--q-gray); box-sizing:border-box; background:#fff; display:flex; z-index:2;}
+.q6-info{position:relative; width:var(--q6-info-w); height:100%; border:none; border-right:var(--line) solid var(--q-gray); flex:none;}
+.q6-info .q-info-mosaic{background:none;   /* Page 6은 레인저 뒤를 투명하게 */ margin-top:var(--q6-top-white); height:var(--q6-mosaic-h); border-bottom:none; margin-bottom:var(--q6-gap);}
+.q6-info .q-info-bar{border-top:var(--line) solid var(--q-gray);}
+.q6-write{position:relative; flex:1; min-width:0; cursor:text;}
+.q6-type{position:absolute; inset:var(--q6-pad-y) var(--q6-pad-x); overflow:hidden; text-align:left;
+  font-family:var(--font-head); color:var(--red); font-size:var(--q6-fs, var(--q6-caret-h)); line-height:1; word-break:break-all; white-space:pre-wrap;}
+.q6-caret{display:inline-block; width:max(3px, .02em); height:1em; margin-left:.04em; vertical-align:top; background:var(--red); animation:caretBlink var(--id-caret-speed,1s) steps(1) infinite;}
+.q6-type.typing .q6-caret{animation:none;}
+#subjectiveInput{position:absolute; left:0; top:0; width:1px; height:1px; opacity:0; border:none; padding:0; resize:none;}
+#screen-q6 .q-nav-row{display:block;}
+
+/* =========== 커서 — 페이지별 도구 (커서 위치 = 손) =========== */
+body[data-cur]:not([data-cur=""]) #handCursor{border-radius:0;}
+body[data-cur="tongs"] #handCursor, body[data-cur="pen"] #handCursor, body[data-cur="eraser"] #handCursor,
+body[data-cur="glow"] #handCursor, body[data-cur="fist"] #handCursor{border:none; background:none no-repeat center/100% 100%; mix-blend-mode:normal;}
+/* P2 집게 — 손은 그림 맨 아래(97%), 주먹이면 늘어난 집게(B) */
+body[data-cur="tongs"] #handCursor{height:var(--q2-tongs-h); width:calc(var(--q2-tongs-h) * 414 / 1580); background-image:url('../files/images/ui/icons/page-2/holderA.png');
+  transform:translate(-50%,-97.2%) rotate(var(--q2-tongs-rot)) scale(var(--s)); transform-origin:50% 97.2%;}   /* 손(그림 아래 끝)을 축으로 왼쪽으로 기울임 */
+/* 회색 판 밖 — 집게 그림을 숨기고 기본 동그라미 커서로 */
+body[data-cur="tongs"] #handCursor.off-zone{width:28px; height:28px; background:none; border:var(--line) solid var(--red); border-radius:50%; mix-blend-mode:multiply;
+  transform:translate(-50%,-50%) scale(var(--s));}
+body[data-cur="tongs"] #handCursor.fist:not(.off-zone){background-image:url('../files/images/ui/icons/page-2/holderB.png');}
+/* P3 펜 — 펜촉(왼쪽 아래 끝)이 손 위치 / 지우개 — 가운데 */
+body[data-cur="pen"] #handCursor{width:var(--q3-pen-cursor); height:calc(var(--q3-pen-cursor) * 1094 / 1035); background-image:url('../files/images/ui/icons/page-3/pen.png');
+  transform:translate(0,-100%) scale(var(--s)); transform-origin:left bottom;}
+body[data-cur="eraser"] #handCursor{width:var(--q3-eraser-cursor); height:calc(var(--q3-eraser-cursor) * 562 / 621); background-image:url('../files/images/ui/icons/page-3/eraser.png');}
+/* P4 야광봉 — 빨간 빛 네모 + 비스듬한 봉 (빛은 screen으로 섞여 어둠 위에서만 붉게) */
+body[data-cur="glow"] #handCursor{width:var(--q4-glow); height:var(--q4-glow); mix-blend-mode:screen;
+  background:radial-gradient(circle closest-side, rgba(200,0,0,.95), rgba(167,0,0,.55) 55%, rgba(110,0,0,.28) 100%);}
+body[data-cur="glow"] #handCursor::after{content:''; position:absolute; left:50%; top:50%; width:var(--q4-stick-w); aspect-ratio:1979/414;
+  background:url('../files/images/ui/icons/page-4/lightStick.png') center/100% 100% no-repeat;
+  transform:translate(calc(-50% + var(--q4-stick-dx)), calc(-50% + var(--q4-stick-dy))) rotate(var(--q4-stick-rot)); image-rendering:pixelated;}
+/* P5 건틀렛 */
+body[data-cur="fist"] #handCursor{width:var(--q5-fist-w); height:calc(var(--q5-fist-w) * 975 / 769); background-image:url('../files/images/ui/icons/page-5/guntlet.png');
+  transform:translate(-50%,-50%) rotate(var(--q5-fist-rot)) scale(var(--s));}
+body[data-cur]:not([data-cur=""]) #handCursor{image-rendering:pixelated;}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project.S — test</title>
+<link rel="stylesheet" href="design.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+<canvas id="fxCanvas"></canvas>   <!-- 화면 전체 그레인 이펙트(fx.js) -->
+<div class="cam-status" id="camStatus"></div>
+<div id="handCursor"></div>
+
+<div class="screen active" id="screen-camstart">
+  <img class="logo-img" src="../files/images/ui/icons/Logo-project_S.png" alt="Project.S">
+  <nav class="main-links">
+    <a class="text-btn dwellable" id="btnHeroList" href="list/index.html"><span>HERO LIST</span></a>
+    <a class="text-btn dwellable" id="btnArchive" href="archive/index.html"><span>ARCHIVE</span></a>
+  </nav>
+  <div class="sub" id="camStartSub"></div>
+  <div class="enter-cta" data-action="camstart" id="camStartBtn"><span class="accent">엔터키</span>를 눌러 시작하기</div>
+</div>
+
+<div class="screen" id="screen-tutorial" data-step="0">
+  <!-- 배경 TUTORIAL — 주먹 쥘 때마다 가로 비율이 커져서 3번째에 화면을 꽉 채운다.
+       viewBox = AG 폰트 "TUTORIAL" 글자 잉크 영역(폰트크기 1000 기준) → 화면 박스에 딱 맞게 늘어난다 -->
+  <svg class="tut-bigword" viewBox="20 -735 5590 819" preserveAspectRatio="none" aria-hidden="true">
+    <text x="0" y="0" font-size="1000">TUTORIAL</text>
+  </svg>
+  <div class="tut-main" id="tutMain">
+    <div class="tut-box"></div>
+    <div class="tut-icon tut-icon-open" id="iconHandOpen" role="img" aria-label="편 손"></div>
+    <div class="tut-icon tut-icon-fist" id="iconFist" role="img" aria-label="주먹" style="display:none;"></div>
+    <div class="tut-caption" id="tutorialCaption"></div>
+  </div>
+  <div class="tut-done" id="tutDone"></div>
+  <div class="tutorial-progress" id="tutorialProgress"><i></i><i></i><i></i></div>   <!-- 화면엔 안 보임(시안에 없음). JS 호환용 -->
+  <button class="next-btn dwellable tutorial-next" id="tutorialNextBtn" data-action="tutorial-done"><img class="next-a" src="../files/images/ui/button/btn-nextA.png" alt="NEXT"><span class="next-b" aria-hidden="true"></span></button>
+</div>
+
+<div class="screen" id="screen-open" data-step="1">   <!-- 1 제목 → 2 색 고르기 → 3 이름 쓰기 + 레인저 (한 화면에 한 단계) -->
+  <!-- 제목 — AG 폰트를 시안 박스에 맞춰 늘림 (viewBox = 글자 잉크 영역, 폰트크기 1000 기준) -->
+  <svg class="id-title" viewBox="50 -790 21419 961" preserveAspectRatio="none" aria-label="시작하기 전에... 당신의 히어로명을 지어봅시다.">
+    <text x="0" y="0" font-size="1000">시작하기 전에... 당신의 히어로명을 지어봅시다.</text>
+  </svg>
+  <!-- 1단계: 제목 두 줄이 각각 화면 폭을 꽉 채운다 (story-line과 같은 방식으로 글자 잉크에 맞춰 늘림) -->
+  <svg class="id-title-line id-title-l1" data-text="시작하기 전에..." preserveAspectRatio="none" aria-hidden="true"></svg>
+  <svg class="id-title-line id-title-l2" data-text="당신의 히어로명을 지어봅시다." preserveAspectRatio="none" aria-hidden="true"></svg>
+
+  <!-- 왼쪽: 색 선택 -->
+  <p class="id-label id-label-1">1)&nbsp;당신에게<br>어울리는 색을<br>고르세요</p>
+  <div class="color-grid" id="colorGrid"></div>
+
+  <!-- 가운데: 닉네임 — 키보드로 친 글자가 노란 타이포로 칸을 채운다(길어지면 가로로 줄어듦) -->
+  <div class="name-cell" id="nameCell">
+    <svg class="name-type" id="nameType" preserveAspectRatio="none" aria-hidden="true"><text id="nameTypeText" x="0" y="0" font-size="1000"></text></svg>
+    <span class="name-placeholder" aria-hidden="true">닉네임을 입력하세요</span>   <!-- 비어 있을 때 깜빡이며 떠 있는 안내 -->
+    <span class="name-caret" id="nameCaret" aria-hidden="true"></span>   <!-- 깜빡이는 캐럿 — 여기에 치면 된다는 신호 -->
+    <input class="nickname-input" id="nicknameInput" maxlength="16" autocomplete="off" spellcheck="false" disabled>
+  </div>
+  <p class="id-label id-label-2">2)&nbsp;당신의<br>닉네임을<br>입력하세요</p>
+
+  <!-- 오른쪽: 고른 색의 레인저 -->
+  <canvas id="openCanvas" width="480" height="480"></canvas>
+  <p class="id-label id-label-3">3)&nbsp;당신의<br>히어로명은<br><span class="id-result" id="combinedIdPreview"></span><br>입니다!</p>
+
+  <button class="next-btn next-diag dwellable" data-action="start" id="startBtn"><img class="next-a" src="../files/images/ui/button/btn-nextA.png" alt="NEXT"><span class="next-b" aria-hidden="true"></span></button>
+</div>
+
+<!-- 시작 스토리 (피그마 start1~4): 문장이 바뀔 때마다 구름 배경이 아래→위로 흘러간다 -->
+<div class="screen" id="screen-story">
+  <!-- A (시안 4_01): 두 단락이 좌상단부터 차례로 타이핑 -->
+  <p class="story-para story-para-1" data-text="갑자기 웬\n히어로냐\n구요?"></p>
+  <p class="story-para story-para-2" data-text="가끔\n당신한테\n히어로가\n필요하다고\n생각한 적\n없나요?"></p>
+  <!-- B (4_02): 화면을 꽉 채운 세 줄이 강조하듯 타이핑 → C (4_03): 위로 납작하게 줄어듦 -->
+  <svg class="story-line story-line-1" data-text="310명의 히어로 중" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <svg class="story-line story-line-2" data-text="당신에게 딱 맞는 수호" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <svg class="story-line story-line-3" data-text="영웅을 매칭해드립니다!" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <!-- C: 오른쪽에서 밀려 나옴 -->
+  <svg class="story-go" data-text="진짜진짜 시작" preserveAspectRatio="none" aria-label="진짜진짜 시작"></svg>
+  <button class="next-btn dwellable story-next" id="storyStartBtn" data-action="story-done"><img class="next-a" src="../files/images/ui/button/btn-nextA.png" alt="NEXT"><span class="next-b" aria-hidden="true"></span></button>
+</div>
+
+<div class="screen" id="screen-q">
+  <!-- Page 인트로 (아트보드 9·11·13·15·17) — 큰 "Page N"이 좌상단에서 대각선으로 들어오고, 질문은 왼쪽 아래에서.
+       질문 화면이 나오면 인트로의 "Page N"은 사라지지 않고 20% 농도로 흐려져 그대로 배경이 된다 -->
+  <div class="q-intro" id="qIntro">
+    <img class="q-title-img" id="qTitleImg" src="../files/images/ui/icons/page-header-1.png" alt="Q1" hidden>
+    <div class="q-logo" id="qLogo" role="img" aria-label="Page 1"></div>
+    <div class="q-sub" id="qSub"></div>
+  </div>
+  <div class="q-body" id="qBody">
+    <!-- 페이지별 무대 바닥: P2 회색 반투명 판 / P4 가장자리가 번지는 검은 판 -->
+    <div class="q-floor" id="qFloor" aria-hidden="true"></div>
+    <div id="eyeMask" aria-hidden="true"></div>   <!-- P4: 검은 판 위를 한 번 더 덮고, 야광봉 자리만 뚫린다 -->
+
+    <!-- 오른쪽 위 정보 패널 (모든 Page 공통): 모자이크 레인저 / 진행 바 / 질문 / RE -->
+    <aside class="q-info" id="qInfo">
+      <div class="q-info-mosaic"><div class="candidate-stage"><canvas id="candidateCanvas" width="480" height="480"></canvas></div></div>
+      <div class="q-info-bar"><i id="qProgress"></i></div>
+      <div class="q-info-row">
+        <div class="q-recap-text" id="qRecapText"></div>
+        <div class="q-info-re" aria-hidden="true"></div>   <!-- RE 버튼(#resetFab)이 이 칸 위에 놓인다 -->
+      </div>
+    </aside>
+    <img class="q-recap-img" id="qRecapImg" src="../files/images/ui/icons/page-header-1.png" alt="" hidden>
+    <div class="q-recap-logo" id="qRecapLogo" aria-hidden="true" hidden></div>
+
+    <div class="q-hint" id="qHint"></div>          <!-- 오른쪽 아래 안내 (0/3) -->
+    <div class="q-question" id="qQuestion"></div>  <!-- 왼쪽 아래 — 지금 질문 (2~3줄 단락) -->
+    <div class="q-caption" id="qCaption"></div>    <!-- 왼쪽 아래 한 줄 이야기 -->
+    <div class="q-dnd" id="qDnd" aria-hidden="true">Drag and Drop!</div>  <!-- P1: 손을 올린 레인저 옆에 -->
+
+    <div class="q-layout" id="qLayout">
+      <div class="kw-grid" id="kwGrid"></div>
+      <div class="paint-tools" id="paintTools" style="display:none;">
+        <button class="tool-btn dwellable active" id="brushTool" data-tool="brush" title="펜 — 칠해서 선택"><img src="../files/images/ui/icons/page-3/pen.png" alt="펜"></button>
+        <button class="tool-btn dwellable" id="eraseTool" data-tool="erase" title="지우개 — 칠한 걸 지워서 해제"><img src="../files/images/ui/icons/page-3/eraser.png" alt="지우개"></button>
+      </div>
+      <div class="q-stage">
+        <div class="basket" id="basketZone"><img class="bk-closed" src="../files/images/ui/icons/page-1/boxA.png" alt="보물상자"><img class="bk-open" src="../files/images/ui/icons/page-1/boxB.png" alt=""></div>
+        <img id="basketFront" src="../files/images/ui/icons/page-1/boxC.png" alt="">
+      </div>
+    </div>
+    <div class="q-nav-row">
+      <button class="q-chev q-chev-prev dwellable" data-action="prev" id="prevBtn" aria-label="이전 질문으로"><svg viewBox="-0.5 -0.5 5 5" aria-hidden="true"><polygon points="0,-0.5 0.5,0 0,0.5 -0.5,0"/><polygon points="1,-0.5 1.5,0 1,0.5 0.5,0"/><polygon points="2,-0.5 2.5,0 2,0.5 1.5,0"/><polygon points="3,-0.5 3.5,0 3,0.5 2.5,0"/><polygon points="4,-0.5 4.5,0 4,0.5 3.5,0"/><polygon points="0,0.5 0.5,1 0,1.5 -0.5,1"/><polygon points="0,1.5 0.5,2 0,2.5 -0.5,2"/><polygon points="0,2.5 0.5,3 0,3.5 -0.5,3"/><polygon points="0,3.5 0.5,4 0,4.5 -0.5,4"/></svg></button>
+      <button class="q-chev q-chev-next dwellable" data-action="next" id="nextBtn" aria-label="다음" disabled><svg viewBox="-0.5 -0.5 5 9" preserveAspectRatio="none" aria-hidden="true"><rect x="-0.5" y="-0.5" width="1" height="1"/><rect x="0.5" y="0.5" width="1" height="1"/><rect x="1.5" y="1.5" width="1" height="1"/><rect x="2.5" y="2.5" width="1" height="1"/><rect x="3.5" y="3.5" width="1" height="1"/><rect x="2.5" y="4.5" width="1" height="1"/><rect x="1.5" y="5.5" width="1" height="1"/><rect x="0.5" y="6.5" width="1" height="1"/><rect x="-0.5" y="7.5" width="1" height="1"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-q6">
+  <!-- Page 6 인트로 (아트보드 19) — 질문이 오른쪽 위 / 왼쪽 아래 두 덩어리로 나뉜다 -->
+  <div class="q-intro" id="qIntroQ6">
+    <div class="q-logo" id="qLogoQ6" style="--logo:url('../files/images/ui/icons/page-header-6.png'); --logo-ratio:1959/501;" role="img" aria-label="Page 6"></div>
+    <div class="q-sub q-sub-tr">어릴 때 이루고싶었지만
+이루지 못한 꿈,</div>
+    <div class="q-sub q-sub-bl">혹은 스스로 잘 아는
+당신의 약점에 대해 알려주세요</div>
+  </div>
+  <!-- Page 6 (아트보드 20) — 큰 테두리 상자: 왼쪽 정보 칸 + 오른쪽 넓은 입력 칸(빨간 캐럿) -->
+  <div class="q-body" id="qBodyQ6">
+    <div class="q-question" id="qQuestionQ6">어릴 때 이루고싶었지만 이루지 못한 꿈,
+혹은 스스로 잘 아는
+당신의 약점에 대해 알려주세요</div>
+    <div class="q6-box">
+      <aside class="q6-info">
+        <div class="q-info-mosaic"><div class="candidate-stage"><canvas id="candidateCanvasQ6" width="480" height="480"></canvas></div></div>
+        <div class="q-info-bar"><i style="width:100%"></i></div>
+        <div class="q-info-row">
+          <div class="q-recap-text" id="qRecapTextQ6">어릴 때 이루고싶었지만 이루지 못한 꿈,
+혹은 스스로 잘 아는 당신의 약점에 대해 알려주세요</div>
+          <div class="q-info-re" aria-hidden="true"></div>
+        </div>
+      </aside>
+      <div class="q6-write" id="q6Write">
+        <div class="q6-type" id="q6Type"><span class="q6-text" id="q6Text"></span><span class="q6-caret" id="q6Caret"></span></div>
+        <textarea class="subjective-input" id="subjectiveInput" maxlength="200" aria-label="꿈 또는 약점 입력"></textarea>
+      </div>
+    </div>
+    <div class="q-nav-row">
+      <button class="q-chev q-chev-next dwellable" data-action="finish" id="finishBtn" aria-label="결과 보기" disabled><svg viewBox="-0.5 -0.5 5 9" preserveAspectRatio="none" aria-hidden="true"><rect x="-0.5" y="-0.5" width="1" height="1"/><rect x="0.5" y="0.5" width="1" height="1"/><rect x="1.5" y="1.5" width="1" height="1"/><rect x="2.5" y="2.5" width="1" height="1"/><rect x="3.5" y="3.5" width="1" height="1"/><rect x="2.5" y="4.5" width="1" height="1"/><rect x="1.5" y="5.5" width="1" height="1"/><rect x="0.5" y="6.5" width="1" height="1"/><rect x="-0.5" y="7.5" width="1" height="1"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- 페이지 사이 한 단계: 지금까지의 답으로 좁혀진 레인저 모자이크를 화면 가운데 크게 (교수님 피드백 — 한 화면에 한 단계) -->
+<div class="mosaic-stage" id="mosaicStage" aria-hidden="true">
+  <canvas id="stageCanvas" width="600" height="600"></canvas>
+  <div class="stage-bar"><i id="stageProgress"></i></div>
+</div>
+
+<div class="screen" id="screen-loading">
+  <div class="kicker">Project.S</div>
+  <div class="title">당신의 약점과<br>가장 닮은 영웅을 찾는 중…</div>
+</div>
+
+<div class="screen" id="screen-result">
+  <div class="result-layout">
+    <div class="result-text">
+      <img class="q-title-img result-title-img" src="../files/images/ui/icons/page-header-7.png" alt="매칭된 영웅">
+      <div class="title" id="resultName">-</div>
+      <div class="sub" id="resultSummary">-</div>
+
+      <div class="result-section-label">영웅의 키워드</div>
+      <div class="result-kw-wrap" id="resultKeywords"></div>
+
+      <div class="result-section-label">영웅과 내가 닮은 이유</div>
+      <div class="result-explanation" id="aiExplanation"></div>
+
+      <div class="ai-quote" id="aiInterpretation"></div>
+
+      <div class="result-section-label">스스로 생각한 모습과 실제 내면</div>
+      <div class="result-explanation" id="aiIdentityCompare"></div>
+
+      <button class="btn dwellable" data-action="restart">처음부터 다시</button>
+      <div class="nav-links">
+        <a class="btn btn-small dwellable" href="archive/index.html">기록의 벽에서 확인하기</a>
+        <a class="btn btn-small dwellable" href="list/index.html">전체 영웅 리스트 보기</a>
+      </div>
+    </div>
+    <div class="hero-stage"><canvas id="resultCanvas" width="600" height="600"></canvas></div>
+  </div>
+</div>
+
+
+<button class="reset-fab dwellable" id="resetFab" data-action="reset" style="display:none;"><img src="../files/images/ui/button/btn-re.png" alt="리셋"></button>
+
+<script src="mosaic.js"></script>
+<script src="fx.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

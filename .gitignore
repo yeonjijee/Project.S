@@ -8,3 +8,9 @@ __pycache__/
 
 # Vercel CLI가 로컬에서 만드는 폴더
 .vercel
+
+# ---- project_S: 배포에 안 올릴 것 ----
+design/
+code/_backup*/
+_claude_tmp/
+*.tar

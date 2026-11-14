@@ -10,3 +10,9 @@ __pycache__/
 .DS_Store
 배포방법.md
 tools/
+
+# ---- project_S: 배포에 안 올릴 것 ----
+design/
+code/_backup*/
+_claude_tmp/
+*.tar

@@ -21,6 +21,12 @@ import re
 from pathlib import Path
 
 from flask import Flask, request, jsonify, send_from_directory
+import mimetypes
+# 오프라인 손 인식 파일(files/vendor/mediapipe)이 브라우저에서 제대로 열리도록 형식 등록
+mimetypes.add_type("text/javascript", ".js")
+mimetypes.add_type("text/javascript", ".mjs")
+mimetypes.add_type("application/wasm", ".wasm")
+mimetypes.add_type("application/octet-stream", ".task")
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
