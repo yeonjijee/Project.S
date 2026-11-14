@@ -366,7 +366,7 @@ function getArchiveForGlobe(){
   let armTimer = null;
   const armHint = document.createElement('div');   // 지구본 위에 보이는 안내
   armHint.className = 'hl-armed'; armHint.textContent = '한 번 더 누르면 HERO LIST로';
-  document.body.appendChild(armHint);
+  if(heroLink) document.body.appendChild(armHint);
   function overHeroList(x, y){
     if(!heroLink || detailItem) return false;
     const r = heroLink.getBoundingClientRect();
