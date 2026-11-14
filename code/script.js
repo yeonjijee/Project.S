@@ -2371,7 +2371,12 @@ async function startCam(){
     minHandPresenceConfidence: 0.5,
     minTrackingConfidence: 0.5
   }; o.baseOptions.delegate = delegate; return o; };
-  try{ landmarker = await HandLandmarker.createFromOptions(filesetResolver, mpOptions('GPU')); console.log('[손 인식] GPU'); }
+  // 오래된 컴퓨터는 GPU 준비가 끝나지 않고 멈춰 있을 수 있어서, 8초 안에 안 되면 CPU로 넘어간다
+  const gpuTry = Promise.race([
+    HandLandmarker.createFromOptions(filesetResolver, mpOptions('GPU')),
+    new Promise((_, rej) => setTimeout(() => rej(new Error('GPU 준비 8초 초과')), 8000))
+  ]);
+  try{ landmarker = await gpuTry; console.log('[손 인식] GPU'); }
   catch(e){ console.warn('[손 인식] GPU 안 됨 → CPU', e); landmarker = await HandLandmarker.createFromOptions(filesetResolver, mpOptions('CPU')); }
 
   video = document.createElement('video');
