@@ -1478,7 +1478,7 @@ async function fetchAiInterpretation(){
         selfName,
         selfColor: selectedColor || ''
       }),
-      signal: AbortSignal.timeout(7000)
+      signal: AbortSignal.timeout(20000)   // AI 답이 6초 이상 걸리는 경우가 많아서 넉넉히 — 이 안에 안 오면 기본 문장
     });
     if(!res.ok) throw new Error('interpret API status ' + res.status);
     const data = await res.json();
