@@ -1333,7 +1333,7 @@ function renderQuestion(){
     fitRecapText(document.getElementById('qRecapText'), Q_SUBS[qIndex]);
     if(qIndex === 1) initFloatingKeywords(grid);
     if(isQ4){
-      setTimeout(() => { if(qIndex === 3) eyeMask.style.display = 'block'; }, 30);
+      setTimeout(() => { if(qIndex === 3){ eyeMask.style.display = 'block'; q4MaskRect = null; } }, 30);
     }
   });
 }
@@ -2079,6 +2079,8 @@ function punchBrick(el){
   el.classList.toggle('hit2', hits === 2);
   if(hits >= BRICK_HITS){ el.classList.remove('hit1', 'hit2'); toggleKeyword(el); }
 }
+let q4MaskRect = null, q4Dark = null;   // P4 어둠 — 위치는 화면이 바뀔 때만 다시 잰다
+window.addEventListener('resize', () => { q4MaskRect = null; });
 function handlePointerActivity(x, y, held){
   const onQScreen = document.getElementById('screen-q').classList.contains('active');
   if(!onQScreen){
@@ -2097,11 +2099,13 @@ function handlePointerActivity(x, y, held){
     // 위치/크기를 매 프레임 kwGrid 기준으로 다시 맞춘다 — 한 번만 재보고 고정해두면
     // 폰트 로딩/레이아웃이 살짝 밀릴 때 버튼 오른쪽 끝이 마스크 밖으로 빠져나와 보일 수 있어서,
     // 여유 패딩까지 더해 버튼 영역을 항상 넉넉히 덮게 한다.
-    const mask = document.getElementById('eyeMask');
-    // 검은 판을 한 번 더 덮는 어둠 — 야광봉 자리만 동그랗게 걷혀서 그 아래 키워드가 보인다
-    const mr = mask.getBoundingClientRect();
-    const hole = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--q4-hole')) * window.innerWidth / 100;
-    mask.style.background = `radial-gradient(circle ${hole}px at ${x - mr.left}px ${y - mr.top}px, transparent 0, transparent ${hole * 0.55}px, #000 ${hole}px)`;
+    // 검은 판을 한 번 더 덮는 어둠 — 야광봉 자리만 동그랗게 걷혀서 그 아래 키워드가 보인다.
+    // (렉 줄이기) 예전엔 매번 화면 크기 어둠 전체를 새 그라데이션으로 다시 그렸다 → 이제 구멍 뚫린 어둠 판(.q4-dark)은
+    // 한 번만 그려두고 위치만 옮긴다(transform). 마스크 위치도 매번 재지 않고 저장해둔 값을 쓴다.
+    if(!q4MaskRect) q4MaskRect = document.getElementById('eyeMask').getBoundingClientRect();
+    if(!q4Dark) q4Dark = document.querySelector('#eyeMask .q4-dark');
+    const mr = q4MaskRect;
+    q4Dark.style.transform = `translate3d(${x - mr.left - mr.width}px, ${y - mr.top - mr.height}px, 0)`;
   }
 
   const now = performance.now();
@@ -2182,11 +2186,16 @@ let mouseHeld = false;
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousedown', () => { mouseHeld = true; });
 document.addEventListener('mouseup', () => { mouseHeld = false; });
-document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+let mouseMovedAt = 0;
+document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; mouseMovedAt = performance.now(); });
 let mouseSeen = false;
 document.addEventListener('mousemove', () => { mouseSeen = true; });
 function pollMouse(){
-  handlePointerActivity(mouseX, mouseY, mouseHeld);
+  // 카메라가 켜져 있으면 손(trackHand)이 매 프레임 handlePointerActivity를 부른다.
+  // 예전엔 여기서도 마우스 위치로 한 번 더 불러서, 한 프레임에 두 번(손 자리 / 가만히 있는 마우스 자리) 처리됐다
+  // → P4 어둠이 두 군데를 오가며 매번 다시 그려지는 렉, 다른 페이지도 판정이 섞임. 이제 카메라가 켜져 있으면
+  // 마우스를 방금(1.5초 안) 움직였을 때만 마우스로 처리한다.
+  if(!camOn || performance.now() - mouseMovedAt < 1500) handlePointerActivity(mouseX, mouseY, mouseHeld);
   syncBasketFront();
   if(!camOn){
     // 카메라 없이 마우스로 테스트할 때도 "손 위치" 커서를 똑같이 보여주고, 누름=주먹으로 취급한다
