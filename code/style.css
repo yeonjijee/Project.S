@@ -540,7 +540,7 @@ body.q-intro-on .reset-fab{visibility:hidden;}
 .stage-bar i{display:block; height:100%; width:0; background:var(--red); transition:width .9s cubic-bezier(.2,.8,.2,1) .2s;}
 .q-question{
   position:absolute; left:var(--q-qn-left); bottom:var(--q-qn-bottom); width:var(--q-qn-w); z-index:6; margin:0;
-  font-family:var(--font-main); font-weight:600; font-size:var(--q-qn-size); line-height:var(--q-qn-lh); color:var(--red); text-align:left; word-break:keep-all; white-space:pre-line;
+  font-family:var(--font-head); font-weight:400; font-size:var(--q-qn-size); line-height:var(--q-qn-lh); color:var(--red); text-align:left; word-break:keep-all; white-space:pre-line;   /* 페이지별 질문 제목 — AG 초특태고딕 */
 }
 .q-caption{
   position:absolute; left:var(--q-cap-left); bottom:var(--q-cap-bottom); z-index:6;
@@ -716,13 +716,14 @@ body[data-cur]:not([data-cur=""]) #handCursor{image-rendering:pixelated;}
 .res-step{position:absolute; left:var(--res-left); top:var(--res-top); width:var(--res-w); bottom:var(--res-bottom); z-index:2;
   display:none; flex-direction:column; gap:var(--res-gap); text-align:left;}
 #screen-result[data-step="1"] .res-step-1, #screen-result[data-step="2"] .res-step-2{display:flex;}
-.res-kicker{margin:0; font-family:var(--font-main); font-weight:600; font-size:var(--res-kicker-size); line-height:1; color:var(--red);}
+.res-kicker{margin:0; font-family:var(--font-head); font-weight:400; font-size:var(--res-kicker-size); line-height:1; color:var(--red);}
 .res-name{display:block; width:100%; height:var(--res-name-h); overflow:visible; flex:none;}
 .res-name text{font-family:var(--font-head); fill:var(--red);}
 .res-name-text{display:none;}
 .res-series{margin:0; font-family:var(--font-main); font-size:var(--res-meta-size); line-height:1.1; color:#000;}
 #screen-result .res-summary{margin:0; font-family:var(--font-main); font-size:var(--res-body-size); line-height:var(--res-body-lh); color:#000; max-width:none;}
-.res-kw-label{margin-top:1vh; font-family:var(--font-main); font-weight:600; font-size:var(--res-meta-size); color:#000;}
+.res-kw-label{margin-top:1vh; font-family:var(--font-head); font-weight:400; font-size:var(--res-label-size); color:#000;}
+.res-kw-label span{font-family:var(--font-main);}
 .res-kw-label span{font-weight:400; color:#555;}
 #screen-result .result-kw-wrap{display:flex; flex-wrap:wrap; gap:.6vw;}
 #screen-result .result-kw-wrap span{border:var(--line) solid #000; padding:.6vh .9vw; font-family:var(--font-main); font-size:var(--res-chip-size); line-height:1; color:#000; background:transparent;}

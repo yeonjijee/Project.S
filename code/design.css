@@ -183,7 +183,7 @@
   --q-hint-left:74.79vw; --q-hint-bottom:2.6vh; --q-hint-size:3.55vh; --q-hint-lh:1.017;
   --q-cap-left:.77vw; --q-cap-bottom:1.0vh; --q-cap-size:2.76vh;
   /* 왼쪽 아래 질문 단락 (한 줄 이야기 바로 위) */
-  --q-qn-left:.77vw; --q-qn-bottom:5.2vh; --q-qn-size:5.6vh; --q-qn-lh:.95; --q-qn-w:36vw;   /* 을유 크기 보정(61.7%) 때문에 실제 글자는 이보다 작게 보임 */
+  --q-qn-left:.77vw; --q-qn-bottom:5.2vh; --q-qn-size:3.5vh; --q-qn-lh:1.25; --q-qn-w:40vw;   /* AG 초특태고딕 (을유보다 글자가 커서 숫자를 줄임) */
   /* 다음 버튼 — 오른쪽 세로 띠 전체 (화살표를 띠에 맞게 늘림) */
   --q-next-strip:10vw; --q-next-pad:3vh;
 
@@ -237,7 +237,8 @@
 /* ---- 7. 결과 화면 ---- */
 :root{
   --res-left:2vw; --res-top:5vh; --res-w:50vw; --res-bottom:4vh; --res-gap:2vh;   /* 왼쪽 글 칸 */
-  --res-kicker-size:5.6vh;      /* "당신의 수호 영웅은" (을유 — 61.7% 보정이라 실제론 더 작게 보임) */
+  --res-kicker-size:3.6vh;      /* "당신의 수호 영웅은" 등 작은 제목 — AG 초특태고딕 */
+  --res-label-size:2.8vh;       /* "영웅의 키워드" 등 라벨 — AG */
   --res-name-h:24vh;            /* 영웅 이름 AG 높이 — 가로는 칸 폭에 맞게 늘어남 */
   --res-meta-size:4.4vh;        /* 시리즈·라벨 */
   --res-body-size:5vh; --res-body-lh:1.12;   /* 본문 (AI 설명·요약) */
