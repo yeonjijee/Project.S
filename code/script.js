@@ -2360,7 +2360,8 @@ async function startCam(){
   const filesetResolver = await FilesetResolver.forVisionTasks(localLib ? MP_LOCAL + 'wasm' : MP_CDN + 'wasm');
   const localModel = await localExists(MP_LOCAL + 'hand_landmarker.task');
   console.log('[손 인식]', localLib ? '라이브러리: 로컬' : '라이브러리: 인터넷', '/', localModel ? '모델: 로컬' : '모델: 인터넷');
-  landmarker = await HandLandmarker.createFromOptions(filesetResolver, {
+  // 손 인식을 그래픽카드(GPU)로 돌려서 CPU 부담(렉)을 줄인다 — 안 되는 컴퓨터면 예전처럼 CPU로
+  const mpOptions = (delegate) => { const o = {
     baseOptions: {
       modelAssetPath: localModel ? MP_LOCAL + 'hand_landmarker.task' : MP_MODEL_CDN
     },
@@ -2369,7 +2370,9 @@ async function startCam(){
     minHandDetectionConfidence: 0.5,
     minHandPresenceConfidence: 0.5,
     minTrackingConfidence: 0.5
-  });
+  }; o.baseOptions.delegate = delegate; return o; };
+  try{ landmarker = await HandLandmarker.createFromOptions(filesetResolver, mpOptions('GPU')); console.log('[손 인식] GPU'); }
+  catch(e){ console.warn('[손 인식] GPU 안 됨 → CPU', e); landmarker = await HandLandmarker.createFromOptions(filesetResolver, mpOptions('CPU')); }
 
   video = document.createElement('video');
   video.style.display = 'none';
@@ -2384,8 +2387,12 @@ async function startCam(){
   requestAnimationFrame(trackHand);
 }
 
+let lastVideoTime = -1;
 function trackHand(){
   if(!camOn) return;
+  // 카메라는 1초에 30장인데 화면은 60번 그려진다 — 새 카메라 장면이 없으면 손 인식을 다시 안 돌린다
+  if(video && video.readyState >= 2 && landmarker && video.currentTime === lastVideoTime){ requestAnimationFrame(trackHand); return; }
+  if(video) lastVideoTime = video.currentTime;
   if(video && video.readyState >= 2 && landmarker){
     const result = landmarker.detectForVideo(video, performance.now());
     if(result.landmarks && result.landmarks.length){

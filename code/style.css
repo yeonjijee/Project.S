@@ -14,7 +14,7 @@ img[src*="(W)"], img[src*="next-w"], img[src*="tut-fist-off"]{filter:invert(1);}
 img{max-width:100%; height:auto;}
 canvas{width:240px; height:240px;}
 /* 화면 전체 그레인 필터 — 내용 위에 multiply로 씌움(클릭은 통과). 픽셀아트라 확대할 때 뭉개지 않는다 */
-#fxCanvas{position:fixed; inset:0; z-index:2147482000; pointer-events:none; image-rendering:pixelated; mix-blend-mode:multiply;}
+#fxCanvas{position:fixed; inset:0; z-index:2147482000; pointer-events:none; image-rendering:pixelated;}   /* multiply 빼서 화면 합성 부담 줄임 — 반투명 검은 점이라 겉모습은 거의 같음 */
 button{font:inherit; cursor:pointer;}
 
 /* ---- 화면 전환 ---- */

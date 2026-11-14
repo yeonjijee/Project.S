@@ -71,6 +71,20 @@
   const sigma2 = (CONFIG.RIPPLE_WIDTH / P) * (CONFIG.RIPPLE_WIDTH / P);
   const widthC = CONFIG.RIPPLE_WIDTH / P;
 
+  /* 렉 줄이기 — 그레인 3만여 개를 매 프레임 전부 다시 그리던 것을,
+     ① 바탕 그레인은 한 번만 따로 그려두고(baseCv) ② 파동이 없으면 아예 다시 안 그리고
+     ③ 파동이 있을 때도 파동이 닿는 네모 영역 안의 그레인만 다시 계산해서 그린다. 겉모습은 같다. */
+  let baseCv = null, cols = 0, rows = 0, dirty = true;
+  function buildBase(){
+    cols = Math.ceil(CW / CONFIG.STEP) + 1; rows = Math.ceil(CH / CONFIG.STEP) + 1;
+    baseCv = document.createElement('canvas'); baseCv.width = CW; baseCv.height = CH;
+    const b = baseCv.getContext('2d');
+    for(let t = 0; t < nTones; t++){
+      b.fillStyle = CONFIG.TONES[t];
+      for(let i = 0; i < N; i++) if(gt[i] === t) b.fillRect(gx[i], gy[i], gs[i], gs[i]);
+    }
+    dirty = true;
+  }
   function frame(now){
     requestAnimationFrame(frame);
     const [cx, cy] = cursorPos();
@@ -82,43 +96,65 @@
       lastX = cx; lastY = cy;
     }
     while(ripples.length && (now - ripples[0].t0) / 1000 > CONFIG.RIPPLE_LIFE) ripples.shift();
+    if(!baseCv) buildBase();
 
+    if(!ripples.length){                       // 파동 없음 — 바탕만, 그것도 바뀌었을 때 한 번만
+      if(dirty){ ctx.clearRect(0, 0, CW, CH); ctx.drawImage(baseCv, 0, 0); dirty = false; }
+      return;
+    }
     const rs = ripples.map(r => {
       const age = (now - r.t0) / 1000;
       return { x: r.x, y: r.y, rad: age * CONFIG.RIPPLE_SPEED / P, amp: r.p * Math.pow(1 - age / CONFIG.RIPPLE_LIFE, 2) };
     });
-    for(let t = 0; t < nTones + 2; t++) buckets[t].length = 0;
-    // buckets[t] = [x, y, size, x, y, size, ...]
-    for(let i = 0; i < N; i++){
-      let dx = 0, dy = 0, lit = 0;
-      for(let k = 0; k < rs.length; k++){
-        const r = rs[k];
-        const vx = gx[i] - r.x, vy = gy[i] - r.y;
-        const dist = Math.sqrt(vx * vx + vy * vy) || 1;
-        const d = dist - r.rad;
-        if(d > widthC * 2.5 || d < -widthC * 2.5) continue;
-        const w = Math.exp(-(d * d) / sigma2) * r.amp;
-        const wave = Math.cos((d / widthC) * Math.PI);
-        dx += (vx / dist) * CONFIG.PUSH * w * wave;   // 칸 단위 (아래에서 반올림)
-        dy += (vy / dist) * CONFIG.PUSH * w * wave;
-        lit += w;
-      }
-      // 이동은 격자 칸 단위로만(0 또는 ±1칸) — 자유롭게 퍼지지 않고 줄 맞춰 한 칸씩 밀린다
-      const ox = Math.round(dx) * CONFIG.STEP, oy = Math.round(dy) * CONFIG.STEP;
-      const size = gs[i] + (lit > 0.6 ? 1 : 0);
-      const b = lit > 0.45 ? nTones + 1 : (lit > 0.18 ? nTones : gt[i]);   // 파동 세기를 2단계로 끊어서 표시
-      buckets[b].push(gx[i] + ox, gy[i] + oy, size);
+    // 파동들이 닿는 범위(네모)만 계산
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    const reach = widthC * 2.5 + CONFIG.STEP * 2;
+    for(const r of rs){
+      x0 = Math.min(x0, r.x - r.rad - reach); x1 = Math.max(x1, r.x + r.rad + reach);
+      y0 = Math.min(y0, r.y - r.rad - reach); y1 = Math.max(y1, r.y + r.rad + reach);
     }
+    const c0 = Math.max(0, Math.floor(x0 / CONFIG.STEP)), c1 = Math.min(cols - 1, Math.ceil(x1 / CONFIG.STEP));
+    const r0 = Math.max(0, Math.floor(y0 / CONFIG.STEP)), r1 = Math.min(rows - 1, Math.ceil(y1 / CONFIG.STEP));
     ctx.clearRect(0, 0, CW, CH);
+    ctx.drawImage(baseCv, 0, 0);
+    if(c0 > c1 || r0 > r1){ dirty = true; return; }
+    // 그 네모 안은 바탕을 지우고 파동 반영해서 다시 그린다
+    const px0 = c0 * CONFIG.STEP, py0 = r0 * CONFIG.STEP;
+    ctx.clearRect(px0, py0, (c1 - c0 + 1) * CONFIG.STEP, (r1 - r0 + 1) * CONFIG.STEP);
+    for(let t = 0; t < nTones + 2; t++) buckets[t].length = 0;
+    for(let r = r0; r <= r1; r++){
+      for(let c = c0; c <= c1; c++){
+        const i = r * cols + c;
+        if(i >= N) continue;
+        let dx = 0, dy = 0, lit = 0;
+        for(let k = 0; k < rs.length; k++){
+          const rr = rs[k];
+          const vx = gx[i] - rr.x, vy = gy[i] - rr.y;
+          const dist = Math.sqrt(vx * vx + vy * vy) || 1;
+          const d = dist - rr.rad;
+          if(d > widthC * 2.5 || d < -widthC * 2.5) continue;
+          const w = Math.exp(-(d * d) / sigma2) * rr.amp;
+          const wave = Math.cos((d / widthC) * Math.PI);
+          dx += (vx / dist) * CONFIG.PUSH * w * wave;
+          dy += (vy / dist) * CONFIG.PUSH * w * wave;
+          lit += w;
+        }
+        const ox = Math.round(dx) * CONFIG.STEP, oy = Math.round(dy) * CONFIG.STEP;
+        const size = gs[i] + (lit > 0.6 ? 1 : 0);
+        const bk = lit > 0.45 ? nTones + 1 : (lit > 0.18 ? nTones : gt[i]);
+        buckets[bk].push(gx[i] + ox, gy[i] + oy, size);
+      }
+    }
     for(let t = 0; t < nTones + 2; t++){
       const arr = buckets[t];
       if(!arr.length) continue;
       ctx.fillStyle = t < nTones ? CONFIG.TONES[t] : CONFIG.LIT[t - nTones];
       for(let j = 0; j < arr.length; j += 3) ctx.fillRect(arr[j], arr[j + 1], arr[j + 2], arr[j + 2]);
     }
+    dirty = true;   // 파동이 끝나면 바탕으로 한 번 되돌린다
   }
 
   build();
-  window.addEventListener('resize', build);
+  window.addEventListener('resize', () => { build(); baseCv = null; });
   requestAnimationFrame(frame);
 })();
