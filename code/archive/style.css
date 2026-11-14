@@ -77,3 +77,83 @@ body{position:relative;}
 .btn{appearance:none; border:var(--line) solid #000; background:transparent; color:#000; font-family:var(--sans); font-size:19px; padding:9px 16px; cursor:pointer;}
 input[type=file]{display:none;}
 body.debug .cam-status{display:block;}
+
+/* ---- 지구본 위 닉네임 ---- */
+.globe-nick{position:absolute; left:0; top:0; white-space:nowrap; pointer-events:none; font-family:var(--sans); font-size:2.6vh; line-height:1; color:#000;
+  transition:font-size .2s, color .2s;}
+.globe-nick.main{font-family:var(--font-head); font-size:5.2vh; color:var(--red); z-index:2;}
+body.grabbing, body.grabbing *{cursor:grabbing !important;}
+.globe-section, .bg-word, .bg-logo, .ar-search{user-select:none; -webkit-user-select:none;}
+
+/* ---- 누르면: 화면이 왼쪽으로 밀리고 오른쪽에 자세히 ---- */
+:root{ --detail-w:44vw; --slide:.8s cubic-bezier(.7,0,.2,1); }
+.globe-section, .bg-word, .ar-search{transition:transform var(--slide);}
+.bg-logo{transition:transform var(--slide);}
+body.detail-open .globe-section, body.detail-open .bg-word, body.detail-open .ar-search{transform:translateX(calc(-1 * var(--detail-w) + 8vw));}
+body.detail-open .bg-logo{transform:translate(calc(-50% - var(--detail-w) + 8vw),-50%) rotate(28deg);}
+.ar-detail{position:fixed; top:0; right:0; bottom:0; width:var(--detail-w); z-index:20; background:var(--paper); border-left:var(--line) solid #000;
+  padding:4vh 3vw 4vh 3vw; overflow-y:auto; transform:translateX(100%); transition:transform var(--slide);}
+body.detail-open .ar-detail{transform:none;}
+.ad-close{position:absolute; right:2vw; top:3vh; width:5vw; padding:0; border:none; background:none; line-height:0; transform:scaleX(-1); cursor:pointer;}
+.ad-close svg{width:100%; height:auto; display:block;}
+.ad-close polygon{fill:rgba(170,170,170,.72); transition:fill .15s;}
+.ad-close:hover polygon, .ad-close.dwell-hover polygon{fill:var(--red);}
+.ad-date{margin:0; font-size:4vh; color:#000;}
+.ad-date b{font-family:var(--font-head); font-weight:400; color:var(--red); margin-left:.4vw;}
+.ad-nick{margin:1vh 0 2vh; font-family:var(--font-head); font-size:11vh; line-height:1; color:var(--red); word-break:keep-all;}
+.ad-hero{display:flex; gap:2vw; align-items:flex-end; margin-bottom:2.5vh;}
+.ad-hero canvas{width:12vw; height:16vw; max-height:34vh; object-fit:contain; image-rendering:pixelated; flex:none;}
+.ad-hero-txt{display:flex; flex-direction:column; gap:.6vh;}
+.ad-label{display:block; margin:1.6vh 0 .6vh; font-family:var(--font-head); font-size:2.8vh; color:#000;}
+.ad-hero-name{font-family:var(--font-head); font-size:6vh; line-height:1; color:#000;}
+.ad-series{font-size:3.6vh; color:#555;}
+.ad-pct{font-family:var(--font-head); font-size:13vh; line-height:.9; color:var(--red);}
+.ad-pct small{font-size:.45em; margin-left:.3vw;}
+.ad-answer{margin:0; font-size:4.6vh; line-height:1.25; color:#000;}
+.ad-empty{color:#888;}
+.ad-kw{display:flex; flex-wrap:wrap; gap:.5vw;}
+.ad-kw span{background:var(--red); color:#fff; padding:.5vh .8vw; font-size:3.6vh; line-height:1;}
+#globeLabels{inset:auto; left:calc(var(--title-w) + 2vw); right:var(--next-w); top:0; bottom:0;}   /* 지구본 캔버스와 같은 칸 */
+
+/* 찾기는 왼쪽 칸 — ARCHIVE 아래, 문장 위 (지구본과 겹치지 않게) */
+.ar-title{height:63vh;}
+.ar-search{left:1.5vw; right:auto; top:67vh;}
+#nickSearch{width:18vw;}
+
+.globe-nick small{display:none;}
+.globe-nick.main small{display:block; margin-top:.6vh; font-family:var(--sans); font-size:3vh; color:#000; text-align:center;}
+.globe-nick{text-align:center;}
+#focusInfo{display:none;}   /* hover 정보는 지구본 위 닉네임이 대신한다 */
+
+/* ---- 30 : 70 — 왼쪽 30% (ARCHIVE·찾기·문장) / 지구본 70%, 화면 꽉 차게 (HERO LIST 위로) ---- */
+:root{ --title-w:27vw; --globe-left:30vw; }
+.ar-title{width:var(--title-w);}
+.ar-side{width:var(--title-w);}
+.ar-lede{font-size:3.8vh;}
+.stat .num{font-size:6vh;} .stat .lbl{font-size:3.4vh;}
+#nickSearch{width:15vw;}
+.globe-stage, #globeLabels{left:var(--globe-left); right:0; top:0; bottom:0;}
+.globe-stage{z-index:7;}
+#globeLabels{z-index:8;}
+.bg-word{left:var(--globe-left); right:0;}
+.bg-word.armed{color:var(--red);}
+.hl-armed{position:fixed; left:var(--globe-left); right:0; top:18vh; text-align:center; z-index:10; pointer-events:none; font-size:3.6vh; font-weight:600; color:var(--red);
+  opacity:0; transition:opacity .2s;}
+.hl-armed.on{opacity:1;}
+.globe-overlay-bottom{left:var(--globe-left); right:0; z-index:9;}
+.globe-hint{font-size:2.6vh;}
+/* 같은 레인저가 몇 번 나왔는지 — 오른쪽에 작게 세로로 */
+.top-heroes{position:fixed; right:1.2vw; top:50%; transform:translateY(-50%); margin:0; z-index:9;
+  flex-direction:column; flex-wrap:nowrap; align-items:flex-end; gap:.6vh;}
+.top-hero-pill{font-size:2.4vh; padding:.3vh .5vw; border:none; gap:.4vw;}
+.top-hero-pill .dot{width:.9vh; height:.9vh;}
+.globe-section .empty{left:calc(var(--globe-left) + 35vw); z-index:9;}
+.globe-section{z-index:7;}   /* 지구본이 HERO LIST 글자보다 위로 */
+
+/* 남긴 말 ↔ 영웅의 답 — 한 흐름으로 */
+.ad-talk{border-top:var(--line) solid #000; margin-top:1vh; padding-top:.5vh;}
+.ad-label span{font-family:var(--sans); color:#555; font-size:2.6vh;}
+.ad-answer{font-size:4.6vh; line-height:1.3;}
+.ad-reply-label{margin-top:3vh; color:var(--red);}
+.ad-oneliner{margin:0 0 1.2vh; font-family:var(--font-head); font-size:4vh; line-height:1.3; color:var(--red);}
+.ad-reply{margin:0; font-size:4.2vh; line-height:1.3; color:#000;}

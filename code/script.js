@@ -1548,6 +1548,7 @@ async function fetchAiInterpretation(){
     explEl.textContent = (data && data.explanation) ? data.explanation : '';
     lineEl.textContent = (data && data.oneLiner) ? data.oneLiner : '';
     if(identityEl) identityEl.textContent = (data && data.identityCompare) ? data.identityCompare : '';
+    attachAiToArchive({ aiOneLiner: lineEl.textContent, aiExplanation: explEl.textContent, aiIdentity: identityEl ? identityEl.textContent : '' });
     fitResultStep2();
   }catch(err){
     console.warn('AI 해석 불러오기 실패 — 인터넷 없이 만든 기본 문장으로 대신:', err);
@@ -1561,12 +1562,24 @@ async function fetchAiInterpretation(){
       : `${matched.name}은(는) 당신이 고른 답들과 가장 가까운 영웅이에요.`;
     lineEl.textContent = '';
     if(identityEl) identityEl.textContent = '';
+    attachAiToArchive({ aiExplanation: explEl.textContent, aiFallback: true });   // 인터넷이 없어 키워드로 만든 문장
   }
 }
 
 /* 기존 archive/index.html("기록의 벽")이 쓰는 localStorage 키·스키마를 그대로 따른다.
    archive와 이 test 페이지가 같은 오리진(같은 로컬 서버)에서 열려야 데이터가 공유된다. */
 const ARCHIVE_KEY = 'projectR_archive';
+let lastArchiveTs = null;   // 방금 저장한 기록 — AI 답이 오면 같은 기록에 덧붙인다
+function attachAiToArchive(fields){
+  try{
+    if(!lastArchiveTs) return;
+    const arr = JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]');
+    const rec = arr.find(r => r.ts === lastArchiveTs);
+    if(!rec) return;
+    Object.assign(rec, fields);
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(arr));
+  }catch(e){}
+}
 function saveToArchive(){
   try{
     const allPicked = picks.flat();
@@ -1579,11 +1592,18 @@ function saveToArchive(){
       heroColor: matched.color || '',
       userKeywords: allPicked,
       matchedKeywords: allPicked.filter(k => canon.includes(k)),
-      freeText: subjectiveText
+      freeText: subjectiveText,
+      // 닮은 정도 = (겹친 약점×2 + 겹친 성격×1) ÷ (이 영웅의 약점 수×2 + 성격 수×1) — 매칭 점수와 같은 가중치
+      similarity: (() => {
+        const w = matched.weaknessCanon || [], p = matched.personalityCanon || [];
+        const max = w.length * 2 + p.length;
+        return max ? Math.round((w.filter(k => allPicked.includes(k)).length * 2 + p.filter(k => allPicked.includes(k)).length) / max * 100) : null;
+      })()
     };
     const arr = JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]');
     arr.push(record);
     localStorage.setItem(ARCHIVE_KEY, JSON.stringify(arr));
+    lastArchiveTs = record.ts;
   }catch(err){
     console.warn('기록 보관 실패 (localStorage 접근 불가):', err);
   }
