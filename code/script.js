@@ -2405,6 +2405,7 @@ async function beginCamera(){
   if(camOn){ goto('tutorial'); return; }   // 결과 화면에서 처음으로 돌아온 경우 — 카메라는 이미 켜져 있다
   camStarting = true;
   camStatus.textContent = '카메라: 로딩 중…';
+  showCamLoading(true);   // 엔터 누르자마자 — 손 인식 준비가 끝날 때까지
   try{
     await startCam();
     goto('tutorial');
@@ -2428,7 +2429,19 @@ async function beginCamera(){
     camOn = false;
   } finally {
     camStarting = false;
+    showCamLoading(false);
   }
+}
+/* 로딩 화면 — 움직임은 CSS(opacity/transform)만 써서, 손 인식 준비로 페이지가 바빠도 멈추지 않고 돈다 */
+function showCamLoading(on){
+  let el = document.getElementById('camLoading');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'camLoading';
+    el.innerHTML = '<div class="cl-title">LOADING</div><div class="cl-dots"><i></i><i></i><i></i><i></i><i></i></div><p class="cl-sub">카메라와 손 인식을 준비하고 있어요</p>';
+    document.body.appendChild(el);
+  }
+  el.classList.toggle('on', on);
 }
 
 /* 손 인식(MediaPipe) — 인터넷 없이도 돌도록 files/vendor/mediapipe/에 넣어둔 파일을 먼저 쓰고,
@@ -2439,7 +2452,29 @@ const MP_MODEL_CDN = 'https://storage.googleapis.com/mediapipe-models/hand_landm
 async function localExists(url){
   try{ const r = await fetch(url, { method:'HEAD', cache:'no-store' }); return r.ok; }catch(e){ return false; }
 }
+// 손 인식 모델은 첫 화면이 열리면 미리 준비해둔다 — 엔터를 누를 땐 카메라만 켜면 되게
+let landmarkerReady = null;
+function prepareLandmarker(){
+  if(!landmarkerReady) landmarkerReady = buildLandmarker().catch(e => { landmarkerReady = null; throw e; });
+  return landmarkerReady;
+}
+window.addEventListener('load', () => setTimeout(() => prepareLandmarker().catch(e => console.warn('[손 인식] 미리 준비 실패 — 엔터 때 다시', e)), 1200));
 async function startCam(){
+  landmarker = await prepareLandmarker();
+  video = document.createElement('video');
+  video.style.display = 'none';
+  document.body.appendChild(video);
+  const stream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 } });
+  video.srcObject = stream;
+  await video.play();
+
+  camOn = true;
+  camStatus.textContent = '카메라: 켜짐 (화면엔 영상이 나오지 않음)';
+  cursor.style.display = 'block';
+  requestAnimationFrame(trackHand);
+}
+async function buildLandmarker(){
+  let landmarker;
   const localLib = await localExists(MP_LOCAL + 'vision_bundle.js');
   const { HandLandmarker, FilesetResolver } = await import(localLib ? MP_LOCAL + 'vision_bundle.js' : MP_CDN + 'vision_bundle.mjs');
   const filesetResolver = await FilesetResolver.forVisionTasks(localLib ? MP_LOCAL + 'wasm' : MP_CDN + 'wasm');
@@ -2463,18 +2498,7 @@ async function startCam(){
   ]);
   try{ landmarker = await gpuTry; console.log('[손 인식] GPU'); }
   catch(e){ console.warn('[손 인식] GPU 안 됨 → CPU', e); landmarker = await HandLandmarker.createFromOptions(filesetResolver, mpOptions('CPU')); }
-
-  video = document.createElement('video');
-  video.style.display = 'none';
-  document.body.appendChild(video);
-  const stream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 } });
-  video.srcObject = stream;
-  await video.play();
-
-  camOn = true;
-  camStatus.textContent = '카메라: 켜짐 (화면엔 영상이 나오지 않음)';
-  cursor.style.display = 'block';
-  requestAnimationFrame(trackHand);
+  return landmarker;
 }
 
 let lastVideoTime = -1;
