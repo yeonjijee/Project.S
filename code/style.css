@@ -777,3 +777,7 @@ body[data-cur="glow"] #handCursor{will-change:left, top;}
 #screen-open .color-swatch:hover, #screen-open .color-swatch.dwell-hover{transform:scale(.96); outline:none;}
 #screen-open .color-grid:has(.selected) .color-swatch:not(.selected){opacity:.2;}   /* 고르면 나머지는 흐리게 */
 #screen-open .color-swatch[data-color*="화이트"]{box-shadow:inset 0 0 0 var(--line) #000;}   /* 흰색은 배경과 구분되게 얇은 선 */
+
+/* 이름 쓰기(3) 화면의 뒤로 — 오른쪽 레인저 칸 왼쪽 위. 3단계에서만 보인다 */
+#screen-open .open-back{left:calc(var(--id3-split) + 1.5vw); top:3vh; width:5.5vw; display:none;}
+#screen-open[data-step="3"] .open-back{display:block;}

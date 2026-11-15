@@ -1666,6 +1666,12 @@ function handleAction(action){
       nickname = raw + ' ' + selectedColor;
       goto('story'); // 시작 스토리 → START 를 누르면 Q1
     });
+  } else if(action==='open-back'){
+    // 이름 쓰기 → 색 고르기로 되돌아가기. 고른 색은 표시된 채로 남아 있고, 다른 색을 누르면 다시 이름 쓰기로.
+    document.getElementById('nicknameInput').blur();
+    clearTimeout(openStepTimer);
+    typeSound.whoosh();
+    setOpenStep(2);
   } else if(action==='story-done'){
     pressThen(document.getElementById('storyStartBtn'), () => {
       clearStoryTimers();
