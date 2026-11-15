@@ -94,7 +94,9 @@ function normSearch(t){ return String(t || '').toLowerCase().replace(/\s+/g, '')
 function searchTextFor(c, row){
   const koName = c.name.split(' ').map(w => JP_COLOR_WORDS[w] || w).join(' ');   // 아카 레인저 → 레드 레인저
   const extra = [].concat(KOREAN_ALIASES[c.name] || [], KOREAN_ALIASES[c.series] || [], KOREAN_ALIASES[row.label] || []);
-  return normSearch([c.name, koName, c.color, c.series, row.label, ...extra].join('|')).replace(/"/g, '');
+  // "정글포스 레드"처럼 한국 전대 이름 + 색으로 쳐도 나오게 (앞의 '파워레인저'는 빼고도)
+  const combos = extra.flatMap(a => { const short = a.replace(/^파워레인저\s*/, ''); return [a + c.color, short + c.color, short]; });
+  return normSearch([c.name, koName, c.color, c.series, row.label, ...extra, ...combos].join('|')).replace(/"/g, '');
 }
 function render(){
   main.innerHTML = ROWS.map(row=>{
