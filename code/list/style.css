@@ -93,3 +93,14 @@ body.grabbing, body.grabbing *{cursor:grabbing !important;}
 /* 손 인식 상태 (왼쪽 아래 작게) */
 .cam-chip{position:fixed; left:1.5vw; bottom:1.5vh; z-index:2147482500; font-size:2.6vh; color:#555; pointer-events:none;}
 .cam-chip.bad{color:var(--red);}
+
+/* 맨 위로 — 오른쪽 아래 고정. 조금 내려가면 나타난다 */
+.to-top{position:fixed; right:1.5vw; bottom:2vh; z-index:50; width:6vw; padding:0; border:none; background:none; cursor:pointer; line-height:0;
+  display:flex; flex-direction:column; align-items:center; gap:1vh; opacity:0; pointer-events:none; transition:opacity .25s, transform .15s;}
+.to-top.show{opacity:1; pointer-events:auto;}
+.to-top svg{width:100%; height:auto; display:block;}
+.to-top rect{fill:rgba(170,170,170,.72); transition:fill .15s;}
+.to-top span{font-family:var(--font-head); font-size:3.6vh; line-height:1; color:rgba(170,170,170,.9); transition:color .15s;}
+.to-top:hover, .to-top.hand-hover{transform:scale(1.06);}
+.to-top:hover rect, .to-top.hand-hover rect{fill:var(--red);}
+.to-top:hover span, .to-top.hand-hover span{color:var(--red);}

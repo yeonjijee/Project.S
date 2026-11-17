@@ -303,3 +303,14 @@ if(window.typeSound){
     e.preventDefault(); typeSound.clack('start'); setTimeout(() => { location.href = a.href; }, 160);
   });
 }
+
+// 맨 위로 버튼 — 화면 하나 정도 내려가면 나타나고, 누르면 부드럽게 맨 위로
+(function(){
+  const btn = document.getElementById('toTopBtn'); if(!btn) return;
+  const upd = () => btn.classList.toggle('show', window.scrollY > window.innerHeight * 0.6);
+  window.addEventListener('scroll', upd, { passive:true }); upd();
+  btn.addEventListener('click', () => {
+    if(window.typeSound) typeSound.clack('next');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+})();
